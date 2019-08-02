@@ -72,6 +72,7 @@ def getOrder(currency, id):
         print(url)
         response = requests.get(url)
         result = response.json()
+
     except Exception as e:
         print("获取委托买单或买单失败", e)
     return result
