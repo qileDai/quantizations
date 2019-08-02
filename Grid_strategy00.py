@@ -24,7 +24,7 @@ class GridStrategy(Thread):
         except Exception as e:
             print("数据库连接错误...", e)
         else:
-            cur = conn.cursor()  # 获取一个游标
+            cur = conn.cursor()  # 获取一个游标对象
             cur.execute(sql)
             data = cur.fetchall()  # 返回元组，元素也是元组，一个元组表示一个
             cur.close()
