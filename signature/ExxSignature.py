@@ -5,11 +5,8 @@ import hmac
 
 accesskey = "accesskey=3b56369d-8072-461e-91f6-243b6277af01"
 secretKey = b"c6b2ee35465dfddf535e8ddaeaaaf4ee8a90894e"
-
-
-
 """
-委托下单签名
+exx交易签名
 :param: amount 交易数量
 :param: currency:eth_usdt 交易的对
 :param: price:1024 价格
@@ -17,6 +14,7 @@ secretKey = b"c6b2ee35465dfddf535e8ddaeaaaf4ee8a90894e"
 :return: int 交易id
 ":return: bytes 加密签名 
 """
+
 def sha512_signature(params):
     current_time = str(int(time.time() * 1000))
     # 拼接加密参数
@@ -30,9 +28,3 @@ def sha512_signature(params):
     signature = hmac.new(secretKey, singature_parmas, hashlib.sha512).hexdigest()
 
     return signature
-
-
-
-
-
-
