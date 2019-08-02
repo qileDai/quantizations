@@ -1,6 +1,6 @@
 # _*_ coding:utf-8 _*_
 import requests
-from exx_deal import sha512
+from signature.ExxSignature import sha512_signature
 import time
 
 """
@@ -25,7 +25,7 @@ def order(amount, currency, price, type):
       current_time = str(int(time.time() * 1000))
       params = "&amount=" + amount + "&currency=" + currency + "&price=" +price + "&type=" + type
       url = baseUrl + "order" + "?" + accesskey + params + \
-            "&nonce=" + current_time + "&signature=" + sha512.sha512_order_signature(params)
+            "&nonce=" + current_time + "&signature=" + sha512_signature(params)
       response = requests.get(url)
       result = response.json()
     except Exception as e:
@@ -44,7 +44,7 @@ def cancelOrder(currency, id):
         current_time = str(int(time.time() * 1000))
         params = "&id="+ id +"&currency="+currency
         url = baseUrl + "cancel" + "?" +accesskey + params +"&nonce=" +current_time + \
-              "&signature="+sha512.sha512_order_signature(params)
+              "&signature="+ sha512_signature(params)
         response = requests.get(url)
         result = response.json()
         print(result)
@@ -64,9 +64,9 @@ def getOrder(currency, id):
     result = {}
     try:
         current_time = str(int(time.time() * 1000))
-        parmas = "&currency=" + currency +"&id=" + id
-        url = baseUrl + "getOrder" + "?" + accesskey + parmas + "&nonce=" + current_time + \
-              "&signature=" + sha512.sha512_order_signature(parmas)
+        params = "&currency=" + currency +"&id=" + id
+        url = baseUrl + "getOrder" + "?" + accesskey + params + "&nonce=" + current_time + \
+              "&signature=" + sha512_signature(params)
         print(url)
         response = requests.get(url)
         result = response.json()
@@ -86,9 +86,9 @@ def getOrder(currency, id):
 def getOpenOrders(currency, pageIndex, type):
     try:
         current_time = str(int(time.time() * 1000))
-        parmas = "&pageIndex=" + pageIndex + "&currency=" + currency + "&type=" + type
-        url = baseUrl + "getOpenOrders" + "?" + accesskey + parmas + "&nonce=" + current_time + \
-              "&signature=" + sha512.sha512_order_signature(parmas)
+        params = "&pageIndex=" + pageIndex + "&currency=" + currency + "&type=" + type
+        url = baseUrl + "getOpenOrders" + "?" + accesskey + params + "&nonce=" + current_time + \
+              "&signature=" + sha512_signature(params)
         print(url)
         response = requests.get(url)
         result = response.json()
@@ -105,8 +105,9 @@ def getOpenOrders(currency, pageIndex, type):
 
 def getBalance():
     params = ""
-    url = baseUrl + "getBalance" + "?" + accesskey + "&nonce=" + sha512.current_time +\
-          "&signature=" + sha512.sha512_order_signature(params)
+    current_time = str(int(time.time() * 1000))
+    url = baseUrl + "getBalance" + "?" + accesskey + "&nonce=" + current_time +\
+          "&signature=" + sha512_signature(params)
     response = requests.get(url)
     result = response.json()
     print(result)
