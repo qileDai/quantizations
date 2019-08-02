@@ -7,6 +7,7 @@ from utils import restful
 from utils import Logger
 
 log = Logger.MylogHandler("deal")
+time = 5  #请求超时时间
 """
 Exx交易平台交易类
 """
@@ -29,7 +30,7 @@ def exx_order(amount, currency, price, type):
         params = "&amount=" + amount + "&currency=" + currency + "&price=" + price + "&type=" + type
         url = baseUrl + "order" + "?" + accesskey + params + \
               "&nonce=" + current_time + "&signature=" + ExxSignature.sha512_signature(params)
-        response = requests.get(url)
+        response = requests.get(url,timeout=time)
         result = response.json()
         try:
             response = requests.get(url)
