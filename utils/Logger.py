@@ -15,11 +15,12 @@ class MylogHandler(logging.Logger):
       if files:
         self.__filesHandler__(self.level)
     def __streamHandler__(self,level=None):
-      curretime = time.strftime('%Y%m%d%H%M%S')
+      # curretime = time.strftime('%Y%m%d%H%M%S')
       file_path = os.path.abspath('..') + "/logs/"
-      filename = file_path + self.name + curretime + ".log"
-      if os.path.isdir(file_path):
+      if not os.path.exists(file_path):
           os.mkdir(file_path)
+          logging.info("创建目录成功：%s" %file_path)
+      filename = file_path + self.name + ".log"
       handler = TimedRotatingFileHandler(filename=filename, when='D', interval=1, backupCount=15)
       handler.suffix = '%Y%m%d.log'
       handler.setLevel(level)

@@ -1,9 +1,10 @@
+
 import pymysql
 import random
 import time
 from threading import Thread
 from exx_deal.APITest import DataAPI
-from exx_deal.order import getOrder, order, cancelOrder, getOpenOrders
+from Deal.ExxDeal import exx_order,getOpenOrders,getBalance,getOrder
 
 
 class GridStrategy(Thread):
@@ -46,7 +47,7 @@ class GridStrategy(Thread):
                 price = round(price, markets_data["priceScale"])
                 amount = round(self.trade_amount, markets_data["amountScale"])
                 # sql = "insert into ..."
-                res = order(str(amount), self.currency_type, str(price), self.order_type)
+                res = exx_order(str(amount), self.currency_type, str(price), self.order_type)
                 print(res)
                 # 字典存放下单id,key为buy/sell，value为id列表
                 self.id_list.append({res["id"]: (a, b)})
@@ -75,14 +76,14 @@ class GridStrategy(Thread):
                             # sql = "select * from ..."
                             # res = self.connect_db(sql)
                             self.id_list.remove(item)
-                            order(str(order_info["trade_amount"]), self.currency_type, str(price), "sell")
+                            exx_order(str(order_info["trade_amount"]), self.currency_type, str(price), "sell")
                         elif order_info["type"] == "sell":
                             price = order_info["price"]*(1-0.005)
                             price = round(price, markets_data["priceScale"])
                             # sql = "select * from ..."
                             # res = self.connect_db(sql)
                             self.id_list.remove(item)
-                            order(str(order_info["trade_amount"]), self.currency_type, str(price), "buy")
+                            exx_order(str(order_info["trade_amount"]), self.currency_type, str(price), "buy")
 
                     # 挂单在一段时间内未成交，撤单并重新下单
                     # elif order_info["status"] == 0:

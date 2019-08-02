@@ -2,9 +2,6 @@
 import time
 import hashlib
 import hmac
-from utils.Logger import MylogHandler
-
-
 
 accesskey = "accesskey=3b56369d-8072-461e-91f6-243b6277af01"
 secretKey = b"c6b2ee35465dfddf535e8ddaeaaaf4ee8a90894e"

@@ -29,7 +29,6 @@ def exx_order(amount, currency, price, type):
         params = "&amount=" + amount + "&currency=" + currency + "&price=" + price + "&type=" + type
         url = baseUrl + "order" + "?" + accesskey + params + \
               "&nonce=" + current_time + "&signature=" + ExxSignature.sha512_signature(params)
-
         response = requests.get(url)
         result = response.json()
         try:
