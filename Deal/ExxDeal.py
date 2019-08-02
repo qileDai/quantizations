@@ -1,12 +1,12 @@
 # _*_ coding:utf-8 _*_
 import requests
+from requests import ConnectionError,ReadTimeout
 from signature import ExxSignature
 import time
 from utils import restful
 from utils import Logger
 
-
-
+log = Logger.MylogHandler("deal")
 """
 Exx交易平台交易类
 """
@@ -29,11 +29,29 @@ def exx_order(amount, currency, price, type):
         params = "&amount=" + amount + "&currency=" + currency + "&price=" + price + "&type=" + type
         url = baseUrl + "order" + "?" + accesskey + params + \
               "&nonce=" + current_time + "&signature=" + ExxSignature.sha512_signature(params)
+
         response = requests.get(url)
         result = response.json()
+        try:
+            response = requests.get(url)
+            result = response.json()
+        except(ConnectionError, ReadTimeout) as e:
+            log.error("请求下单链接失败",e)
+        # 签名验证不通过，开始重新3次连接，3次连接不成功退出连接
+        if result['code'] == 103:
+            for i in range(1, 4):
+                response = requests.get(url)
+                result = response.json()
+                log.info(result)
+                if result['code'] == 103:
+                    return
+                elif result['code'] == 100:
+                    return result
     except Exception as e:
-        print("委托下单失败", e)
-    return restful.result("200",message="委托单成功",data=result)
+        log.error("委托下单失败",e)
+    return result
+
+
 
 """
 取消委托
