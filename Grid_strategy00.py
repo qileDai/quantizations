@@ -90,7 +90,8 @@ class GridStrategy(Thread):
                 try:
                     res = order(str(amount), self.currency_type, str(price), self.order_type)
                     sql = "insert into exx_order(price, amount, currency, ordertype, orderid)" \
-                          " values({},'{}','{}','{}','{}')".format(price, str(amount), self.currency_type, self.order_type, res["id"])
+                          " values({},'{}','{}','{}','{}')".format(price, str(amount), self.currency_type,
+                                                                   self.order_type, res["id"])
                     self.connect_db(sql)
                     # 字典存放下单id,key为buy/sell，value为id列表
                     self.id_list.append({res["id"]: (a, b)})
@@ -102,7 +103,7 @@ class GridStrategy(Thread):
 
         print(self.id_list)
 
-    def update_order_info(self, price, item, order_info):
+    def update_order_info(self, price, item, order_info, order_type):
         """
         更新挂单信息
         :param price: 撤单后，再次挂单的价格
@@ -113,14 +114,16 @@ class GridStrategy(Thread):
         try:
             b_id = list(item.keys())[0]
             ret = cancelOrder(self.currency_type, b_id)
-            self.id_list.remove(item)
+            print("-"*20, ret, type(ret["code"]))
             # 撤单成功后，下单并添加下单id及价格区间
-            if ret["code"] in ["100", "211", "212"]:
+            if ret["code"] in [100, 211, 212]:
                 res = order(str(order_info["trade_amount"]),
                             self.currency_type,
                             str(price),
-                            "sell")  # 调用api
+                            order_type)  # 调用api
+                self.id_list.remove(item)
                 self.id_list.append({res["id"]: (price - 0.25, price + 0.25)})
+                print("+"*20)
         except Exception as e:
             self.log_info("api")
             logging.exception("UPDATE ORDER FAILED...", e)
@@ -151,11 +154,11 @@ class GridStrategy(Thread):
                             if order_info["type"] == "buy":
                                 price = order_info["price"]*(1+0.005)
                                 price = round(price, markets_data["priceScale"])
-                                self.update_order_info(price, item, order_info)
+                                self.update_order_info(price, item, order_info, "sell")
                             elif order_info["type"] == "sell":
                                 price = order_info["price"]*(1-0.005)
                                 price = round(price, markets_data["priceScale"])
-                                self.update_order_info(price, item, order_info)
+                                self.update_order_info(price, item, order_info, "buy")
                         # 挂单在一段时间内未成交，撤单并重新下单
                         # elif order_info["status"] == 0:
                         #     res = cancelOrder(self.currency_type, b_id)

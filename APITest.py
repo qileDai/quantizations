@@ -4,6 +4,9 @@ import json
 
 
 class DataAPI(object):
+    """
+    行情接口
+    """
     def __init__(self):
         self.base_url = global_settings.DATA_BASE_URL
 
@@ -39,9 +42,9 @@ class DataAPI(object):
         response = requests.get(url)
         return json.loads(response.text)
 
-
-if __name__ == "__main__":
-    tt = DataAPI()
-    res = tt.markets_api()
-    # res = tt.depth_api("eth_btc")
-    print(res["eth_usdt"]["priceScale"])
+#
+# if __name__ == "__main__":
+#     tt = DataAPI()
+#     res = tt.markets_api()
+#     # res = tt.depth_api("eth_btc")
+#     print(res["eth_usdt"]["priceScale"])
