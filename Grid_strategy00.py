@@ -73,35 +73,36 @@ class GridStrategy(Thread):
         try:
             markets_data = self.get_markets_data()
         except Exception as e:
-            self.log_info("db")
-            logging.exception("GET MARKETS DATA ERROR...", e)
+            self.log_info("api")
+            logging.exception("GET MARKETS DATA FAILED...", e)
             print("获取市场信息失败...", e)
         else:
             a, b = self.starting_price
             for item in range(self.grid_counts):
-                self.trade_amount = random.uniform(float(markets_data["minAmount"]), 10)
+                self.trade_amount = random.uniform(float(markets_data.get("minAmount")), 10)
                 if self.order_type == "buy" and flag == 0:
                     a, b = a-0.5, a
                 elif self.order_type == "sell" and flag == 0:
                     a, b = b, b+0.5
                 price = random.uniform(a, b)
-                price = round(price, markets_data["priceScale"])
-                amount = round(self.trade_amount, markets_data["amountScale"])
+                price = round(price, markets_data.get("priceScale"))
+                amount = round(self.trade_amount, markets_data.get("amountScale"))
                 try:
                     res = order(str(amount), self.currency_type, str(price), self.order_type)
                     sql = "insert into exx_order(price, amount, currency, ordertype, orderid)" \
                           " values({},'{}','{}','{}','{}')".format(price, str(amount), self.currency_type,
-                                                                   self.order_type, res["id"])
+                                                                   self.order_type, res.get("id"))
                     self.connect_db(sql)
                     # 字典存放下单id,key为buy/sell，value为id列表
-                    self.id_list.append({res["id"]: (a, b)})
+                    if res.get("id") is not None:
+                        self.id_list.append({res.get("id"): (a, b)})
                 except Exception as e:
                     self.log_info("api")
                     logging.exception("PLACE ORDER ERROR...", e)
                     print("下单失败")
                 time.sleep(0.5)
 
-        print(self.id_list)
+            print("id列表", self.id_list, len(self.id_list))
 
     def update_order_info(self, price, item, order_info, order_type):
         """
@@ -114,16 +115,17 @@ class GridStrategy(Thread):
         try:
             b_id = list(item.keys())[0]
             ret = cancelOrder(self.currency_type, b_id)
-            print("-"*20, ret, type(ret["code"]))
+            # print("-"*20, ret, type(ret["code"]))
             # 撤单成功后，下单并添加下单id及价格区间
-            if ret["code"] in [100, 211, 212]:
+            if ret.get("code") in [100, 211, 212]:
                 res = order(str(order_info["trade_amount"]),
                             self.currency_type,
                             str(price),
                             order_type)  # 调用api
-                self.id_list.remove(item)
-                self.id_list.append({res["id"]: (price - 0.25, price + 0.25)})
-                print("+"*20)
+                if res.get("id") is not None:
+                    self.id_list.remove(item)
+                    self.id_list.append({res.get("id"): (price - 0.25, price + 0.25)})
+                    print("+"*20)
         except Exception as e:
             self.log_info("api")
             logging.exception("UPDATE ORDER FAILED...", e)
@@ -137,7 +139,7 @@ class GridStrategy(Thread):
         try:
             markets_data = self.get_markets_data()
         except Exception as e:
-            self.log_info("db")
+            self.log_info("api")
             logging.exception("GET_ORDER_INFO...", e)
             print("获取挂单信息失败...", e)
         else:
@@ -151,25 +153,26 @@ class GridStrategy(Thread):
                         print(b_id, limit, order_info)
 
                         # 挂单交易完成，撤单并生成对应的buy/sell挂单
-                        if order_info["status"] in [2, 3]:
-                            if order_info["type"] == "buy":
-                                price = order_info["price"]*(1+0.005)
-                                price = round(price, markets_data["priceScale"])
+                        if order_info.get("status") in [2, 3]:
+                            if order_info.get("type") == "buy":
+                                price = order_info.get("price")*(1+0.005)
+                                price = round(price, markets_data.get("priceScale"))
                                 self.update_order_info(price, item, order_info, "sell")
-                            elif order_info["type"] == "sell":
-                                price = order_info["price"]*(1-0.005)
-                                price = round(price, markets_data["priceScale"])
+                            elif order_info.get("type") == "sell":
+                                price = order_info.get("price")*(1-0.005)
+                                price = round(price, markets_data.get("priceScale"))
                                 self.update_order_info(price, item, order_info, "buy")
 
                         # 挂单在一段时间内未成交，撤单并重新下单
-                        elif order_info["status"] == 0:
+                        elif order_info.get("status") == 0:
                             res = cancelOrder(self.currency_type, b_id)
                             self.id_list.remove(item)
                             self.starting_price = limit
-                            if res["code"] in ["100", "211", "212"]:
+                            print("*"*20, type(res.get("code")))
+                            if res.get("code") in [100, 211, 212]:
                                 self.place_order(1)
                     except Exception as e:
-                        self.log_info("db")
+                        self.log_info("api")
                         logging.exception("GET_ORDER_INFO...", e)
                         print("获取挂单状态失败...", e)
                     time.sleep(1)
