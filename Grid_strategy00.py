@@ -39,12 +39,14 @@ class GridStrategy(Thread):
                                    port=3306,
                                    charset="utf8")
         except Exception as e:
+            conn.rollback()
             self.log_info("db")
             logging.exception("数据库连接错误...", e)
             print("数据库连接错误...", e)
         else:
             cur = conn.cursor()  # 获取一个游标
             cur.execute(sql)
+            conn.commit()
             data = cur.fetchall()  # 返回元组，元素也是元组，一个元组表示一个
             cur.close()
             conn.close()
@@ -70,7 +72,8 @@ class GridStrategy(Thread):
                 amount = round(self.trade_amount, markets_data["amountScale"])
                 try:
                     res = order(str(amount), self.currency_type, str(price), self.order_type)
-                    sql = "insert into exx_order values('{}','{}','{}','{}','{}')".format(price, str(amount), self.currency_type, self.order_type, res["id"])
+                    sql = "insert into exx_order(price, amount, currency, ordertype, orderid)" \
+                          " values({},'{}','{}','{}','{}')".format(price, str(amount), self.currency_type, self.order_type, res["id"])
                     self.connect_db(sql)
                     # 字典存放下单id,key为buy/sell，value为id列表
                     self.id_list.append({res["id"]: (a, b)})
