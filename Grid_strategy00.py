@@ -149,6 +149,7 @@ class GridStrategy(Thread):
                     try:
                         order_info = getOrder(self.currency_type, b_id)  # 调用api
                         print(b_id, limit, order_info)
+
                         # 挂单交易完成，撤单并生成对应的buy/sell挂单
                         if order_info["status"] in [2, 3]:
                             if order_info["type"] == "buy":
@@ -159,13 +160,14 @@ class GridStrategy(Thread):
                                 price = order_info["price"]*(1-0.005)
                                 price = round(price, markets_data["priceScale"])
                                 self.update_order_info(price, item, order_info, "buy")
+
                         # 挂单在一段时间内未成交，撤单并重新下单
-                        # elif order_info["status"] == 0:
-                        #     res = cancelOrder(self.currency_type, b_id)
-                        #     self.id_list.remove(item)
-                        #     self.starting_price = limit
-                        #     if res["code"] in ["100", "211", "212"]:
-                        #         self.place_order(1)
+                        elif order_info["status"] == 0:
+                            res = cancelOrder(self.currency_type, b_id)
+                            self.id_list.remove(item)
+                            self.starting_price = limit
+                            if res["code"] in ["100", "211", "212"]:
+                                self.place_order(1)
                     except Exception as e:
                         print(e)
                     time.sleep(1)
