@@ -169,7 +169,9 @@ class GridStrategy(Thread):
                             if res["code"] in ["100", "211", "212"]:
                                 self.place_order(1)
                     except Exception as e:
-                        print(e)
+                        self.log_info("db")
+                        logging.exception("GET_ORDER_INFO...", e)
+                        print("获取挂单状态失败...", e)
                     time.sleep(1)
                 time.sleep(10)
 
@@ -181,8 +183,6 @@ class GridStrategy(Thread):
 if __name__ == "__main__":
     currency_type = "eth_usdt"
     change = round(random.uniform(0.004, 0.005), 3)
-    # b_order = GridStrategy((99, 100), 10, 0, change, currency_type, "buy")
-    # s_order = GridStrategy((101, 102), 10, 0, change, currency_type, "sell")
     thread1 = GridStrategy((99, 100), 10, 0, change, currency_type, "buy")
     thread2 = GridStrategy((100, 101), 10, 0, change, currency_type, "sell")
     thread1.start()
