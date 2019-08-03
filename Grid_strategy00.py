@@ -64,7 +64,7 @@ class GridStrategy(Thread):
             logging.exception("DB CONNECT ERROR...", e)
             print("数据库连接错误...", e)
 
-    def place_order(self, flag=0):
+    def place_order(self, flag=0, order_types=self.order_type):
         """
         下单，根据flag判断批量/单笔
         :param flag: 默认参数
@@ -88,14 +88,14 @@ class GridStrategy(Thread):
                 price = round(price, markets_data.get("priceScale"))
                 amount = round(self.trade_amount, markets_data.get("amountScale"))
                 try:
-                    res = order(str(amount), self.currency_type, str(price), self.order_type)
+                    res = order(str(amount), self.currency_type, str(price), self.order_type)  # 修改self.order_type
                     sql = "insert into exx_order(price, amount, currency, ordertype, orderid)" \
                           " values({},'{}','{}','{}','{}')".format(price, str(amount), self.currency_type,
                                                                    self.order_type, res.get("id"))
                     self.connect_db(sql)
                     # 字典存放下单id,key为buy/sell，value为id列表
                     if res.get("id") is not None:
-                        self.id_list.append({res.get("id"): (a, b)})
+                        self.id_list.append({res.get("id"): {"price_range": (a, b), "status": order_types}})
                 except Exception as e:
                     self.log_info("api")
                     logging.exception("PLACE ORDER ERROR...", e)
@@ -124,7 +124,7 @@ class GridStrategy(Thread):
                             order_type)  # 调用api
                 if res.get("id") is not None:
                     self.id_list.remove(item)
-                    self.id_list.append({res.get("id"): (price - 0.25, price + 0.25)})
+                    self.id_list.append({res.get("id"): {"price_range": (price - 0.25, price + 0.25), "status": order_types})
                     print("+"*20)
         except Exception as e:
             self.log_info("api")
