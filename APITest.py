@@ -1,5 +1,5 @@
 import requests
-from exx_deal import global_settings
+import global_settings
 import json
 
 
