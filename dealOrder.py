@@ -7,31 +7,10 @@ price = 1023
 is_stop = True
 
 
-def buy_order():
-    while is_stop:
-        num = random.uniform(2, 100)
-        num = str(num)
-        buy_price = price + 0.1
-        buy_price = str(buy_price)
-        time.sleep(0.2)
-        result = order(num, "eth_usdt$@#@&&&", buy_price, "buy")
-        print(result)
-
-
-def sell_order():
-    while is_stop:
-        num = random.uniform(2, 100)
-        num = str(num)
-        sell_price = price - 0.1
-        sell_price = str(sell_price)
-        time.sleep(0.2)
-        result = order(num, "eth_usdt", sell_price, "sell")
-        print(result)
-
-
-def getOrders(type):
-    for i in range(1, 8):
-        i = str(i)
+def cancel_orders(type):
+    print("开始执行%s单撤单" %type)
+    print("*****" * 2)
+    for i in range(1, 20):
         results = getOpenOrders("eth_usdt", i, type)
         try:
             if results:
@@ -39,15 +18,15 @@ def getOrders(type):
                     if result:
                         id = result['id']
                         time.sleep(0.5)
-                        ss = cancelOrder("eth_usdt", id)
-                        print(ss)
+                        response = cancelOrder("eth_usdt", id)
+                        print(response)
         except Exception as e:
-            print("撤掉失败", e)
+            print("%s单撤单完成:" %type, e)
 
 
 if __name__ == "__main__":
-    getOrders("buy")
-    getOrders("sell")
+    cancel_orders("buy")
+    cancel_orders("sell")
 
 
 
