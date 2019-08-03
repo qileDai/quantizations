@@ -6,7 +6,7 @@ import time
 from utils import restful
 from utils import Logger
 
-log = Logger.MylogHandler("deal")
+log = Logger.MylogHandler("exxdeal")
 time = 5  #请求超时时间
 """
 Exx交易平台交易类
@@ -25,12 +25,15 @@ accesskey = "accesskey=3b56369d-8072-461e-91f6-243b6277af01"
 :return: int 交易id
 """
 def exx_order(amount, currency, price, type):
+    current_time = str(int(time.time() * 1000))
+    if isinstance(amount,int):
+        amount = str(amount)
+    print(current_time)
     try:
-        current_time = str(int(time.time() * 1000))
         params = "&amount=" + amount + "&currency=" + currency + "&price=" + price + "&type=" + type
         url = baseUrl + "order" + "?" + accesskey + params + \
               "&nonce=" + current_time + "&signature=" + ExxSignature.sha512_signature(params)
-        response = requests.get(url,timeout=time)
+        response = requests.get(url)
         result = response.json()
         try:
             response = requests.get(url)
