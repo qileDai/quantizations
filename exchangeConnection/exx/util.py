@@ -30,6 +30,6 @@ def sha512_signature(params):
     sort_parmas = sorted(list_parmas)
     singature_parmas = "&".join(sort_parmas)
     singature_parmas = bytes(singature_parmas, encoding="utf-8")
-    signature = hmac.new(SECRET_KEY, singature_parmas, hashlib.sha512).hexdigest()
+    signature = hmac.new(bytes(SECRET_KEY,encoding="utf-8"), singature_parmas, hashlib.sha512).hexdigest()
 
     return signature

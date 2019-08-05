@@ -51,8 +51,6 @@ def order(amount, currency, price, type):
                 log.info(result)
                 if result['code'] == 103:
                     return
-                elif result['code'] == 100:
-                    return result
     except Exception as e:
         log.error("委托下单失败",e)
     return result
