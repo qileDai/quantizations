@@ -58,7 +58,6 @@ def order(amount, currency, price, type):
     return result
 
 
-
 """
 取消委托
 :param: currency：eth_btc 交易对
