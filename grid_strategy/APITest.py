@@ -1,5 +1,5 @@
 import requests
-import global_settings
+from grid_strategy import global_settings
 import json
 
 

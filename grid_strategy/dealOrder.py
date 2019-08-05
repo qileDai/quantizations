@@ -1,6 +1,5 @@
 # _*_ coding:utf-8 _*_
-from order import order, getOrder, getOpenOrders, getBalance, cancelOrder
-import random
+from grid_strategy.order import getOpenOrders, cancelOrder
 import time
 
 price = 1023

@@ -1,10 +1,10 @@
-import pymysql
 import random
+import pymysql
 import time
 import logging
 from threading import Thread
-from APITest import DataAPI
-from order import getOrder, order, cancelOrder
+from grid_strategy.APITest import DataAPI
+from grid_strategy.order import getOrder, order, cancelOrder
 
 
 class GridStrategy(Thread):
@@ -64,7 +64,7 @@ class GridStrategy(Thread):
             logging.exception("DB CONNECT ERROR...", e)
             print("数据库连接错误...", e)
 
-    def place_order(self, flag=0, order_types=self.order_type):
+    def place_order(self, order_type=None, flag=0):
         """
         下单，根据flag判断批量/单笔
         :param flag: 默认参数
@@ -88,14 +88,17 @@ class GridStrategy(Thread):
                 price = round(price, markets_data.get("priceScale"))
                 amount = round(self.trade_amount, markets_data.get("amountScale"))
                 try:
-                    res = order(str(amount), self.currency_type, str(price), self.order_type)  # 修改self.order_type
+                    if order_type is None:
+                        res = order(str(amount), self.currency_type, str(price), self.order_type)  # 修改self.order_type
+                    else:
+                        res = order(str(amount), self.currency_type, str(price), order_type)
                     sql = "insert into exx_order(price, amount, currency, ordertype, orderid)" \
                           " values({},'{}','{}','{}','{}')".format(price, str(amount), self.currency_type,
                                                                    self.order_type, res.get("id"))
                     self.connect_db(sql)
                     # 字典存放下单id,key为buy/sell，value为id列表
                     if res.get("id") is not None:
-                        self.id_list.append({res.get("id"): {"price_range": (a, b), "status": order_types}})
+                        self.id_list.append({res.get("id"): {"price_range": (a, b), "order_type": order_type}})
                 except Exception as e:
                     self.log_info("api")
                     logging.exception("PLACE ORDER ERROR...", e)
@@ -124,7 +127,8 @@ class GridStrategy(Thread):
                             order_type)  # 调用api
                 if res.get("id") is not None:
                     self.id_list.remove(item)
-                    self.id_list.append({res.get("id"): {"price_range": (price - 0.25, price + 0.25), "status": order_types})
+                    self.id_list.append({res.get("id"): {"price_range": (price - 0.25, price + 0.25),
+                                                         "order_type": order_type}})
                     print("+"*20)
         except Exception as e:
             self.log_info("api")
@@ -147,7 +151,8 @@ class GridStrategy(Thread):
             while True:
                 for item in self.id_list:
                     b_id = list(item.keys())[0]
-                    limit = item[b_id]
+                    limit = item[b_id]["price_range"]
+                    order_type = item[b_id]["order_type"]
                     try:
                         order_info = getOrder(self.currency_type, b_id)  # 调用api
                         print(b_id, limit, order_info)
@@ -157,11 +162,11 @@ class GridStrategy(Thread):
                             if order_info.get("type") == "buy":
                                 price = order_info.get("price")*(1+0.005)
                                 price = round(price, markets_data.get("priceScale"))
-                                self.update_order_info(price, item, order_info, "sell")
+                                self.update_order_info(price, item, order_info, order_type)
                             elif order_info.get("type") == "sell":
                                 price = order_info.get("price")*(1-0.005)
                                 price = round(price, markets_data.get("priceScale"))
-                                self.update_order_info(price, item, order_info, "buy")
+                                self.update_order_info(price, item, order_info, order_type)
 
                         # 挂单在一段时间内未成交，撤单并重新下单
                         elif order_info.get("status") == 0:
@@ -170,7 +175,7 @@ class GridStrategy(Thread):
                             self.starting_price = limit
                             print("*"*20, type(res.get("code")))
                             if res.get("code") in [100, 211, 212]:
-                                self.place_order(1)
+                                self.place_order(order_type, 1)
                     except Exception as e:
                         self.log_info("api")
                         logging.exception("GET_ORDER_INFO...", e)
