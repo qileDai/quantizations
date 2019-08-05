@@ -1,4 +1,5 @@
 # _*_ coding:utf-8 _*_
+__author__ = "daiiqle"
 from exchangeConnection.exx.exxService import getOpenOrders,cancelOrder
 import time
 
