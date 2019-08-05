@@ -4,7 +4,6 @@ from requests import ConnectionError,ReadTimeout
 from exchangeConnection.exx.util import sha512_signature
 import time
 
-from utils import restful
 from utils import Logger
 import accountConfig
 
@@ -28,7 +27,7 @@ accesskey = accountConfig.EXX["ACCESS_KEY"]
 :param: type:buy/sell 交易类型
 :return: int 交易id
 """
-def exx_order(amount, currency, price, type):
+def order(amount, currency, price, type):
     current_time = str(int(time.time() * 1000))
     if isinstance(amount,int):
         amount = str(amount)
@@ -67,7 +66,7 @@ def exx_order(amount, currency, price, type):
 :return: json 对象
 """
 
-def exx_cancelOrder(currency, id):
+def cancelOrder(currency, id):
     try:
         current_time = str(int(time.time() * 1000))
         params = "&id=" + id + "&currency=" + currency
