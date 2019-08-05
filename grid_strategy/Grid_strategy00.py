@@ -4,7 +4,7 @@ import time
 import logging
 from threading import Thread
 from grid_strategy.APITest import DataAPI
-from grid_strategy.order import getOrder, order, cancelOrder
+from exchangeConnection.exx.exxService import getOrder, order, cancelOrder
 
 
 class GridStrategy(Thread):
