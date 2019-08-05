@@ -62,6 +62,7 @@ def order(amount, currency, price, type):
 """
 
 def cancelOrder(currency, id):
+
     try:
         current_time = str(int(time.time() * 1000))
         params = "&id=" + id + "&currency=" + currency
@@ -105,6 +106,8 @@ def getOrder(currency, id):
 """
 
 def getOpenOrders(currency, pageIndex, type):
+    if isinstance(pageIndex,int):
+        pageIndex = str(pageIndex)
     try:
         current_time = str(int(time.time() * 1000))
         params = "&pageIndex=" + pageIndex + "&currency=" + currency + "&type=" + type

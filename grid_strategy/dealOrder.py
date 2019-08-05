@@ -1,5 +1,5 @@
 # _*_ coding:utf-8 _*_
-from grid_strategy.order import getOpenOrders, cancelOrder
+from exchangeConnection.exx.exxService import getOpenOrders,cancelOrder
 import time
 
 price = 1023
