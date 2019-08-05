@@ -90,19 +90,22 @@ class GridStrategy(Thread):
                 try:
                     if order_type is None:
                         res = order(str(amount), self.currency_type, str(price), self.order_type)  # 修改self.order_type
+                        if res.get("id") is not None:
+                            self.id_list.append({res.get("id"): {"price_range": (a, b), "order_type": self.order_type}})
                     else:
                         res = order(str(amount), self.currency_type, str(price), order_type)
+                        print(res)
+                        if res.get("id") is not None:
+                            self.id_list.append({res.get("id"): {"price_range": (a, b), "order_type": order_type}})
                     sql = "insert into exx_order(price, amount, currency, ordertype, orderid)" \
                           " values({},'{}','{}','{}','{}')".format(price, str(amount), self.currency_type,
                                                                    self.order_type, res.get("id"))
                     self.connect_db(sql)
-                    # 字典存放下单id,key为buy/sell，value为id列表
-                    if res.get("id") is not None:
-                        self.id_list.append({res.get("id"): {"price_range": (a, b), "order_type": order_type}})
+
                 except Exception as e:
                     self.log_info("api")
                     logging.exception("PLACE ORDER ERROR...", e)
-                    print("下单失败")
+                    print("下单失败", e)
                 time.sleep(0.5)
 
             print("id列表", self.id_list, len(self.id_list))
@@ -129,7 +132,7 @@ class GridStrategy(Thread):
                     self.id_list.remove(item)
                     self.id_list.append({res.get("id"): {"price_range": (price - 0.25, price + 0.25),
                                                          "order_type": order_type}})
-                    print("+"*20)
+            print("+"*20)
         except Exception as e:
             self.log_info("api")
             logging.exception("UPDATE ORDER FAILED...", e)
@@ -162,11 +165,11 @@ class GridStrategy(Thread):
                             if order_info.get("type") == "buy":
                                 price = order_info.get("price")*(1+0.005)
                                 price = round(price, markets_data.get("priceScale"))
-                                self.update_order_info(price, item, order_info, order_type)
+                                self.update_order_info(price, item, order_info, "sell")
                             elif order_info.get("type") == "sell":
                                 price = order_info.get("price")*(1-0.005)
                                 price = round(price, markets_data.get("priceScale"))
-                                self.update_order_info(price, item, order_info, order_type)
+                                self.update_order_info(price, item, order_info, "buy")
 
                         # 挂单在一段时间内未成交，撤单并重新下单
                         elif order_info.get("status") == 0:
