@@ -36,10 +36,8 @@ def order(amount, currency, price, type):
         params = "&amount=" + amount + "&currency=" + currency + "&price=" + price + "&type=" + type
         url = baseUrl + "order" + "?" + accesskey + params + \
               "&nonce=" + current_time + "&signature=" + sha512_signature(params)
-        response = requests.get(url)
-        result = response.json()
         try:
-            response = requests.get(url)
+            response = requests.get(url,timeout=5)
             result = response.json()
         except(ConnectionError, ReadTimeout) as e:
             log.error("请求下单链接失败",e)
