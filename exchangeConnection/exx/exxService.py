@@ -36,7 +36,7 @@ def order(amount, currency, price, type):
     try:
         params = "&amount=" + amount + "&currency=" + currency + "&price=" + price + "&type=" + type
         url = baseUrl + "order" + "?" + accesskey + params + \
-              "&nonce=" + current_time + "&signature=" + sha512_signature(params) +"ssd"
+              "&nonce=" + current_time + "&signature=" + sha512_signature(params)
         try:
             response = requests.get(url,timeout=5)
             result = response.json()
