@@ -25,8 +25,9 @@ def cancel_orders(type):
 
 
 if __name__ == "__main__":
-    cancel_orders("buy")
-    cancel_orders("sell")
+    while True:
+        cancel_orders("buy")
+        cancel_orders("sell")
 
 
 

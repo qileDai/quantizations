@@ -32,7 +32,7 @@ def order(amount, currency, price, type):
     current_time = str(int(time.time() * 1000))
     if isinstance(amount,int):
         amount = str(amount)
-    print(current_time)
+    # print(current_time)
     try:
         params = "&amount=" + amount + "&currency=" + currency + "&price=" + price + "&type=" + type
         url = baseUrl + "order" + "?" + accesskey + params + \
@@ -71,7 +71,7 @@ def cancelOrder(currency, id):
               "&signature=" + sha512_signature(params)
         response = requests.get(url)
         result = response.json()
-        print(result)
+        # print(result)
     except Exception as e:
         print("取消委托失败", e)
     return result
@@ -90,7 +90,7 @@ def getOrder(currency, id):
         params = "&currency=" + currency + "&id=" + id
         url = baseUrl + "getOrder" + "?" + accesskey + params + "&nonce=" + current_time + \
               "&signature=" + sha512_signature(params)
-        print(url)
+        # print(url)
         response = requests.get(url)
         result = response.json()
 
