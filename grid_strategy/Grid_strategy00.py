@@ -64,7 +64,7 @@ class GridStrategy(Thread):
             logging.exception("DB CONNECT ERROR...", e)
             print("数据库连接错误...", e)
 
-    def place_order(self, order_type=None, flag=0):
+    def place_order(self, item=None, order_type=None, flag=0):
         """
         下单，根据flag判断批量/单笔
         :param flag: 默认参数
@@ -78,7 +78,7 @@ class GridStrategy(Thread):
             print("获取市场信息失败...", e)
         else:
             a, b = self.starting_price
-            for item in range(self.grid_counts):
+            for i in range(self.grid_counts):
                 self.trade_amount = random.uniform(float(markets_data.get("minAmount")), 10)
                 if self.order_type == "buy" and flag == 0:
                     a, b = a-0.5, a
@@ -91,11 +91,16 @@ class GridStrategy(Thread):
                     if order_type is None:
                         res = order(str(amount), self.currency_type, str(price), self.order_type)  # 修改self.order_type
                         if res.get("id") is not None:
+                            if item is not None:
+                                self.id_list.remove(item)
+                                time.sleep(1)
                             self.id_list.append({res.get("id"): {"price_range": (a, b), "order_type": self.order_type}})
                     else:
                         res = order(str(amount), self.currency_type, str(price), order_type)
-                        print(res)
                         if res.get("id") is not None:
+                            if item is not None:
+                                time.sleep(1)
+                                self.id_list.remove(item)
                             self.id_list.append({res.get("id"): {"price_range": (a, b), "order_type": order_type}})
                     sql = "insert into exx_order(price, amount, currency, ordertype, orderid)" \
                           " values({},'{}','{}','{}','{}')".format(price, str(amount), self.currency_type,
@@ -106,11 +111,9 @@ class GridStrategy(Thread):
                     self.log_info("api")
                     logging.exception("PLACE ORDER ERROR...", e)
                     print("下单失败", e)
-                time.sleep(0.5)
+                time.sleep(0.1)
 
-            print("id列表", self.id_list, len(self.id_list))
-
-    def update_order_info(self, price, item, order_info, order_type):
+    def completed_order_info(self, price, item, order_info, order_type):
         """
         更新挂单信息
         :param price: 撤单后，再次挂单的价格
@@ -138,7 +141,7 @@ class GridStrategy(Thread):
             logging.exception("UPDATE ORDER FAILED...", e)
             print("更新挂单失败")
 
-    def get_order_info(self):
+    def update_order_info(self):
         """
         获取挂单信息
         :return:
@@ -152,6 +155,7 @@ class GridStrategy(Thread):
         else:
             self.grid_counts = 1
             while True:
+                print("id列表", self.id_list, len(self.id_list))
                 for item in self.id_list:
                     b_id = list(item.keys())[0]
                     limit = item[b_id]["price_range"]
@@ -161,41 +165,47 @@ class GridStrategy(Thread):
                         print(b_id, limit, order_info)
 
                         # 挂单交易完成，撤单并生成对应的buy/sell挂单
-                        if order_info.get("status") in [2, 3]:
+                        if order_info.get("status") in [2]:
                             if order_info.get("type") == "buy":
                                 price = order_info.get("price")*(1+0.005)
                                 price = round(price, markets_data.get("priceScale"))
-                                self.update_order_info(price, item, order_info, "sell")
+                                t = Thread(target=self.completed_order_info, args=(price, item, order_info, "sell"))
+                                t.start()
+                                # self.completed_order_info(price, item, order_info, "sell")
                             elif order_info.get("type") == "sell":
                                 price = order_info.get("price")*(1-0.005)
                                 price = round(price, markets_data.get("priceScale"))
-                                self.update_order_info(price, item, order_info, "buy")
+                                t = Thread(target=self.completed_order_info, args=(price, item, order_info, "buy"))
+                                t.start()
+                                # self.completed_order_info(price, item, order_info, "buy")
 
                         # 挂单在一段时间内未成交，撤单并重新下单
-                        elif order_info.get("status") == 0:
+                        elif order_info.get("status") in [0, 1]:
                             res = cancelOrder(self.currency_type, b_id)
-                            self.id_list.remove(item)
-                            self.starting_price = limit
-                            print("*"*20, type(res.get("code")))
+                            print("*"*20, res.get("code"))
                             if res.get("code") in [100, 211, 212]:
-                                self.place_order(order_type, 1)
+                                # self.id_list.remove(item)
+                                self.starting_price = limit
+                                t1 = Thread(target=self.place_order, args=(item, order_type, 1))
+                                t1.start()
+                                # self.place_order(item, order_type, 1)
                     except Exception as e:
                         self.log_info("api")
                         logging.exception("GET_ORDER_INFO...", e)
                         print("获取挂单状态失败...", e)
-                    time.sleep(1)
-                time.sleep(10)
+                    time.sleep(0.5)
+                # time.sleep(10)
 
     def run(self):
         self.place_order()
-        self.get_order_info()
+        self.update_order_info()
 
 
 if __name__ == "__main__":
     currency_type = "eth_usdt"
     change = round(random.uniform(0.004, 0.005), 3)
-    thread1 = GridStrategy((99, 100), 10, 0, change, currency_type, "buy")
-    thread2 = GridStrategy((100, 101), 10, 0, change, currency_type, "sell")
+    thread1 = GridStrategy((99, 100), 5, 0, change, currency_type, "buy")
+    thread2 = GridStrategy((100, 101), 5, 0, change, currency_type, "sell")
     thread1.start()
     thread2.start()
 

@@ -36,7 +36,7 @@ def order(amount, currency, price, type):
     try:
         params = "&amount=" + amount + "&currency=" + currency + "&price=" + price + "&type=" + type
         url = baseUrl + "order" + "?" + accesskey + params + \
-              "&nonce=" + current_time + "&signature=" + sha512_signature(params) +"ssd"
+              "&nonce=" + current_time + "&signature=" + sha512_signature(params)
         try:
             response = requests.get(url,timeout=5)
             result = response.json()
@@ -47,11 +47,11 @@ def order(amount, currency, price, type):
             for i in range(1, 4):
                 response = requests.get(url)
                 result = response.json()
-                log.info("请求第%s次" %str(i))
+                log.info("请求第%s次" % str(i))
                 # if result['code'] != 100:
                 #     return result.update({"code":400,"message":"请求失败"})
     except Exception as e:
-        log.error("委托下单失败",e)
+        log.error("委托下单失败", e)
     return result
 
 
