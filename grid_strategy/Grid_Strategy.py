@@ -202,7 +202,7 @@ class GridStrategy(Thread):
                     self.log_info("api")
                     logging.exception("GET_ORDER_INFO...", e)
                     print("获取挂单状态失败...", e)
-            time.sleep(1.3)
+                time.sleep(0.5)
 
     def run(self):
         self.place_order()
