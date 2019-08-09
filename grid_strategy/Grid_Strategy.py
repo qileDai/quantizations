@@ -136,11 +136,7 @@ class GridStrategy(Thread):
             logging.exception("UPDATE ORDER FAILED...", e)
             print("更新挂单失败")
 
-    def update_order_info(self):
-        """
-        获取挂单信息
-        :return:
-        """
+    def update_completed_order(self):
         try:
             markets_data = self.get_markets_data()
         except Exception as e:
@@ -148,14 +144,12 @@ class GridStrategy(Thread):
             logging.exception("GET_ORDER_INFO...", e)
             print("获取挂单信息失败...", e)
         else:
-            self.grid_counts = 1
-            num = 0
             while True:
                 print("id列表", self.id_list, len(self.id_list))
                 for item in self.id_list:
                     b_id = list(item.keys())[0]
                     limit = item[b_id]["price_range"]
-                    order_type = item[b_id]["order_type"]
+                    # order_type = item[b_id]["order_type"]
                     try:
                         order_info = getOrder(self.currency_type, b_id)  # 调用api
                         print(b_id, limit, order_info)
@@ -172,30 +166,50 @@ class GridStrategy(Thread):
                                 price = round(price, markets_data.get("priceScale"))
                                 t = Thread(target=self.completed_order_info, args=(price, item, order_info, "buy"))
                                 t.start()
-
-                        # 挂单在一段时间内未成交，撤单并重新下单
-                        elif order_info.get("status") in [0, 1] and num == 2:
-                            res = cancelOrder(self.currency_type, b_id)
-                            print("*"*50, res.get("code"))
-                            if res.get("code") in [100, 211, 212]:
-                                # self.id_list.remove(item)
-                                self.starting_price = limit
-                                self.place_order(item, order_type, 1)
-                                # t1 = Thread(target=self.place_order, args=(item, order_type, 1))
-                                # t1.start()
-
                     except Exception as e:
                         self.log_info("api")
                         logging.exception("GET_ORDER_INFO...", e)
                         print("获取挂单状态失败...", e)
-                num += 1
-                if num == 3:
-                    num = 0
-                # time.sleep(1)
+
+    def update_order_info(self):
+        """
+        获取挂单信息
+        :return:
+        """
+        self.grid_counts = 1
+        while True:
+            print("id列表", self.id_list, len(self.id_list))
+            for item in self.id_list:
+                b_id = list(item.keys())[0]
+                limit = item[b_id]["price_range"]
+                order_type = item[b_id]["order_type"]
+                try:
+                    order_info = getOrder(self.currency_type, b_id)  # 调用api
+                    print(b_id, limit, order_info)
+
+                    # 挂单在一段时间内未成交，撤单并重新下单
+                    if order_info.get("status") in [0, 1]:
+                        res = cancelOrder(self.currency_type, b_id)
+                        print("*"*50, res.get("code"))
+                        if res.get("code") in [100, 211, 212]:
+                            # self.id_list.remove(item)
+                            self.starting_price = limit
+                            self.place_order(item, order_type, 1)
+                            # t1 = Thread(target=self.place_order, args=(item, order_type, 1))
+                            # t1.start()
+
+                except Exception as e:
+                    self.log_info("api")
+                    logging.exception("GET_ORDER_INFO...", e)
+                    print("获取挂单状态失败...", e)
+            time.sleep(1.3)
 
     def run(self):
         self.place_order()
-        self.update_order_info()
+        thread_a = Thread(target=self.update_completed_order)
+        thread_b = Thread(target=self.update_order_info)
+        thread_a.start()
+        thread_b.start()
 
 
 if __name__ == "__main__":
