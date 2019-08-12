@@ -80,9 +80,9 @@ class GridStrategy(Thread):
             for i in range(self.grid_counts):
                 self.trade_amount = random.uniform(float(markets_data.get("minAmount")), 10)
                 if self.order_type == "buy" and flag == 0:
-                    a, b = a-0.25, a
+                    a, b = a-0.2, a
                 elif self.order_type == "sell" and flag == 0:
-                    a, b = b, b+0.25
+                    a, b = b, b+0.2
                 price = random.uniform(a, b)
                 price = round(price, markets_data.get("priceScale"))
                 amount = round(self.trade_amount, markets_data.get("amountScale"))
@@ -163,12 +163,12 @@ class GridStrategy(Thread):
                         # 挂单交易完成，撤单并生成对应的buy/sell挂单
                         if order_info.get("status") in [2]:
                             if order_info.get("type") == "buy":
-                                price = order_info.get("price")*(1+0.005)
+                                price = order_info.get("price")*(1+0.002)
                                 price = round(price, markets_data.get("priceScale"))
                                 t = Thread(target=self.completed_order_info, args=(price, item, order_info, "sell"))
                                 t.start()
                             elif order_info.get("type") == "sell":
-                                price = order_info.get("price")*(1-0.005)
+                                price = order_info.get("price")*(1-0.002)
                                 price = round(price, markets_data.get("priceScale"))
                                 t = Thread(target=self.completed_order_info, args=(price, item, order_info, "buy"))
                                 t.start()
@@ -200,8 +200,8 @@ class GridStrategy(Thread):
 
 if __name__ == "__main__":
     currency_type = "eth_usdt"
-    thread1 = GridStrategy((101, 101.5), 50, 0, currency_type, "buy")
-    thread2 = GridStrategy((99.5, 100), 50, 0, currency_type, "sell")
+    thread1 = GridStrategy((101, 101), 50, 0, currency_type, "buy")
+    thread2 = GridStrategy((98, 98), 50, 0, currency_type, "sell")
     thread1.start()
     thread2.start()
 
