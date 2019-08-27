@@ -1,123 +1,151 @@
-from django.shortcuts import render,redirect,reverse,HttpResponse
-from .models import UserInfo,Role,Menu,Permission
-from apps.rbac.service.init_session import init_permission
+from django.shortcuts import render, redirect, reverse, HttpResponse
+from .models import UserInfo, Role, Menu, Permission
+from apps.rbac.service.init_permission import init_permission
 from django.views.generic import View
 from utils import restful
 from django.core.paginator import Paginator
 from urllib import parse
-from django.db import connection
-from .forms import UserInfoModelForm, RoleModelForm, PermissionModelForm
-
+from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, PermissionModelForm, MenuModelForm
+import hashlib
+from django.conf import settings
 # Create your views here.
+
+
+# 用户登录装饰器
+def is_login(func):
+    def wrapper(request, *args, **kwargs):
+        if 'ADMIN' in request.session:
+            res = func(request, *args, **kwargs)
+            return res
+        else:
+            return redirect(settings.LOGIN_URL)
+    return wrapper
+
 
 def login(request):
     if request.method == "GET":
-        return render(request,"login.html")
+        return render(request, "cms/login.html")
     else:
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-        user_obj = UserInfo.objects.filter(username=username,password=password).first()
+        username = request.POST.get('telephone')
+        password = request.POST.get('password')
+        hl = hashlib.md5()
+        hl.update(password.encode(encoding='utf-8'))
+        password = hl.hexdigest()
+        user_obj = UserInfo.objects.filter(username=username, password=password).first()
         if not user_obj:
-            return render(request,"cms/login.html",{"error","用户名或密码错误！"})
-        else:
-            init_permission(request,user_obj)
-            return redirect('/index')
+            return render(request, "cms/login.html", {'error': '用户名或密码错误！'})
+        elif user_obj.status == 0:
+            return render(request, "cms/login.html", {'error': '用户已被禁用，请联系管理员！'})
+        elif username == 'admin':               # 管理员
+            request.session.clear()
+            request.session['ADMIN'] = 'is_login'
+            request.session.set_expiry(600)
+            return render(request, 'cms/index.html')
+        else:                                   # 普通用户
+            init_permission(request, user_obj)  # 调用权限初始化
+            print('-'*20)
+            return redirect('index/')
+
+
+@is_login
+def index(request):
+    if 'is_login' in request.session:
+        return render(request, 'rbac/index.html')
+    else:
+        return redirect('login/')
+
 
 def logout(request):
-    return render(request,'cms/login.html')
-
-def index(request):
-    return render(request,'cms/index.html')
+    return render(request, 'cms/login.html')
 
 
-
+@is_login
 def account(request):
     roles = Role.objects.all()
     users = UserInfo.objects.all()
     context = {
         'users': users,
-        'roles':roles
+        'roles': roles,
     }
-    return render(request,'cms/account.html',context=context)
+    return render(request, 'cms/account.html', context=context)
 
+
+@is_login
 def menu(request):
     menus = Menu.objects.all()
     context = {
-        'menus':menus
+        'menus': menus
     }
-    return render(request,'cms/menu.html',context=context)
+    return render(request, 'cms/menu.html', context=context)
 
+
+@is_login
 def permission(request):
     menus = Menu.objects.all()
     permissions = Permission.objects.all()
     context = {
-        'menus':menus,
-        'permissions':permissions
+        'menus': menus,
+        'permissions': permissions
     }
-    return render(request,'cms/permission.html',context=context)
+    return render(request, 'cms/permission.html', context=context)
 
+
+@is_login
 def role(request):
     roles = Role.objects.all()
     permissions = Permission.objects.all()
     # print(permissions)
     context = {
-        'roles':roles,
-        'permissions':permissions
+        'roles': roles,
+        'permissions': permissions
     }
-    return render(request,'cms/role.html',context=context)
+    return render(request, 'cms/role.html', context=context)
 
 
+@is_login
 def users_list(request):
-   users =UserInfo.objects.all()
-   context = {
-      'users':users
-   }
-   return render(request,'cms/account.html',context=context)
+    users = UserInfo.objects.all()
+    context = {
+      'users': users
+    }
+    return render(request, 'cms/account.html', context=context)
 
+
+@is_login
 def roles(request):
     roles = Role.objects.all()
     permissions = Permission.objects.all()
     context = {
-        'roles':roles,
+        'roles': roles,
         'permissions': permissions
     }
-    return render(request,'cms/role.html',context=context)
+    return render(request, 'cms/role.html', context=context)
 
 
+@is_login
 def add_roles(request):
     form = RoleModelForm(request.POST)
-    print('daiqile')
+    print('*'*20)
     if form.is_valid():
         form.save()
-        # rolename = form.cleaned_data.get('rolename')
-        # permission_id = form.cleaned_data.get('permission')
-        # print(rolename,permission_id)
-        # permission = Permission.objects.get(pk=permission_id)
-        # # print(permission)
-        # Role.objects.create(rolename=rolename, permission=permission)
         return restful.ok()
     else:
         return restful.params_error(message=form.get_errors())
 
+
+@is_login
 def add_users(request):
     form = UserInfoModelForm(request.POST)
     print("afadf")
     if form.is_valid():
         print("sdaf")
         form.save()
-        # username = form.cleaned_data.get('username')
-        # password = form.cleaned_data.get('password')
-        # email = form.cleaned_data.get('email')
-        # role_id = form.cleaned_data.get('role')
-        # role = Role.objects.get(pk=role_id)
-        # UserInfo.objects.create(username=username,password=password,email=email)
-        # user_id = UserInfo.objects.get()
-        # cursor = connection.cursor()
-        # cursor.execute('insert userinfo_role values(' + role + ')')
         return restful.ok()
     else:
         return restful.params_error(message=form.get_errors())
 
+
+@is_login
 def delete_users(request):
     pk = request.POST.get('pk')
     print(pk)
@@ -126,6 +154,7 @@ def delete_users(request):
         return restful.ok()
     except:
         return restful.params_error(message="该用户不存在")
+
 
 class RolesListView(View):
     def get(self, request):
@@ -185,6 +214,8 @@ class RolesListView(View):
             'num_pages': num_pages
         }
 
+
+@is_login
 def delete_roles(request):
     pk = request.POST.get('pk')
     try:
@@ -193,15 +224,17 @@ def delete_roles(request):
     except:
         return restful.params_error(message='该角色不存在')
 
+
+@is_login
 def add_permission(request):
     form = PermissionModelForm(request.POST)
-    print('daiqoe')
+    print('*'*20)
     if form.is_valid():
         title = form.cleaned_data.get('title')
         url = form.cleaned_data.get('url')
         menu_id = form.cleaned_data.get('menu')
         menu = Menu.objects.get(pk=menu_id)
-        Permission.objects.create(title=title,url=url,menu=menu)
+        Permission.objects.create(title=title, url=url, menu=menu)
         return restful.ok()
     else:
         return restful.params_error(form.get_errors())

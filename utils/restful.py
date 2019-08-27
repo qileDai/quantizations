@@ -1,6 +1,8 @@
 #encoding：utf-8
 
 from django.http import JsonResponse
+
+
 class HttpCode(object):
     ok = 200
     paramserror = 400
@@ -8,27 +10,33 @@ class HttpCode(object):
     methoderror = 405
     servererror = 500
 
-def result(code=HttpCode.ok,message="",data=None,kwargs=None):
-    json_dict = {"code":code,"message":message,"data":data}
 
-    if kwargs and isinstance(kwargs,dict) and  kwargs.keys():
+def result(code=HttpCode.ok, message="", data=None, kwargs=None):
+    json_dict = {"code": code, "message": message, "data": data}
+
+    if kwargs and isinstance(kwargs, dict) and kwargs.keys():
         json_dict.update(kwargs)
     return JsonResponse(json_dict)
+
 
 def ok():
     return result()
 
-def params_error(message="",data=None):
-    return result(code=HttpCode.paramserror,message=message)
 
-def unauth(message="",data=None):
-    return result(code=HttpCode.unauth,message=message)
+def params_error(message="", data=None):
+    return result(code=HttpCode.paramserror, message=message)
 
-def method_error(message="",data=None):
-    return  result(code=HttpCode.methoderror,message=message)
 
-def server_error(message="",data=None):
-    return  result(code=HttpCode.servererror,message=message)
+def unauth(message="", data=None):
+    return result(code=HttpCode.unauth, message=message)
+
+
+def method_error(message="", data=None):
+    return result(code=HttpCode.methoderror, message=message)
+
+
+def server_error(message="", data=None):
+    return result(code=HttpCode.servererror, message=message)
 
 
 

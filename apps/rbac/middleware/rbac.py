@@ -1,12 +1,13 @@
-# _*_coding:utf-8 _*_
 from django.conf import settings
 from django.shortcuts import HttpResponse, redirect
 import re
 
+
+# 无法导入MiddlewareMixin类，把MiddlewareMixin类拿过来继承
 class MiddlewareMixin(object):
-    def __init__(self,get_response=None):
+    def __init__(self, get_response=None):
         self.get_response = get_response
-        super(MiddlewareMixin,self).__init__()
+        super(MiddlewareMixin, self).__init__()
 
     def __call__(self, request):
         response = None
@@ -18,6 +19,7 @@ class MiddlewareMixin(object):
             response = self.process_response(request, response)
         return response
 
+
 class RbacMiddleware(MiddlewareMixin):
     """
     检查用户的url请求是否是其权限范围内
@@ -25,14 +27,15 @@ class RbacMiddleware(MiddlewareMixin):
     def process_request(self, request):
         request_url = request.path_info
         permission_url = request.session.get(settings.SESSION_PERMISSION_URL_KEY)
-        print('访问url',request_url)
-        print('权限--',permission_url)
+        print('访问url', request_url)
+        print('权限--', permission_url)
         # 如果请求url在白名单，放行
         for url in settings.SAFE_URL:
             if re.match(url, request_url):
                 return None
 
         # 如果未取到permission_url, 重定向至登录；为了可移植性，将登录url写入配置
+        # 另外，Login必须设置白名单，否则访问login会反复重定向
         if not permission_url:
             return redirect(settings.LOGIN_URL)
 
@@ -49,9 +52,12 @@ class RbacMiddleware(MiddlewareMixin):
         else:
             # 如果是调试模式，显示可访问url
             if settings.DEBUG:
-                info ='<br/>' + ( '<br/>'.join(permission_url))
-                return HttpResponse('无权限，请尝试访问以下地址：%s' %info)
+                info = '<br/>' + ('<br/>'.join(permission_url))
+                return HttpResponse('无权限，请尝试访问以下地址：%s' % info)
             else:
                 return HttpResponse('无权限访问')
+
+
+
 
 

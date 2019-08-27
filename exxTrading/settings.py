@@ -45,7 +45,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -57,7 +57,7 @@ ROOT_URLCONF = 'exxTrading.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'front','templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'front', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -80,11 +80,11 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'exx',
-        'HOST': '127.0.0.1',
-        'USER':'root',
-        'PASSWORD':'123456',
-        'PORT':'3306',
+        'NAME': 'exx_quantitative_admin',
+        'HOST': '192.168.4.201',
+        'PORT': 3306,
+        'USER': 'root',
+        'PASSWORD': 'password'
     }
 }
 
@@ -111,9 +111,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-hans'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
@@ -127,30 +127,34 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR,'front','dist')
+    os.path.join(BASE_DIR, 'front', 'dist')
 ]
 
 # 定义session 键：
-# 保存用户权限url列表
-# 保存 权限菜单 和所有 菜单
-SESSION_PERMISSION_URL_KEY = 'cool'
 
-SESSION_MENU_KEY = 'awesome'
-ALL_MENU_KEY = 'k1'
-PERMISSION_MENU_KEY = 'k2'
+# 保存用户权限url列表
+SESSION_PERMISSION_URL_KEY = 'url_list'
+# 保存 权限菜单 和所有 菜单
+SESSION_MENU_KEY = 'menu_list'
+ALL_MENU_KEY = 'all_menu'
+PERMISSION_MENU_KEY = 'permission_menu'
 
 LOGIN_URL = '/login/'
-REGEX_URL = r'^{url}$'  # url作严格匹配
+
+# url作严格匹配
+REGEX_URL = r'^{url}$'
 
 # 配置url权限白名单
 SAFE_URL = [
     r'/login/',
-    r'/admin/.*',
-    r'/test/',
-    r'/index/',
+    '/admin/.*',
+    '/test/',
+    '/index/',
     '^/rbac/',
-    '^/exx/',
-    '/rbac/role',
 ]
+
+# 用户是否登陆
+LOGIN = 'is_login'
+
 
 
