@@ -1,0 +1,80 @@
+{% extends 'cms/base.html' %}
+{% load static %}
+{% block title %}
+    交易账户管理
+{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/manamegent/account.min.css' %}">
+{% endblock %}
+{% block header %}
+    <h1>交易账户管理</h1>
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-header account-management">
+                    <div class="form-group account-group ">
+                        <a class="btn btn-info pull-right account ">添加账户</a>
+                    </div>
+                    <div class="form-group curry-group">
+                        <a class="btn btn-info pull-right curry">账户币种配置</a>
+                    </div>
+                    <div class="form-group property-group">
+                        <a class="btn btn-info pull-right property">资产汇总</a>
+                    </div>
+
+                </div>
+                <div class="box-body">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>账户名称</th>
+                            <th>所属平台</th>
+                            <th>账户添加时间</th>
+                            <th></th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>exx</td>
+                            <td>exx</td>
+                            <td>2019</td>
+                            <td></td>
+                            <td>
+                                <a href="">编辑</a>
+                                <a href="">编辑</a>
+                                <a href="">编辑</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <div class="add-account-wrapper">
+        <form action="">
+            <div class="account-wrapper">
+                <div class="close-group">
+                    <span class="close-btn icon-close iconfont"></span>
+                </div>
+                <div class="account-modal-header">
+                    <div class="role-modal-header-inner">添加角色</div>
+                </div>
+                <div class="account-body">
+                    <div class="form-group ">
+                        <label for="">所属平台</label>
+                        <select name="" id="">
+                            <option value="">exx</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </div>
+    </div>
+{% endblock %}

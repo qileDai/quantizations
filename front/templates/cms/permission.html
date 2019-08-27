@@ -1,0 +1,149 @@
+{% extends 'cms/base.html' %}
+{% load static %}
+{% block title %}
+    权限管理
+{% endblock %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{% static 'adminlte/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/rbac/permission.min.css' %}">
+    <script src="{% static 'adminlte/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}"></script>
+    <script src="{% static 'adminlte/bower_components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.zh-CN.min.js' %}"></script>
+    <script src="{% static 'js/roles.min.js' %}"></script>
+{% endblock %}
+
+{% block header %}
+    <h2>权限管理</h2>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-header">
+                    <form action="" class="form-inline">
+                        <div class="form-group left-group">
+                            <input type="text" class="form-control" name="permission-seach" placeholder="搜索权限名称" style="border-radius: 5px" value="">
+                        </div>
+                        <div class="form-group left-group">
+{#                            <a href="{% url 'rbac:RolesListView' %}" class="btn btn-info" id="search">搜索</a>#}
+                        </div>
+                         <div class="form-group left-group">
+                            <a class="btn btn-info" id="permission-search">搜索</a>
+                        </div>
+                        <div class="form-group left-group">
+                            <a class="btn btn-info" id="permission-add-btn">添加权限</a>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="box-body">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>权限名称</th>
+                            <th>url</th>
+                            <th>菜单</th>
+                            <th>操作</th>
+                        </thead>
+                        <tbody>
+                        {% for permission in permissions %}
+                            <tr data-permission-id="{{ permission.pk }}">
+                                <td>
+                                    {{ permission.title }}
+                                </td>
+                                <td>{{ permission.url }}</td>
+                                <td>{{ permission.menu.caption }}</td>
+                                <td>
+                                    <a href="" class="btn btn-info btn-xs">编辑</a>
+                                    <a class="btn btn-danger btn-xs" id="delete-RoleBtn" data_news_id="">删除
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="box-footer">
+                    <p class="page_count pull-left">第{{ current_page }}/总共{{ num_pages }}页</p>
+                    <ul class="pagination pull-right">
+                        {#上一页#}
+                        {% if page_obj.has_previous %}
+                            <li><a href="?p={{ page_obj.previous_page_number }}{{ url_query }}">上一页</a></li>
+                        {% else %}
+                            <li class="disabled"><a href="javascript:void(0);">上一页</a></li>
+                        {% endif %}
+
+                        {# 是否需要出现三个点 #}
+                        {% if left_has_more %}
+                            <li><a href="?p=1">1</a></li>
+                            <li><a href="javascript:void(0);">...</a></li>
+                        {% endif %}
+
+                        {# 左边的页码 #}
+                        {% for left_page in left_pages %}
+                            <li><a href="?p={{ left_page }}{{ url_query }}">{{ left_page }}</a></li>
+                        {% endfor %}
+
+                        {# 当前的页面 #}
+                        <li class="active"><a href="?p={{ current_page }}{{ url_query }}">{{ current_page }}</a></li>
+
+                        {# 右边的页码 #}
+                        {% for right_page in right_pages %}
+                            <li><a href="?p={{ right_page }}{{ url_query }}">{{ right_page }}</a></li>
+                        {% endfor %}
+
+                        {# 用来控制右边三个点 #}
+                        {% if right_has_more %}
+                            <li><a href="javascript:void(0);">...</a></li>
+                            <li><a href="?p={{ num_pages }}{{ url_query }}">{{ num_pages }}</a></li>
+                        {% endif %}
+
+                        {#下一页#}
+                        {% if page_obj.has_next %}
+                            <li><a href="?p={{ page_obj.next_page_number }}{{ url_query }}">下一页</a></li>
+                        {% else %}
+                            <li class="disabled"><a href="javascript:void(0);">下一页</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="permission-wrapper">
+        <form action="" class="form">
+            <div class="permission-modal-content">
+                <div class="close-group">
+                    <span class="close-btn icon-close iconfont"></span>
+                </div>
+                <div class="permission-modal-header">
+                    <div class="role-modal-header-inner">添加权限</div>
+                </div>
+                <div class="permission-modal-body ">
+                    <div class="form-group permission">
+                        <lable class="role-label-body" for="title">权限:</lable>
+                        <input type="text" class="form-control" name="permission" placeholder="请输入角色" value="">
+                    </div>
+                    <div class="form-group-permission-url">
+                        <lable class="role-label-url" for="title">url:</lable>
+                        <input type="text" class="form-control" name="url" placeholder="请输入角色" value="">
+                    </div>
+                    <div class="form-group ">
+                        <lable class="role-label-body-select" for="permission">菜单:</lable>
+                        <select name="menu" id="permission" class="form-control-select">
+                            {% for metu in menus %}
+                                <option value="{{ metu.pk }}">{{ metu.caption }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="button-account">
+                    <a id="permission-confirm" class="btn  pull-right confirm">确认</a>
+                    <button id="cacle" class="btn  pull-right cancle">取消</button>
+                    {#                    <button class="btn btn-danger">登陆</button>#}
+                </div>
+            </div>
+        </form>
+
+    </div>
+{% endblock %}
