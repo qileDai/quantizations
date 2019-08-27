@@ -1,0 +1,129 @@
+@import "contents";
+
+.footer{
+    font-size: 16px;
+    color: #c9c9c9;
+    margin-top: 20px;
+    .top-group{
+        background: #555e67;
+        height: 100px;
+        .top-inner-group{
+            width: $pagewidth;
+            margin: 0 auto;
+            position: relative;
+            //overflow: hidden;
+            .logo-box{
+                width: 160px;
+                height: 54px;
+                float: left;
+                background: url("http://www.xfz.cn/static/build/images/foot-logo.png");
+                background-repeat: no-repeat;
+                background-size: 100%;
+                margin-top: 22px;
+            }
+            .detail-group{
+                margin-left: 84px;
+                float: left;
+                .line1{
+                    overflow: hidden;
+                    margin-top: 20px;
+                    .links{
+                        float: left;
+                        overflow: hidden;
+                        li{
+                            float: left;
+                            padding: 0 10px;
+                            border-right: 1px solid #c9c9c9;
+                            &:last-of-type{
+                                border-right: none;
+                            }
+                            &:first-of-type{
+                                padding-left: 0;
+                            }
+                            a{
+                                color: #c9c9c9;
+                            }
+                        }
+
+                    }
+                    .about-us{
+                        float: left;
+                        margin-left: 30px;
+                        overflow: hidden;
+                        .socail{
+                            float: right;
+                            overflow: hidden;
+                            .weixin{
+                                float: left;
+                                margin-left: 10px;
+                                background: url("http://www.xfz.cn/static/build/images/wx-icon.png");
+                                background-repeat: no-repeat;
+                                background-size: 30%;
+                                cursor: pointer;
+                                &:hover .wx-qrcode{
+                                    display: block;
+                                }
+                                .wx-qrcode{
+                                    width: 204px;
+                                    height: 204px;
+                                    background: url("http://xfz.cn/static/build/images/wxQr.jpg");
+                                    background-size: 70%;
+                                    background-repeat: no-repeat;
+                                    position: absolute;
+                                    right: 300px;
+                                    top: -140px;
+                                    display: none;
+
+                                }
+
+                                .text{
+                                    margin-left: 30px;
+                                }
+                                a{
+                                    color: #ffffff;
+                                }
+                            }
+                            .weibo{
+                                float: left;
+                                margin-left: 20px;
+                                background: url("http://www.xfz.cn/static/build/images/xl-icon.png");
+                                background-repeat: no-repeat;
+                                background-size: 17%;
+                                a{
+                                    color: #ffffff;
+                                }
+                                .text{
+                                    margin-left: 30px;
+                                }
+                            }
+                        }
+                    }
+
+            }
+                .line2{
+                    overflow: hidden;
+                    margin-top: 15px;
+                    .address{
+                        float: left;
+                    }
+                    .content{
+                        margin-left: 20px;
+                        float: right;
+                    }
+                }
+    }
+        }
+
+    }
+    .bottom-group{
+        background: #383e44;
+        height: 60px;
+        text-align: center;
+        line-height: 60px;
+
+
+
+
+
+    }
+}

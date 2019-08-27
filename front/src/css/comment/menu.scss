@@ -1,0 +1,15 @@
+@import "contents";
+@import "init";
+
+.menu-wrapper{
+  $authWrapperHeight:500px;
+  $authWrapperWidth:400px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top:10px;
+  bottom: 0;
+  background: rgba(0,0,0,0.2);
+  display: none;
+  z-index: 100;
+}

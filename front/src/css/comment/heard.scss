@@ -1,0 +1,107 @@
+@import "contents";
+
+.header{
+    width: 100%;
+    height: $navHight;
+    background: #3a3a3a;
+    left: 0;
+    top:0;
+    right: 0;
+    //opacity: 0.5;
+
+    .content{
+        width: $pagewidth;
+        height:100%;
+
+        margin: 0 auto;
+        overflow: hidden;
+        .logo-box{
+            width: 160px;
+            height: 52px;
+           background: url("http://www.xfz.cn/static/build/images/logo.png") no-repeat;
+            margin-top: 9px;
+            float: left;
+
+            a{
+                display: block;
+                width: 100%;
+                height: 100%;
+            }
+
+        }
+        .nav{
+            margin-left: 128px;
+            float: left;
+
+            li{
+                float: left;
+                margin-right: 60px;
+                line-height: 64px;
+                height: 64px;
+                box-sizing: border-box;
+
+                a{
+                    color: white;
+                }
+                &.active{
+                    border-bottom: 5px solid #5c87d9;
+                }
+            }
+        }
+        .auth-box{
+            float: right;
+            line-height:$navHight;
+            //box-sizing: border-box;
+            .iconfont{
+               color: #ffffff;
+                font-size: 20px;
+                margin-right: 10px;
+            }
+            a{
+                color: #ffffff;
+            }
+
+            .authenticated-name{
+                color: #578cd9;
+                font-size: 16px;
+            }
+            .user-more-box{
+                background: #fff;
+                width: 140px;
+                position: absolute;
+                box-shadow: 0 3px 4px #ccc;
+                border-radius: 5px;
+                top:65px;
+                //left: 50%;
+                margin-right: -70px;
+                z-index: 2;
+                font-size: 14px;
+                float: right;
+                //
+                .triangle{
+                    border: solid transparent;
+                    border-width: 10px;
+                    border-bottom-color: #fff;
+                    display: block;
+                    width: 0;
+                    height: 0;
+                    margin-top: -20px;
+                    margin-left: 60px;
+                }
+                a{
+                    text-align: center;
+                    height: 44px;
+                    color: #6d85ac!important;
+                    display: block;
+                    line-height: 44px;
+                }
+
+
+
+
+            }
+
+        }
+
+    }
+}
