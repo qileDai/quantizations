@@ -48,9 +48,18 @@
                                 <td>
                                     {{ role.rolename }}
                                 </td>
-                                {% for permission in role.permission.all %}
-                                    <td>{{ permission.title }}</td>
-                                {% endfor %}
+
+                            <td>
+                                {% for permission in role.permissions.all%}
+                                    {{ permission.title }} &nbsp;
+                                    {% endfor %}
+                            </td>
+{#                                {% for permission in role.permissions.all%}#}
+{#                                    <td>{{ permission.title }}</td>#}
+{##}
+{#                                {% endfor %}#}
+
+
                                 <td>
                                     <a href="#" class="btn btn-info btn-xs">编辑</a>
                                     <a class="btn btn-info btn-xs delete-roles-btn" id="delete-RoleBtn"
