@@ -90,7 +90,7 @@ def get_structure_data(request):
 def get_menu_html(menu_data):
     """显示：菜单 + [子菜单] + 权限(url)"""
     option_str = """
-          <div class='rbac-menu-item'>
+          <li class='rbac-menu-item '>
                 <div class='rbac-menu-header'>
                 <span class='glyphicon glyphicon-folder-{status}'>
                 {menu_title}</div>
