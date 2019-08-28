@@ -1,5 +1,6 @@
 {% extends 'cms/base.html' %}
 {% load static %}
+{% load custom_tag %}
 {% block title %}
     账户管理
 {% endblock %}
@@ -24,19 +25,20 @@
                     <form action="" class="form-inline">
                         <div class="form-group left-group">
                             <lable for="title">用户名</lable>
-                            <input type="text" class="form-control account-title" name="title" placeholder="搜索用户名"
+                            <input type="text" class="form-control account-title" name="username" placeholder="搜索用户名"
                                    value="">
                         </div>
                         <div class="form-group status-group">
                             <lable for="rolename">状态</lable>
-                            <select name="aacount-status" id="status" class="form-control account-status">
-                                {% for role in roles %}
-                                    <option value="">{{ role.rolename }}</option>
-                                {% endfor %}
+                            <select name="status" id="status" class="form-control account-status">
+                                <option value="">正常</option>
+                                <option value="">禁用</option>
                             </select>
                         </div>
                         <div class="form-group left-group">
-                            <a href="#" class="btn btn-info search" id="search">搜索</a>
+                            <button  class="btn btn-info search" id="search">
+                                <a href="{% url 'rbac:user_list' %}">搜索</a>
+                            </button>
                         </div>
                         <div class="form-group left-group">
                             {#                            <a href="#"><button>新增</button></a>#}

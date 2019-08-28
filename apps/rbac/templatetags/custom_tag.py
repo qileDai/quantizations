@@ -3,6 +3,8 @@ import os
 from django import template
 from django.conf import settings
 from django.utils.safestring import mark_safe
+import datetime
+from django.utils.timezone import now as now_func,localtime
 
 register = template.Library()  # 创建Library对象，register的名字是固定的,不可改变
 
@@ -174,6 +176,13 @@ def rbac_js():
     js_path = os.path.join('front/src', 'style_script', 'rbac.js')
     js = open(js_path, 'r', encoding='utf-8').read()
     return mark_safe(js)
+
+@register.filter
+def time_format(value):
+    if not isinstance(value,datetime):
+        return value
+
+    return localtime(value).strftime("%Y/%m/%d %H:%M:%S")
 
 
 
