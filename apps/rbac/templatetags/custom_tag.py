@@ -160,7 +160,7 @@ def rbac_css():
     rabc要用到的css文件路径，并读取返回；注意返回字符串用mark_safe，否则传到模板会转义
     :return: 
     """
-    css_path = os.path.join('rbac', 'style_script', 'rbac.css')
+    css_path = os.path.join('front/src', 'style_script', 'rbac.css')
     css = open(css_path, 'r', encoding='utf-8').read()
     return mark_safe(css)
 
@@ -171,7 +171,7 @@ def rbac_js():
     rabc要用到的js文件路径，并读取返回
     :return: 
     """
-    js_path = os.path.join('rbac', 'style_script', 'rbac.js')
+    js_path = os.path.join('front/src', 'style_script', 'rbac.js')
     js = open(js_path, 'r', encoding='utf-8').read()
     return mark_safe(js)
 
