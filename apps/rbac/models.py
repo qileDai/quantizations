@@ -119,7 +119,7 @@ class Role(models.Model):
     # 定义角色和权限的多对多关系
 
     def __str__(self):
-        return self.title
+        return self.rolename
 
 
 class UserInfo(models.Model):
@@ -131,7 +131,7 @@ class UserInfo(models.Model):
     password = models.CharField(max_length=128)
     nickname = models.CharField(max_length=32)
     email = models.EmailField()
-    status = models.CharField(max_length=10, choices=(('1', '正常'), ('0', '禁用')), default='1')
+    status = models.CharField(max_length=10)
     create_time = models.DateTimeField(auto_now_add=True)
 
     roles = models.ManyToManyField("Role")

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, reverse, HttpResponse
 from .models import UserInfo, Role, Menu, Permission
-from apps.rbac.service.init_session import init_permission
+from apps.rbac.service.init_permission import init_permission
 from django.views.generic import View
 from utils import restful
 from django.core.paginator import Paginator
@@ -14,7 +14,7 @@ from django.conf import settings
 # 用户登录装饰器
 def is_login(func):
     def wrapper(request, *args, **kwargs):
-        if 'ADMIN' in request.session:
+        if 'ADMIN' in request.session or 'is_login' in request.session:
             res = func(request, *args, **kwargs)
             return res
         else:
@@ -43,16 +43,15 @@ def login(request):
             return render(request, 'cms/index.html')
         else:                                   # 普通用户
             init_permission(request, user_obj)  # 调用权限初始化
-            print('-'*20)
-            return redirect('index/')
+            return redirect('/rbac/index/')
 
 
 @is_login
 def index(request):
     if 'is_login' in request.session:
-        return render(request, 'rbac/index.html')
+        return render(request, 'cms/index.html')
     else:
-        return redirect('login/')
+        return redirect('settings.LOGIN_URL')
 
 
 def logout(request):

@@ -149,7 +149,7 @@ SAFE_URL = [
     r'/login/',
     '/admin/.*',
     '/test/',
-    '/index/',
+    '/rbac/index/',
     '^/rbac/',
 ]
 
