@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, reverse, HttpResponse
 from .models import UserInfo, Role, Menu, Permission
-from apps.rbac.service.init_permission import init_permission
+from apps.rbac.service.init_session import init_permission
 from django.views.generic import View
 from utils import restful
 from django.core.paginator import Paginator
@@ -26,7 +26,7 @@ def login(request):
     if request.method == "GET":
         return render(request, "cms/login.html")
     else:
-        username = request.POST.get('telephone')
+        username = request.POST.get('username')
         password = request.POST.get('password')
         hl = hashlib.md5()
         hl.update(password.encode(encoding='utf-8'))

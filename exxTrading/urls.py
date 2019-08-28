@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('rbac/', include('apps.rbac.urls')),
     path('exx/', include('apps.exx.urls')),
+    path('login/',views.login,name='login' ),
 ]
