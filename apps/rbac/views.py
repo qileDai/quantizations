@@ -56,7 +56,7 @@ def index(request):
 
 
 def logout(request):
-    return render(request, 'cms/login.html')
+    return redirect('../../login/')
 
 
 @is_login
