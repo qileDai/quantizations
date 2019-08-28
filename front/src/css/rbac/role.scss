@@ -7,7 +7,16 @@
 .role-box{
   overflow: hidden;
   .role-add-btn{
-    float: right;
+    margin-left: 1200px;
+  }
+  .rolename-label{
+    font-weight: 400 ;
+  }
+  .rolename-input{
+    border-radius: 5px;
+  }
+  .rolename-serach{
+    margin-left: 20px;
   }
 }
 

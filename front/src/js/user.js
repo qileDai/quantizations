@@ -1,28 +1,99 @@
 
-
 function User() {
 
 };
 
-User.prototype.listAddUserEvent = function(){
-   var addBtn = $('#user-add-btn');
-   addBtn.click(function () {
-       xfzalert.alertOneInput({
-           'title':'添加新闻分类',
-            'placeholder':'请输入新闻分类',
-            'confirmCallback':function (inputValue) {
-
-            }
-       });
-   })
-}
-
 User.prototype.run = function () {
-  var self = this;
-  self.listAddUser();
+    var self = this;
+    self.listDelteUsersEvent();
+    self.listUserSubmintEvent();
+    self.listenEditUserShowEvent();
+
+};
+
+User.prototype.listUserSubmintEvent = function () {
+    var siginupGroup = $('.singup-group');
+    var userSubmitBtn = $('#user-confirm');
+    userSubmitBtn.click(function () {
+        console.log("用户添加页面")
+        var usernameInput = siginupGroup.find("input[name='username']")
+        var emailInput = siginupGroup.find("input[name='email']")
+        var passwordInput = siginupGroup.find("input[name='password']")
+        var roleInput = siginupGroup.find("select[name='userrole']")
+        var username = usernameInput.val()
+        var email = emailInput.val()
+        var password = passwordInput.val()
+        var role = roleInput.val()
+        console.log(username, email, password,role)
+
+        xfzajax.post({
+            'url': '/rbac/add_users/',
+            'data': {
+                'username': username,
+                'password': password,
+                'email': email,
+                'role':role
+            },
+            'success': function (result) {
+                if (result['code'] === 200) {
+                    xfzalert.alertSuccess("添加用户成功", function () {
+                        window.location.reload()
+                    });
+                }
+            }
+        });
+
+    });
+
+};
+User.prototype.listDelteUsersEvent = function () {
+    var self = this;
+    $('.delete-users-btn').on("click", function () {
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var pk = tr.attr('data_users_id');
+        console.log(pk)
+        xfzalert.alertConfirm({
+            'title': '您确定要删除这个用户吗？',
+            'confirmCallback': function () {
+                xfzajax.post({
+                    'url': '/rbac/delete_users/',
+                    'data': {
+                        'pk': pk,
+                    },
+                    'success': function (result) {
+                        if (result['code'] === 200) {
+                            window.location.reload()
+                        }
+                    }
+                });
+            }
+        });
+    });
+};
+User.prototype.listenEditUserShowEvent = function () {
+    var self = this;
+    var userGroup = $('.singup-group ');
+    var userWrapper = $('.mask-wrapper');
+    // console.log(user)
+    $('.edit-user-btn').on('click', function () {
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var user = tr.attr('data-name');
+        var email = tr.attr('data-email');
+        var role = tr.attr('data-role');
+        console.log(role)
+        var password = tr.attr('data-password')
+        userWrapper.show()
+        userGroup.find("input[name='username']").val(user)
+        userGroup.find("input[name='password']").val(password)
+        userGroup.find("input[name='email']").val(email)
+        userGroup.find("select[name='userrole']").val(role)
+
+    })
 };
 
 $(function () {
-    var usr = new User();
-    usr.run();
-});
+    var user = new  User();
+    user.run();
+})
