@@ -9,11 +9,11 @@
     <link rel="stylesheet" href="{% static 'css/rbac/account.min.css' %}">
     <script src="{% static 'adminlte/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}"></script>
     <script src="{% static 'adminlte/bower_components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.zh-CN.min.js' %}"></script>
-    <script src="{% static 'js/news_list.min.js' %}"></script>
+    <script src="{% static 'js/user.min.js' %}"></script>
 {% endblock %}
 
 {% block header %}
-    <h1>账户管理</h1>
+    <p>账户管理</p>
 {% endblock %}
 
 {% block content %}
@@ -24,7 +24,8 @@
                     <form action="" class="form-inline">
                         <div class="form-group left-group">
                             <lable for="title">用户名</lable>
-                            <input type="text" class="form-control account-title" name="title" placeholder="搜索用户名" value="">
+                            <input type="text" class="form-control account-title" name="title" placeholder="搜索用户名"
+                                   value="">
                         </div>
                         <div class="form-group status-group">
                             <lable for="rolename">状态</lable>
@@ -39,7 +40,8 @@
                         </div>
                         <div class="form-group left-group">
                             {#                            <a href="#"><button>新增</button></a>#}
-                            <a class="btn btn-info user-add-btn" id="user-add-btn">新增账户</a>
+                            <a href="#" class="btn btn-info user-add-btn" id="user-add-btn">
+                                 <i class="fa fa-plus-square" aria-hidden="true">新增账户</i> </a>
                         </div>
                     </form>
                 </div>
@@ -65,9 +67,9 @@
                                 <td>
                                     {{ user.username }}
                                 </td>
-                                <td>{{ user.phone_number }}</td>
+                                <td></td>
                                 <td>{{ user.email }}</td>
-                                <td>{{ user.status }}</td>
+                                <td></td>
                                 {% for role in user.role.all %}
                                     <td>{{ role.rolename }}</td>
                                 {% endfor %}
@@ -143,8 +145,15 @@
                         <div class="form-group left-group">
                             <div class="input-group">
                                 <label for="username" class="label-user">用户名:</label>
-                                <input type="text" class="form-control" name="username" autocomplete="off"
+                                <input type="text" class="form-control" name="usernamea" autocomplete="off"
                                        placeholder="请输入用户名">
+                            </div>
+                            <div class="input-group">
+                                <div class="short-group">
+                                    <label for="email" class="label-user">手机号:</label>
+                                    <input type="text" class="form-control" name="email" autocomplete="off"
+                                           placeholder="请输入手机号">
+                                </div>
                             </div>
                             <div class="input-group">
                                 <div class="short-group">
@@ -152,6 +161,14 @@
                                     <input type="text" class="form-control" name="email" autocomplete="off"
                                            placeholder="请输入邮箱">
                                 </div>
+                            </div>
+                            <div class="input-group">
+                                <div class="short-group">
+                                    <label for="">用户状态</label>
+                                    <a href="#">正常</a>
+                                    <a href="#">禁用</a>
+                                </div>
+
                             </div>
                             <div class="input-group">
                                 <label for="password" class="label-user">密码:</label>
@@ -172,8 +189,8 @@
                 </div>
                 <div class="user-modal-footer">
                     <div class="button-account">
-                        <a id="user-confirm" class="btn  pull-right confirm">确认</a>
-                        <button id="user-cacle" class="btn  pull-right cancle">取消</button>
+                        <button id="user-cacle" class="btn confirm">取消</button>
+                        <a id="user-confirm" class="btn cancle">确认</a>
                     </div>
                 </div>
             </div>

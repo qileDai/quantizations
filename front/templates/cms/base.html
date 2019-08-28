@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="{% static 'sweetalert/sweetalert.css' %}">
     <link rel="stylesheet" href="http:////at.alicdn.com/t/font_796312_9rg7q2ll57o.css">
     <link rel="stylesheet" href="{% static 'css/cms/cms.min.css' %}">
-{#    <link rel="stylesheet" href="{% static 'css/comment/auth.min.css' %}">#}
+    {#    <link rel="stylesheet" href="{% static 'css/comment/auth.min.css' %}">#}
     <script src="{% static 'adminlte/bower_components/jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static 'adminlte/bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'adminlte/dist/js/adminlte.min.js' %}"></script>
@@ -131,19 +131,24 @@
                         <span>权限管理</span>
                     </a>
                 <li></li>
-                 <li class="header" style="font-size: 14px;color: #FFFFFF">交易管理</li>
-                 <li>
+
+                <li class="header" style="font-size: 14px;color: #FFFFFF">交易管理</li>
+                <li>
                     <a href="{% url 'exx:trading_account' %}">
                         <i class="fa fa-tv"></i>
                         <span>交易账户管理</span>
                     </a>
                 <li></li>
-                 <li>
+                <li>
                     <a href="#">
                         <i class="fa fa-tv"></i>
                         <span>机器人管理-网格交易</span>
                     </a>
-                <li></li>
+                </li>
+
+                <li class='header' style="font-size: 14px;color: #FFFFFF">窗口管理
+
+                </li>
             </ul>
         </section>
         <!-- /.sidebar -->

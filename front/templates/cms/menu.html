@@ -9,11 +9,11 @@
     <link rel="stylesheet" href="{% static 'css/rbac/menu.min.css' %}">
     <script src="{% static 'adminlte/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}"></script>
     <script src="{% static 'adminlte/bower_components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.zh-CN.min.js' %}"></script>
-    <script src="{% static 'js/news_list.min.js' %}"></script>
+    <script src="{% static 'js/menu.min.js' %}"></script>
 {% endblock %}
 
 {% block header %}
-    <h3>菜单管理</h3>
+    <p>菜单管理</p>
 {% endblock %}
 
 {% block content %}
@@ -29,8 +29,8 @@
                         <div class="form-group left-group">
                             <button class="btn btn-info" id="search">搜索</button>
                         </div>
-                        <div class="form-group left-group">
-                            <a class="btn btn-info" id="menu-add-btn">添加一级菜单</a>
+                        <div class="menu-btn-group">
+                            <a class="btn btn-info pull-right" id="menu-add-btn">添加一级菜单</a>
                         </div>
                     </form>
                 </div>
@@ -46,14 +46,14 @@
                         <tbody>
                         {% for menu in menus %}
                             <tr>
-                                <td >{{ menu.pk }}</td>
-                                <td>{{ menu.caption}}</td>
-                                <td>{{ menu.parent.caption}}</td>
+                                <td>{{ menu.pk }}</td>
+                                <td>{{ menu.caption }}</td>
+                                <td>{{ menu.parent.caption }}</td>
                                 <td>
                                     <a href="" class="btn btn-info btn-xs">编辑</a>
-                                    <button class="btn btn-danger btn-xs" id="delete-newsBtn" data_news_id="">删除
+                                    <button class="btn btn-info btn-xs" id="delete-newsBtn" data_news_id="">删除
                                     </button>
-                                    <button class="btn btn-primary btn-xs" id="delete-newsBtn" data_news_id="">分配权限
+                                    <button class="btn btn-info btn-xs" id="delete-newsBtn" data_news_id="">分配权限
                                     </button>
                                 </td>
                             </tr>
@@ -120,24 +120,31 @@
                 <div class="menu-modal-body">
                     <div class="form-group ">
                         <p class="menu-model-title">level</p>
-                        <select type="text" class="form-control" placeholder="请输入一级菜单序号">
-                            <option selected="selected" disabled="disabled"  style='display: none' value=''></option>
+                        <select type="text" class="form-control menu-level" placeholder="请输入一级菜单序号">
                             <option value="1">一级菜单</option>
                             <option value="2">二级菜单</option>
                         </select>
                     </div>
-                    <div class="form-group ">
+                    <div class="form-group level1-wrapper" style="display: none">
                         <p class="menu-model-title">一级菜单名称</p>
                         <input type="text" class="form-control" placeholder="请输入一级菜单名称">
                     </div>
-                    <div class="form-group ">
-                        <p class="menu-model-title">父级菜单路由</p>
-                        <select type="text" class="form-control" placeholder="请输入一级菜单序号">
-                            <option selected="selected" disabled="disabled"  style='display: none' value=''></option>
-                            <option value="1">一级菜单</option>
-                            <option value="2">二级菜单</option>
-                        </select>
+                    <div class="form-group level2-wrapper" >
+                        <div class="form-group level1-wrapper" >
+                            <p class="menu-model-title">二级菜单名称</p>
+                            <input type="text" class="form-control" placeholder="请输入一级菜单名称">
+                        </div>
+                        <div class="form-group ">
+                            <p class="menu-model-title">父级菜单</p>
+                            <select type="text" class="form-control parent-menu" placeholder="请输入一级菜单序号">
+                                <option selected="selected" disabled="disabled" style='display: none' value=''></option>
+                                {% for menu in menus %}
+                                    <option value="{{ menu.pk }}">{{ menu.caption }}</option>
+                                {%endfor  %}
+                            </select>
+                        </div>
                     </div>
+
                 </div>
                 <div class="menu-modal-footer">
                     <div class="button-account">

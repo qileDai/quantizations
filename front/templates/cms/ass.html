@@ -1,0 +1,56 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>管理后台</title>
+
+    <style>
+
+        .rbac-hide {
+            display: none;
+        }
+
+        .rbac-menu-item .rbac-menu-body {
+            margin-left: 20px;
+        }
+
+        .rbac-menu-body a {
+            display: block;
+        }
+
+        .rbac-menu-body a.rbac-active {
+            color: red;
+        }
+
+    </style>
+    <script src="/static/jquery-3.2.1.js"></script>
+    <script>
+        $(function () {
+            $('.rbac-menu-header').click(function () {
+                $(this).next().toggleClass('rbac-hide');
+                //$(this).next().removeClass('rbac-hide').parent().siblings().find('.rbac-menu-body').addClass('rbac-hide');
+            });
+        })
+    </script>
+
+</head>
+<body>
+
+
+<div class='rbac-menu-item'>
+    <div class='rbac-menu-header'>
+                <span class='glyphicon glyphicon-folder-close'>
+                库存管理</div>
+    <div class='rbac-menu-body rbac-hide'>
+        <a href=" " class="">入库</a>
+
+        <a href="/stock/out/" class="">出库</a>
+
+        <a href="/stock/lose/" class="">报损</a>
+
+        <a href="/stock/detail/" class="">查看库存清单</a>
+    </div>
+</div>
+
+
+</body>
+</html>

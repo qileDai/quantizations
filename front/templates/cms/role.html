@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block header %}
-    <h1>角色管理</h1>
+    <p>角色管理</p>
 {% endblock %}
 
 {% block content %}
@@ -23,11 +23,11 @@
                 <div class="box-header">
                     <form action="" class="form-inline">
                         <div class="form-group left-group">
-                            <label for="role">角色</label>
-                            <input type="text" class="form-control" name="rolename-seach" placeholder="搜索角色名称" value="">
+                            <label class="rolename-label" for="role">角色</label>
+                            <input type="text" class="form-control rolename-input" name="rolename-seach" placeholder="搜索角色名称" value="">
                         </div>
                         <div class="form-group left-group">
-                            {#                            <a href="{% url 'rbac:RolesListView' %}" class="btn btn-info" id="search">搜索</a>#}
+                            <a href="#" class="btn btn-info rolename-serach" id="search">搜索</a>
                         </div>
                         <div class="form-group left-group">
                             <a class="btn btn-info role-add-btn" id="role-add-btn">添加角色</a>
@@ -52,8 +52,8 @@
                                     <td>{{ permission.title }}</td>
                                 {% endfor %}
                                 <td>
-                                    <a href="" class="btn btn-info btn-xs">编辑</a>
-                                    <a class="btn btn-danger btn-xs delete-roles-btn" id="delete-RoleBtn"
+                                    <a href="#" class="btn btn-info btn-xs">编辑</a>
+                                    <a class="btn btn-info btn-xs delete-roles-btn" id="delete-RoleBtn"
                                        data_news_id="">删除
                                     </a>
                                 </td>
