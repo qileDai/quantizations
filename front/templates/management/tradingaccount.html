@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{% static 'css/manamegent/account.min.css' %}">
 {% endblock %}
 {% block header %}
-    <h1>交易账户管理</h1>
+    <p>交易账户管理</p>
 {% endblock %}
 {% block content %}
     <div class="row">
@@ -62,19 +62,256 @@
                     <span class="close-btn icon-close iconfont"></span>
                 </div>
                 <div class="account-modal-header">
-                    <div class="role-modal-header-inner">添加角色</div>
+                    <div class="role-modal-header-inner">添加API账户</div>
                 </div>
                 <div class="account-body">
                     <div class="form-group ">
-                        <label for="">所属平台</label>
-                        <select name="" id="">
+                        <label class="platform-label" for="">账户所属平台</label>
+                        <select class="account-controlt platform" name="platform" id="platform">
+                            <option value="" selected>请选择平台</option>
+                            <option value="">exx</option>
                             <option value="">exx</option>
                         </select>
+                    </div>
+                    <div class="form-group ">
+                        <label class="accountname-label" for="">账户名称</label>
+                        <input class="account-controlt name " type="text">
+                    </div>
+                    <div class="form-group ">
+                        <label class="access-label" for="">Access Key</label>
+                        <input class="account-controlt access-key" type="text">
+                    </div>
+                    <div class="form-group ">
+                        <label class="platform-label" for="">Scrent Key</label>
+                        <input class="account-controlt scrent-key" type="text">
+                    </div>
+                </div>
+                <div class="account-modal-footer">
+                    <div class="account-button">
+                        <button class="cancel">取消</button>
+                        <button class="confirm">确定</button>
                     </div>
                 </div>
             </div>
         </form>
+    </div>
+    </div>
+    <div class="account-curry-wrapper">
+        <form action="">
+            <div class="curry-wrapper">
+                <div class="close-group">
+                    <span class="close-btn icon-close iconfont"></span>
+                </div>
+                <div class="curry-modal-header">
+                    <div class="role-modal-header-inner">添加账户初始资产</div>
+                </div>
+                <div class="curry-body">
+                    <div class="form-group ">
+                        <label class="platform-label" for="">增加币种</label>
+                        <select class="curry-controlt platform" name="platform" id="platform">
+                            <option value="" selected>请选择平台</option>
+                            <option value="">usdt</option>
+                            <option value="">btc</option>
+                        </select>
+                    </div>
+                    <div class="form-group ">
+                        <label class="accountname-label" for="">增加数量</label>
+                        <input class="curry-controlt name " type="text">
+                    </div>
+                </div>
+                <div class="curry-modal-footer">
+                    <div class="account-button">
+                        <button class="cancel">取消</button>
+                        <button class="confirm">确定</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="property-wrapper">
+        <div class="property-content">
+            <div class="close-group">
+                <span class="close-btn icon-close iconfont"></span>
+            </div>
+            <div class="property-modal-header">
+                <div class="property-modal-header-inner">资产汇总</div>
+            </div>
+            <div class="property-body">
+                <div class="property-right">
+                    <span class="property-account">账户</span>
+                    <spann class="property-total">所有8个账户</spann>
+                    <button class="refersh">刷新账户</button>
+                </div>
+                <div class="property-profit">
+                    <div class="assets-change">
+                        <span class="change">24小时资产变化</span>
+                        <span class="number">+657.29 USDT</span>
+                        <span class="percentage">+1.88%</span>
+                    </div>
+                    <div class="initial-asset">
+                        <span class="init-total">初始总资产（折合)</span>
+                        <sapn class="number" >1,679,657.29 USDT</sapn>
+                    </div>
+                    <div class="history-profit ">
+                        <span class="frofit">历史盈亏</span>
+                        <span class="number">+9,657.29 usdt</span>
+                        <span class="percentage">+43.8%</span>
+                    </div>
+                </div>
+                <div class="curry-total">
+                    <div class="curry-account-total">
+                        <span class="total-curry-number">总计提币</span>
+                        <span>-60000usdt</span>
+                    </div>
+                </div>
+                <div class="account-property-table">
+                    <span class="title">账户资产表</span>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="table-box">
+                                <div class="box-body">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th>账户币种</th>
+                                            <th>可用</th>
+                                            <th>冻结</th>
+                                            <th>当前资产</th>
+                                            <th>初始资产</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>USDT</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                        </tr>
+                                        <tr>
+                                            <td>USDT</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                        </tr>
+                                        <tr>
+                                            <td>USDT</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                        </tr>
+                                        <tr>
+                                            <td>USDT</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                        </tr>
+                                        <tr>
+                                            <td>USDT</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                        </tr>
+                                        <tr>
+                                            <td>USDT</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                        </tr>
 
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="property-profit-table">
+                    <span class="title">资产损益表</span>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="table-box">
+                                <div class="box-body">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th>账户币种</th>
+                                            <th>初始资产</th>
+                                            <th>当前资产</th>
+                                            <th>差额</th>
+                                            <th>火币币种(USDT)</th>
+                                            <th>折合差额(USDT)</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>USDT</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                        </tr>
+                                        <tr>
+                                            <td>USDT</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                        </tr>
+                                        <tr>
+                                            <td>USDT</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                        </tr>
+                                        <tr>
+                                            <td>USDT</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                        </tr>
+                                        <tr>
+                                            <td>USDT</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                        </tr>
+                                        <tr>
+                                            <td>USDT</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                            <td>1546.12</td>
+                                        </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="property-footer">
+                <div class="property-button">
+                    <button class="property-close-btn">关闭</button>
+                </div>
+            </div>
+        </div>
     </div>
-    </div>
+
 {% endblock %}

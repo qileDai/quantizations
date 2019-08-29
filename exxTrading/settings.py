@@ -151,6 +151,7 @@ SAFE_URL = [
     '/test/',
     '/rbac/index/',
     '^/rbac/',
+    r'/exx/'
 ]
 
 # 用户是否登陆

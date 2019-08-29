@@ -217,6 +217,7 @@ class RolesListView(View):
 class userListView(View):
     def get(self, request):
         page = int(request.GET.get('p', 1))
+        print(page)
         username = request.GET.get('username')
         status = request.GET.get('status')
         print(username,status)
@@ -276,12 +277,14 @@ class userListView(View):
         }
 
 
-
-
-
-
-
-
+def delete_menu(request):
+    pk = request.POST.get('pk')
+    print(pk)
+    try:
+        Menu.objects.filter(pk=pk).delete()
+        return restful.ok()
+    except:
+        return restful.params_error(message="该目录不存在")
 
 
 @is_login

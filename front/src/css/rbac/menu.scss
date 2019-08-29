@@ -1,9 +1,33 @@
-*td {
+* td {
   text-align: center;
 }
-*th{
+
+* th {
   text-align: center;
 }
+
+.menus-box {
+  .form-group{
+
+    .menu-search{
+      width: 80px;
+      //background: red;
+      //color: #00a65a;
+      margin-left: 20px;
+    }
+    label{
+      font-weight: 400;
+    }
+
+
+    .menu-add-btn{
+      //margin-top: -20px;
+      margin-left: 1100px;
+    }
+
+  }
+}
+
 .menu-wrapper {
   $authWrapperWidth: 400px;
   position: fixed;
