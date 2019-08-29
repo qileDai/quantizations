@@ -1,3 +1,4 @@
+
 .account-management {
   .form-group {
 
@@ -231,19 +232,33 @@
 
 }
 
-.property-wrapper {
-  position: fixed;
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.2);
-  z-index: 100;
-
+.property {
   * span {
     font-size: 14px;
-    //font-family: "Arial Normal', 'Arial";
+    font-family: "Arial Normal', 'Arial";
+  }
+
+  .property-details-wrapper {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    display: none;
+  }
+
+  .property-total-wrapper {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    display: none;
+
   }
 
   .property-content {
@@ -252,7 +267,7 @@
     position: absolute;
     background: white;
     left: 20%;
-    top: 5%;
+    top: 7%;
     border-radius: 5px;
 
     .close-group {
@@ -314,10 +329,12 @@
         .assets-change {
           float: left;
           margin-left: 20px;
-          .number{
+
+          .number {
             margin-left: 10px;
           }
-          .percentage{
+
+          .percentage {
             margin-left: 10px;
           }
         }
@@ -325,7 +342,8 @@
         .initial-asset {
           float: left;
           margin-left: 200px;
-          .number{
+
+          .number {
             margin-left: 10px;
           }
 
@@ -334,10 +352,12 @@
         .history-profit {
           float: right;
           margin-right: 30px;
-          .number{
+
+          .number {
             margin-right: 10px;
           }
-          .frofit{
+
+          .frofit {
             margin-right: 10px;
           }
         }
@@ -358,28 +378,34 @@
       }
 
       .account-property-table {
-        th{
+        th {
           text-align: center;
         }
-        td{
+
+        td {
           text-align: center;
         }
+
         height: auto;
-        .title{
+
+        .title {
           margin-left: 20px;
         }
       }
 
       .property-profit-table {
-        th{
+        th {
           text-align: center;
         }
-        td{
+
+        td {
           text-align: center;
         }
+
         margin-top: 20px;
         height: auto;
-        .title{
+
+        .title {
           margin-left: 20px;
         }
       }
@@ -392,6 +418,7 @@
       .property-button {
         text-align: center;
         margin-bottom: 30px;
+
         .property-close-btn {
           width: 140px;
           height: 40px;
