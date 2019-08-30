@@ -5,6 +5,7 @@
 {% endblock %}
 {% block head %}
     <link rel="stylesheet" href="{% static 'css/manamegent/account.min.css' %}">
+    <script src="{% static 'js/account.min.js' %}"></script>
 {% endblock %}
 {% block header %}
     <p>交易账户管理</p>
@@ -18,7 +19,7 @@
                         <a class="btn btn-info pull-right account " id="add-account-btn">添加账户</a>
                     </div>
                     <div class="form-group curry-group">
-                        <a class="btn btn-info pull-right curry">账户币种配置</a>
+                        <a class="btn btn-info pull-right curry "id="account-curry-configuration">账户币种配置</a>
                     </div>
                     <div class="form-group property-group">
                         <a class="btn btn-info pull-right property" id="property-total">资产汇总</a>
@@ -43,9 +44,11 @@
                             <td>2019</td>
                             <td></td>
                             <td>
-                                <a href="">编辑</a>
-                                <a href="">编辑</a>
-                                <a href="">编辑</a>
+                                <a class="btn btn-info check-property" href="">查看资产</a>
+                                <a class="btn btn-info update-property" href="">修改</a>
+                                <a class="btn btn-info delete-property" href="">删除</a>
+                                <a class="btn btn-info edit-property" href="">编辑</a>
+                                <a class="btn btn-info" href="">提币</a>
                             </td>
                         </tr>
                         </tbody>
