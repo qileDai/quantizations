@@ -1,10 +1,222 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'cms/base.html' %}
+{% load static %}
+{% block title %}
+    交易账户管理
+{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'ystep-master/css/ystep.css' %}">
+    <link rel="stylesheet" href="{% static 'css/manamegent/girding.min.css' %}">
+{% endblock %}
+{% block header %}
+    <p>网格交易</p>
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-header account-management">
+                    <div class="form-group account-group ">
+                        <a class="btn btn-info pull-right account " id="add-account-btn">添加账户</a>
+                    </div>
+                    <div class="form-group curry-group">
+                        <a class="btn btn-info pull-right curry " id="account-curry-configuration">账户币种配置</a>
+                    </div>
+                    <div class="form-group property-group">
+                        <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">创建机器人</button>
+                    </div>
 
-</body>
-</html>
+                </div>
+                <div class="box-body">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>机器人ID</th>
+                            <th>交易账户</th>
+                            <th>交易币种</th>
+                            <th>交易市场</th>
+                            <th>交易策略</th>
+                            <th>总投入</th>
+                            <th>浮动盈亏</th>
+                            <th>实现利润</th>
+                            <th>总利润</th>
+                            <th>年化收益率</th>
+                            <th>创建日期</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>EXX账户1</td>
+                            <td>trx</td>
+                            <td>USDT</td>
+                            <td>网格交易V1.0</td>
+                            <td>1,000,000.00 usdt</td>
+                            <td>+56.33 usdt</td>
+                            <td>+0.01 usdt</td>
+                            <td>+56.33 usdt</td>
+                            <td>68%</td>
+                            <td>2018-11-21 13:54:23</td>
+                            <td>运行中</td>
+                            <td>
+                                <a class="check-property" id="check-property-total" href="#">停止</a>
+                                <a class="update-property" href="{% url 'exx:index' %}">详情</a>
+                                <a class="delete-property" href="">配置</a>
+                                <a class="edit-property" href="">保护</a>
+                                <a class="" href="">提币</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>EXX账户1</td>
+                            <td>trx</td>
+                            <td>USDT</td>
+                            <td>网格交易V1.0</td>
+                            <td>1,000,000.00 usdt</td>
+                            <td>+56.33 usdt</td>
+                            <td>+0.01 usdt</td>
+                            <td>+56.33 usdt</td>
+                            <td>68%</td>
+                            <td>2018-11-21 13:54:23</td>
+                            <td>运行中</td>
+                            <td>
+                                <a class="check-property" id="check-property-total" href="#">停止</a>
+                                <a class="update-property" href="">详情</a>
+                                <a class="delete-property" href="">配置</a>
+                                <a class="edit-property" href="">保护</a>
+                                <a class="" href="">提币</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>EXX账户1</td>
+                            <td>trx</td>
+                            <td>USDT</td>
+                            <td>网格交易V1.0</td>
+                            <td>1,000,000.00 usdt</td>
+                            <td>+56.33 usdt</td>
+                            <td>+0.01 usdt</td>
+                            <td>+56.33 usdt</td>
+                            <td>68%</td>
+                            <td>2018-11-21 13:54:23</td>
+                            <td>运行中</td>
+                            <td>
+                                <a class="check-property" id="check-property-total" href="#">停止</a>
+                                <a class="update-property" href="">详情</a>
+                                <a class="delete-property" href="">配置</a>
+                                <a class="edit-property" href="">保护</a>
+                                <a class="" href="">提币</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>EXX账户1</td>
+                            <td>trx</td>
+                            <td>USDT</td>
+                            <td>网格交易V1.0</td>
+                            <td>1,000,000.00 usdt</td>
+                            <td>+56.33 usdt</td>
+                            <td>+0.01 usdt</td>
+                            <td>+56.33 usdt</td>
+                            <td>68%</td>
+                            <td>2018-11-21 13:54:23</td>
+                            <td>运行中</td>
+                            <td>
+                                <a class="check-property" id="check-property-total" href="#">停止</a>
+                                <a class="update-property" href="">详情</a>
+                                <a class="delete-property" href="">配置</a>
+                                <a class="edit-property" href="">保护</a>
+                                <a class="" href="">提币</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>EXX账户1</td>
+                            <td>trx</td>
+                            <td>USDT</td>
+                            <td>网格交易V1.0</td>
+                            <td>1,000,000.00 usdt</td>
+                            <td>+56.33 usdt</td>
+                            <td>+0.01 usdt</td>
+                            <td>+56.33 usdt</td>
+                            <td>68%</td>
+                            <td>2018-11-21 13:54:23</td>
+                            <td>运行中</td>
+                            <td>
+                                <a class="check-property" id="check-property-total" href="#">停止</a>
+                                <a class="update-property" href="">详情</a>
+                                <a class="delete-property" href="">配置</a>
+                                <a class="edit-property" href="">保护</a>
+                                <a class="" href="">提币</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="robot-wrapper">
+        <div class="robot-content">
+            <div class="close-group">
+                <span class="close-btn icon-close iconfont"></span>
+            </div>
+            <div class="robot-modal-header">
+                <div class="robot-modal-header-inner">创建机器人</div>
+            </div>
+            <div class="robot-modal-body">
+                <div class="ystep">
+                </div>
+                <!-- 选择交易对-->
+                <div class="trading-on">
+                    <span class="title">选中交易对</span>
+                    <div class="select-trading">
+                        <div class="trading-curry">
+                            <div class="curry-title">
+                                <span>交易币种</span>
+                            </div>
+                            <select class="curry" name="curry" id="curry">
+                                <option value="">exx</option>
+                                <option value="">exx</option>
+                                <option value="">exx</option>
+                            </select>
+                        </div>
+                        <div class="trading-market">
+                            <select name="market" id="market">
+                                <option value="">exx-usdt</option>
+                                <option value="">exx-usdt</option>
+                                <option value="">exx-usdt</option>
+                                <option value="">exx-usdt</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'ystep-master/js/jquery.min.js' %}"></script>
+    <script src="{% static 'ystep-master/js/ystep.js' %}"></script>
+    <script>
+        //根据jQuery选择器找到需要加载ystep的容器
+        //loadStep 方法可以初始化ystep
+
+        $(".ystep").loadStep({
+            size: "large",
+            color: "green",
+            steps: [{
+                title: "选择交易对",
+            }, {
+                title: "选择交易策略",
+            }, {
+                title: "设置策略参数",
+            }, {
+                title: "设置风险策略",
+            },]
+        });
+
+        $(".ystep").setStep(0);
+
+    </script>
+{% endblock %}
