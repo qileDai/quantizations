@@ -19,7 +19,7 @@
                         <a class="btn btn-info pull-right account " id="add-account-btn">添加账户</a>
                     </div>
                     <div class="form-group curry-group">
-                        <a class="btn btn-info pull-right curry "id="account-curry-configuration">账户币种配置</a>
+                        <a class="btn btn-info pull-right curry " id="account-curry-configuration">账户币种配置</a>
                     </div>
                     <div class="form-group property-group">
                         <a class="btn btn-info pull-right property" id="property-total">资产汇总</a>
@@ -44,7 +44,7 @@
                             <td>2019</td>
                             <td></td>
                             <td>
-                                <a class="btn btn-info check-property" href="">查看资产</a>
+                                <a class="btn btn-info check-property" id="check-property-total" href="#">查看资产</a>
                                 <a class="btn btn-info update-property" href="">修改</a>
                                 <a class="btn btn-info delete-property" href="">删除</a>
                                 <a class="btn btn-info edit-property" href="">编辑</a>
@@ -57,7 +57,7 @@
             </div>
         </div>
     </div>
-    </div>
+
     <div class="add-account-wrapper">
         <form action="">
             <div class="account-wrapper">
@@ -98,7 +98,7 @@
             </div>
         </form>
     </div>
-    </div>
+
     <div class="account-curry-wrapper">
         <form action="">
             <div class="curry-wrapper">
@@ -132,7 +132,7 @@
         </form>
     </div>
     <div class="property">
-        <div class="property-total-wrapper">
+        <div class="property-total-wrapper"style="overflow-y:scroll">
             <div class="property-content">
                 <div class="close-group">
                     <span class="close-btn icon-close iconfont"></span>
@@ -301,7 +301,38 @@
                                                 <td>1546.12</td>
                                                 <td>1546.12</td>
                                             </tr>
-
+                                            <tr>
+                                                <td>USDT</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                            </tr>
+                                            <tr>
+                                                <td>USDT</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                            </tr>
+                                            <tr>
+                                                <td>USDT</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                            </tr>
+                                            <tr>
+                                                <td>USDT</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                                <td>1546.12</td>
+                                            </tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -317,7 +348,7 @@
                 </div>
             </div>
         </div>
-        <div class="property-details-wrapper">
+        <div class="property-details-wrapper" style="overflow-y:scroll">
             <div class="property-content">
                 <div class="close-group">
                     <span class="close-btn icon-close iconfont"></span>
@@ -405,14 +436,6 @@
                                                 <td>1546.12</td>
                                                 <td>1546.12</td>
                                             </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-
                                             </tbody>
                                         </table>
                                     </div>
@@ -503,8 +526,5 @@
             </div>
         </div>
     </div>
-
-
-
 
 {% endblock %}
