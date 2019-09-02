@@ -4,6 +4,8 @@ from django.forms import ModelForm
 from .models import UserInfo, Role, Permission, Menu
 from django.forms import fields
 from django.core.exceptions import ValidationError
+from utils.forms import FormMixin
+from django import forms
 
 
 class UserInfoModelForm(ModelForm):
@@ -97,37 +99,24 @@ class UserInfoAddModelForm(ModelForm):
         return self.cleaned_data    # 全局钩子要返回所有的数据
 
 
-class RoleModelForm(ModelForm):
+class RoleModelForm(forms.ModelForm,FormMixin):
     class Meta:
         model = Role
         fields = '__all__'
+        # fields = ('username','password','email')
         labels = {
-            'title': '角色',
-            'permissions': '权限',
+            'rolename': '角色',
+            'permission': '权限',
         }
 
-    # def clean_title(self):
-    #     title = self.cleaned_data.get("title")
-    #     print(title)
-    #     role_obj = UserInfo.objects.filter(title=title).first()
-    #     if role_obj:
-    #         raise ValidationError('该角色已经存在!')  # 验证角色是否存在
-    #     else:
-    #         return title
 
-
-class PermissionModelForm(ModelForm):
+class PermissionModelForm(forms.ModelForm,FormMixin):
+    menu = forms.IntegerField()
     class Meta:
         model = Permission
-        fields = '__all__'
-        labels = {
-            'title': '权限',
-            'url': 'url',
-            'menu': '所属菜单'
-        }
+        fields = ('title','url')
 
-
-class MenuModelForm(ModelForm):
+class MenuModelForm(ModelForm,FormMixin):
     class Meta:
         model = Menu
         fields = '__all__'

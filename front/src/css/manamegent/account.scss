@@ -27,6 +27,30 @@
   }
 }
 
+.account-box {
+  * th {
+    text-align: center;
+    font-weight: 400;
+  }
+
+  * td {
+    text-align: center;
+  }
+
+  .check-property {
+    margin-right: 10px;
+  }
+
+  .update-property {
+    margin-right: 10px;
+  }
+
+  .delete-property {
+    margin-right: 10px;
+  }
+
+}
+
 .add-account-wrapper {
   position: fixed;
   left: 0;

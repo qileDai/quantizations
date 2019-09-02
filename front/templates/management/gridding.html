@@ -64,7 +64,6 @@
                                 <a class="update-property" href="{% url 'exx:index' %}">详情</a>
                                 <a class="delete-property" href="">配置</a>
                                 <a class="edit-property" href="">保护</a>
-                                <a class="" href="">提币</a>
                             </td>
                         </tr>
                         <tr>
@@ -85,7 +84,7 @@
                                 <a class="update-property" href="">详情</a>
                                 <a class="delete-property" href="">配置</a>
                                 <a class="edit-property" href="">保护</a>
-                                <a class="" href="">提币</a>
+
                             </td>
                         </tr>
                         <tr>
@@ -106,7 +105,7 @@
                                 <a class="update-property" href="">详情</a>
                                 <a class="delete-property" href="">配置</a>
                                 <a class="edit-property" href="">保护</a>
-                                <a class="" href="">提币</a>
+
                             </td>
                         </tr>
                         <tr>
@@ -127,7 +126,7 @@
                                 <a class="update-property" href="">详情</a>
                                 <a class="delete-property" href="">配置</a>
                                 <a class="edit-property" href="">保护</a>
-                                <a class="" href="">提币</a>
+
                             </td>
                         </tr>
                         <tr>
@@ -148,7 +147,7 @@
                                 <a class="update-property" href="">详情</a>
                                 <a class="delete-property" href="">配置</a>
                                 <a class="edit-property" href="">保护</a>
-                                <a class="" href="">提币</a>
+
                             </td>
                         </tr>
                         </tbody>
@@ -157,6 +156,8 @@
             </div>
         </div>
     </div>
+
+
     <div class="robot-wrapper">
         <div class="robot-content">
             <div class="close-group">
@@ -183,7 +184,10 @@
                             </select>
                         </div>
                         <div class="trading-market">
-                            <select name="market" id="market">
+                            <div class="market-title">
+                                <span>交易市场</span>
+                            </div>
+                            <select class="market" name="market" id="market">
                                 <option value="">exx-usdt</option>
                                 <option value="">exx-usdt</option>
                                 <option value="">exx-usdt</option>
@@ -191,32 +195,108 @@
                             </select>
                         </div>
                     </div>
+
+                </div>
+                <div class="trading-strategy">
+                    <div class="strategy-curry">
+                        <span class="title">选中交易对:</span>
+                        <span class="curry">LTC/USDT</span>
+                    </div>
+                    <div class="strategy-title">
+                        <span class="title">选择交易策略</span>
+                    </div>
+                    <div class="strategy-name">
+                        <div class="strategy-button">
+                            <button class="deal-strategy active girding">网格交易V1.0</button>
+                            {#                            <img class="correctimg" src="{% static 'images/correct.png' %}" alt="">#}
+                            <button class="deal-strategy triangle">三角套利V1.0</button>
+                            <button class="deal-strategy banzhuan">搬砖套利V1.0</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="set-strategy">
+                    <div class="strategy-curry">
+                        <span class="title">选中交易对:</span>
+                        <span class="curry">LTC/USDT</span>
+                    </div>
+                    <div class="strategy-title">
+                        <span class="title">选择交易策略:</span>
+                        <span>网格交易V1.0</span>
+                    </div>
+                    <div class="title">
+                        <span>设置策略参数</span>
+                    </div>
+                    <div class="strategy-parameters">
+                        <div class="trading-parameters account-curry">
+                            <span class="title">交易账户</span>
+                            <select class="parameters-control" name="account" id="">
+                                <option value="">EXX</option>
+                                <option value="">EXX</option>
+                                <option value="">EXX</option>
+                            </select>
+                        </div>
+                        <div class="trading-parameters account-details">
+                            <span class="title">可用:</span>
+                            <span class=""> 45,000.00 usdt</span>
+                            <span> 6,000.0000 ltc</span>
+                        </div>
+                        <div class="trading-parameters  current-price">
+                            <span class="title">当前价</span>
+                            <span class="price">72.56 usdt</span>
+                            <input class="set-price">
+                            <a href="">设置当前价</a>
+                        </div>
+                        <div class="trading-parameters">
+                            <span class="title">重新挂单频率</span>
+                            <input class="parameters-control" type="text">
+                            <span class="millisecond">毫秒</span>
+                        </div>
+                        <div class="trading-parameters resistance">
+                            <span class="title">阻力位</span>
+                            <input class="parameters-control" type="text">
+                        </div>
+                        <div class="trading-parameters support-level ">
+                            <span class="title">支撑位</span>
+                            <input class="parameters-control" type="text">
+                        </div>
+                        <div class="trading-parameters girding-num ">
+                            <span class="title">网格数量</span>
+                            <input class="parameters-control" type="text">
+                        </div>
+                        <div class="trading-parameters procudere-fee ">
+                            <span class="title">单次交易手续费</span>
+                            <input class="parameters-control" type="text">
+                            <span class="percent">%</span>
+                        </div>
+                        <div class="trading-parameters mix-number ">
+                            <span class="title">单网格最小交易数量</span>
+                            <input class="parameters-control" type="text">
+                        </div>
+                        <div class="trading-parameters max-number ">
+                            <span class="title">单网格最大交易数量</span>
+                            <input class="parameters-control" type="text">
+                        </div>
+                        <div class="trading-parameters profit ">
+                            <span class="title">单网格利润</span>
+                            <span class="profit-value">0.21%-0.46%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="set-risk-strategy"></div>
+            </div>
+            <div class="trading-footer">
+                <div class="trading-button">
+                    <button class="prevent-btn">上一步</button>
+                    <button class="next-btn">下一步</button>
                 </div>
             </div>
         </div>
+
+    </div>
     </div>
 
     <script src="{% static 'ystep-master/js/jquery.min.js' %}"></script>
     <script src="{% static 'ystep-master/js/ystep.js' %}"></script>
-    <script>
-        //根据jQuery选择器找到需要加载ystep的容器
-        //loadStep 方法可以初始化ystep
+    <script src="{% static 'js/girding.min.js' %}"></script>
 
-        $(".ystep").loadStep({
-            size: "large",
-            color: "green",
-            steps: [{
-                title: "选择交易对",
-            }, {
-                title: "选择交易策略",
-            }, {
-                title: "设置策略参数",
-            }, {
-                title: "设置风险策略",
-            },]
-        });
-
-        $(".ystep").setStep(0);
-
-    </script>
 {% endblock %}
