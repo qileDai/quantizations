@@ -22,15 +22,20 @@
             <div class="box role-box">
                 <div class="box-header">
                     <form action="" class="form-inline">
-                        <div class="form-group left-group">
-                            <label class="rolename-label" for="role">角色</label>
-                            <input type="text" class="form-control rolename-input" name="rolename-seach" placeholder="搜索角色名称" value="">
+                        <div class="role-left-group">
+                            <div class="form-group left-group">
+                                <label class="rolename-label" for="role">角色</label>
+                                <input type="text" class="form-control rolename-input" name="rolename-seach"
+                                       placeholder="搜索角色名称" value="">
+                            </div>
+                            <div class="form-group left-group">
+                                <button href="#" class="btn btn-info rolename-serach" id="search">搜索</button>
+                            </div>
                         </div>
-                        <div class="form-group left-group">
-                            <button href="#" class="btn btn-info rolename-serach" id="search">搜索</button>
-                        </div>
-                        <div class="form-group left-group">
-                            <a class="btn btn-info role-add-btn" id="role-add-btn">添加角色</a>
+                        <div class="role-right-group">
+                            <div class="form-group left-group">
+                                <a class="btn btn-info role-add-btn" id="role-add-btn">添加角色</a>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -49,15 +54,15 @@
                                     {{ role.rolename }}
                                 </td>
 
-                            <td>
-                                {% for permission in role.permissions.all%}
-                                    {{ permission.title }} &nbsp;
+                                <td>
+                                    {% for permission in role.permissions.all %}
+                                        {{ permission.title }} &nbsp;
                                     {% endfor %}
-                            </td>
-{#                                {% for permission in role.permissions.all%}#}
-{#                                    <td>{{ permission.title }}</td>#}
-{##}
-{#                                {% endfor %}#}
+                                </td>
+                                {#                                {% for permission in role.permissions.all%}#}
+                                {#                                    <td>{{ permission.title }}</td>#}
+                                {##}
+                                {#                                {% endfor %}#}
 
 
                                 <td>

@@ -1,28 +1,43 @@
-*td {
+* td {
   text-align: center;
 }
-*th{
+
+* th {
   text-align: center;
   font-weight: 400;
 }
-.account-box{
-  .form-group{
-    margin-left: 30px;
-    .account-title{
-      border-radius: 5px;
-    }
-    .account-status{
-      border-radius: 5px;
-    }
-    .search{
-      width: 70px;
-    }
-    .user-add-btn{
-      margin-left: 900px;
-      width: 100px;
 
+.account-box {
+  overflow: hidden;
+
+  .account-left-group {
+    float: left;
+
+    .form-group {
+      margin-left: 10px;
+
+      .account-title {
+        border-radius: 5px;
+        width: 140px;
+      }
+
+      .account-status {
+        border-radius: 5px;
+        width: 120px;
+      }
+      .search {
+        width: 80px;
+      }
     }
   }
+
+  .account-right-group {
+    float: right;
+    .user-add-btn {
+        width: 100px;
+      }
+  }
+
 
 }
 
@@ -88,44 +103,43 @@
       border-bottom: 1px solid #F2F2F2;
 
 
-
-        .form-group {
-          margin-top: 20px;
+      .form-group {
+        margin-top: 20px;
+        overflow: hidden;
+        //border-bottom: 1px solid #F2F2F2 ;
+        .input-group {
+          margin-bottom: 20px;
           overflow: hidden;
-          //border-bottom: 1px solid #F2F2F2 ;
-          .input-group {
-            margin-bottom: 20px;
-            overflow: hidden;
 
-            .label-title {
-              float: left;
-            }
+          .label-title {
+            float: left;
+          }
 
-            .userrole {
-              height: 40px;
-              width: 250px;
-              border-radius: 4px;
-            }
+          .userrole {
+            height: 40px;
+            width: 250px;
+            border-radius: 4px;
+          }
 
-            .label-user {
-              font-size: 12px;
-              color: #444;
-              font-weight: 500;
-            }
+          .label-user {
+            font-size: 12px;
+            color: #444;
+            font-weight: 500;
+          }
 
-            .form-control {
-              margin-left: 10px;
-              float: right;
-              border: 1px solid #c9c9c9;
-              padding: 10px;
-              width: 250px;
-              box-sizing: border-box;
-              height: 40px;
-              outline: none;
-              border-radius: 4px;
-            }
+          .form-control {
+            margin-left: 10px;
+            float: right;
+            border: 1px solid #c9c9c9;
+            padding: 10px;
+            width: 250px;
+            box-sizing: border-box;
+            height: 40px;
+            outline: none;
+            border-radius: 4px;
           }
         }
+      }
     }
 
     .user-modal-footer {

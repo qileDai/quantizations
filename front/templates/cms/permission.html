@@ -20,23 +20,23 @@
     <div class="row">
         <div class="col-md-12">
             <div class="box">
-                <div class="box-header">
+                <div class="box-header permission-box">
                     <form action="" class="form-inline">
-                        <div class="form-group left-group">
-                            <span class="permission-title">权限名称</span>
-                            <input type="text"  class="form-control" name="permission-seach" placeholder="搜索权限名称"
-                                   style="border-radius: 5px;margin-left: 10px" value="">
+                        <div class="permission-left-group">
+                            <div class="form-group left-group">
+                                <span class="permission-title">权限名称</span>
+                                <input type="text" class="form-control " name="permission-seach" placeholder="搜索权限名称"
+                                       value="">
+                            </div>
+                            <div class="form-group left-group">
+                                <a class="btn btn-info search" id="permission-search">搜索</a>
+                            </div>
                         </div>
-                        <div class="form-group left-group">
-                            {#                            <a href="{% url 'rbac:RolesListView' %}" class="btn btn-info" id="search">搜索</a>#}
+                        <div class="permission-right-group">
+                            <div class="permission-btn">
+                                <a class="btn btn-info pull-right" id="permission-add-btn">添加权限</a>
+                            </div>
                         </div>
-                        <div class="form-group left-group">
-                            <a class="btn btn-info" id="permission-search" style="margin-left: 10px">搜索</a>
-                        </div>
-                        <div class="permission-btn">
-                            <a class="btn btn-info pull-right" id="permission-add-btn">添加权限</a>
-                        </div>
-
                     </form>
                 </div>
                 <div class="box-body">
@@ -58,7 +58,8 @@
                                 <td>{{ permission.menu.title }}</td>
                                 <td>
                                     <a href="" class="btn btn-info btn-xs">编辑</a>
-                                    <a class="btn btn-info btn-xs delete-PermissioneBtn" id="delete-PermissioneBtn" data_news_id="">删除
+                                    <a class="btn btn-info btn-xs delete-PermissioneBtn" id="delete-PermissioneBtn"
+                                       data_news_id="">删除
                                     </a>
                                 </td>
                             </tr>
@@ -130,9 +131,9 @@
                         <lable class="role-label-body" for="title">权限:</lable>
                         {% if permissionss %}
                             <input type="text" class="form-control" name="permission" placeholder="请输入权限"
-                                   value="{{ permissionss.title  }}">
-                            {% else %}
-                             <input type="text" class="form-control" name="permission" placeholder="请输入权限">
+                                   value="{{ permissionss.title }}">
+                        {% else %}
+                            <input type="text" class="form-control" name="permission" placeholder="请输入权限">
                         {% endif %}
 
                     </div>

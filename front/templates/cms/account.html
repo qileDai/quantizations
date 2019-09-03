@@ -24,28 +24,34 @@
             <div class="box">
                 <div class="box-header account-box">
                     <form action="" method="get" class="form-inline">
-                        <div class="form-group left-group">
-                            <lable for="title">用户名</lable>
-                            <input type="text" class="form-control account-title" name="username" placeholder="搜索用户名"
-                                   value="">
+                        <div class="account-left-group">
+                            <div class="form-group left-group">
+                                <lable for="title">用户名</lable>
+                                <input type="text" class="form-control account-title" name="username"
+                                       placeholder="搜索用户名"
+                                       value="">
+                            </div>
+                            <div class="form-group status-group">
+                                <lable for="rolename">状态</lable>
+                                <select name="status" id="status" class="form-control account-status">
+                                    <option value="">正常</option>
+                                    <option value="">禁用</option>
+                                </select>
+                            </div>
+                            <div class="form-group left-group">
+                                <button class="btn btn-info search" id="search">
+                                    <a href="{% url 'rbac:user_list' %}">搜索</a>
+                                </button>
+                            </div>
                         </div>
-                        <div class="form-group status-group">
-                            <lable for="rolename">状态</lable>
-                            <select name="status" id="status" class="form-control account-status">
-                                <option value="">正常</option>
-                                <option value="">禁用</option>
-                            </select>
+                        <div class="account-right-group">
+                            <div class="form-group ">
+                                {#                            <a href="#"><button>新增</button></a>#}
+                                <a href="#" class="btn btn-info user-add-btn" id="user-add-btn">
+                                    <i class="fa fa-plus-square" aria-hidden="true">新增账户</i> </a>
+                            </div>
                         </div>
-                        <div class="form-group left-group">
-                            <button  class="btn btn-info search" id="search">
-                                <a href="{% url 'rbac:user_list' %}">搜索</a>
-                            </button>
-                        </div>
-                        <div class="form-group left-group">
-                            {#                            <a href="#"><button>新增</button></a>#}
-                            <a href="#" class="btn btn-info user-add-btn" id="user-add-btn">
-                                <i class="fa fa-plus-square" aria-hidden="true">新增账户</i> </a>
-                        </div>
+
                     </form>
                 </div>
                 <div class="box-body">

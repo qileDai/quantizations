@@ -20,18 +20,23 @@
     <div class="row">
         <div class="col-md-12">
             <div class="box menus-box">
-                <div class="box-header">
+                <div class="box-header menu-box">
                     <form action="" class="form-inline">
-                        <div class="form-group left-group">
-                            <label class="munu-label" for="rolename">菜单</label>
-                            <input type="text" class="form-control munus-input-menu" name="munu" placeholder="搜索菜单名称"
-                                 style="margin-left: 10px;border-radius: 5px"  value="">
+                        <div class="menu-left-group">
+                            <div class="form-group left-group">
+                                <label class="munu-label" for="rolename">菜单</label>
+                                <input type="text" class="form-control munus-input-menu" name="munu"
+                                       placeholder="搜索菜单名称"
+                                       value="">
+                            </div>
+                            <div class="form-group left-group">
+                                <button class="btn btn-info menu-search" id="search">搜索</button>
+                            </div>
                         </div>
-                        <div class="form-group left-group">
-                            <button class="btn btn-info menu-search" id="search">搜索</button>
-                        </div>
-                        <div class="form-group ">
-                            <a class="btn btn-info  menu-add-btn" id="menu-add-btn">添加一级菜单</a>
+                        <div class="menu-right-group">
+                            <div class="form-group ">
+                                <a class="btn btn-info  menu-add-btn" id="menu-add-btn">添加一级菜单</a>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -52,7 +57,8 @@
                                 <td>{{ menu.url }}</td>
                                 <td>
                                     <a href="" class="btn btn-info btn-xs">编辑</a>
-                                    <button class="btn btn-info btn-xs delete-menusBtn" id="delete-menusBtn" data_news_id="">删除
+                                    <button class="btn btn-info btn-xs delete-menusBtn" id="delete-menusBtn"
+                                            data_news_id="">删除
                                     </button>
                                     <button class="btn btn-info btn-xs" id="delete-newsBtn" data_news_id="">分配权限
                                     </button>
@@ -130,8 +136,8 @@
                         <p class="menu-model-title">一级菜单名称</p>
                         <input type="text" class="form-control" placeholder="请输入一级菜单名称">
                     </div>
-                    <div class="form-group level2-wrapper" >
-                        <div class="form-group level1-wrapper" >
+                    <div class="form-group level2-wrapper">
+                        <div class="form-group level1-wrapper">
                             <p class="menu-model-title">二级菜单名称</p>
                             <input type="text" class="form-control" placeholder="请输入一级菜单名称">
                         </div>
@@ -141,7 +147,7 @@
                                 <option selected="selected" disabled="disabled" style='display: none' value=''></option>
                                 {% for menu in menus %}
                                     <option value="{{ menu.pk }}">{{ menu.caption }}</option>
-                                {%endfor  %}
+                                {% endfor %}
                             </select>
                         </div>
                     </div>

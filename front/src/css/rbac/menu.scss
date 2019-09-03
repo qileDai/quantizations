@@ -8,25 +8,41 @@
 }
 
 .menus-box {
-  .form-group{
+  overflow: hidden;
 
-    .menu-search{
-      width: 80px;
-      //background: red;
-      //color: #00a65a;
-      margin-left: 20px;
+  .menu-left-group {
+    float: left;
+
+    .form-group {
+      margin-left: 10px;
+      .menu-search {
+        width: 80px;
+        //background: red;
+        //color: #00a65a;
+        //margin-left: 10px;
+      }
+      .munus-input-menu{
+        width: 140px;
+        border-radius: 5px;
+      }
+
+      label {
+        font-weight: 400;
+      }
+
+
+      .menu-add-btn {
+        //margin-top: -20px;
+        margin-left: 1100px;
+      }
+
     }
-    label{
-      font-weight: 400;
-    }
-
-
-    .menu-add-btn{
-      //margin-top: -20px;
-      margin-left: 1100px;
-    }
-
   }
+
+  .menu-right-group {
+    float: right;
+  }
+
 }
 
 .menu-wrapper {

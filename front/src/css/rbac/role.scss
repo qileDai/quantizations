@@ -1,24 +1,42 @@
-*td {
+* td {
   text-align: center;
 }
-*th{
+
+* th {
   text-align: center;
   font-weight: 400;
 }
-.role-box{
+
+.role-box {
   overflow: hidden;
-  .role-add-btn{
-    margin-left: 1200px;
+
+  .role-left-group {
+    float: left;
+    .form-group{
+      margin-left: 10px;
+    }
+
+    .rolename-label {
+      font-weight: 400;
+    }
+
+    .rolename-input {
+      border-radius: 5px;
+      width: 140px;
+    }
+
+    .rolename-serach {
+      //margin-left: 10px;
+      width: 80px;
+
+    }
   }
-  .rolename-label{
-    font-weight: 400 ;
+
+  .role-right-group {
+    float: right;
   }
-  .rolename-input{
-    border-radius: 5px;
-  }
-  .rolename-serach{
-    margin-left: 20px;
-  }
+
+
 }
 
 .role-wrapper {
