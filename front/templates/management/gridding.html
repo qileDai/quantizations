@@ -14,16 +14,51 @@
     <div class="row">
         <div class="col-md-12">
             <div class="box">
-                <div class="box-header account-management">
-                    <div class="form-group account-group ">
-                        <a class="btn btn-info pull-right account " id="add-account-btn">添加账户</a>
-                    </div>
-                    <div class="form-group curry-group">
-                        <a class="btn btn-info pull-right curry " id="account-curry-configuration">账户币种配置</a>
-                    </div>
-                    <div class="form-group property-group">
-                        <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">创建机器人</button>
-                    </div>
+                <div class="box-header deal-management">
+                    <form action="" class="form-inline">
+                        <div class="deal-left-group">
+                            <div class="form-group left-group">
+                                <span class="curry-title">交易币种</span>
+                                <select class="form-control deal-curry" name="deal-curry">
+                                    <option value="" selected>请选择</option>
+                                    <option value="">BTC</option>
+                                    <option value="">USDT</option>
+                                    <option value="">LTC</option>
+                                    <option value="">ETH</option>
+                                </select>
+                            </div>
+                            <div class="form-group left-group">
+                                <span class="market-title">交易市场</span>
+                                <select class="form-control deal-market">
+                                    <option value="" selected>请选择</option>
+                                    <option value="">BTC</option>
+                                    <option value="">USDT</option>
+                                    <option value="">LTC</option>
+                                    <option value="">ETH</option>
+                                </select>
+                            </div>
+                            <div class="form-group left-group">
+                                <span class="status">状态</span>
+                                <select class="form-control deal-status">
+                                    <option value="" selected>请选择</option>
+                                    <option value="">运行中</option>
+                                    <option value="">已停止</option>
+                                    <option value="">保护中</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="deal-right-group">
+                            <div class="form-group account-group ">
+                                <a class="btn btn-info pull-right account " id="add-account-btn">一键停止</a>
+                            </div>
+                            <div class="form-group curry-group">
+                                <a class="btn btn-info pull-right curry " id="account-curry-configuration">一键运行</a>
+                            </div>
+                            <div class="form-group property-group">
+                                <button class="btn btn-info " id="create-robot">创建机器人</button>
+                            </div>
+                        </div>
+                    </form>
 
                 </div>
                 <div class="box-body">
@@ -156,8 +191,6 @@
             </div>
         </div>
     </div>
-
-
     <div class="robot-wrapper">
         <div class="robot-content">
             <div class="close-group">
@@ -282,12 +315,42 @@
                         </div>
                     </div>
                 </div>
-                <div class="set-risk-strategy"></div>
+                <div class="set-risk-strategy">
+                    <div class="strategy-curry">
+                        <span class="title">选中交易对:</span>
+                        <span class="curry">LTC/USDT</span>
+                    </div>
+                    <div class="strategy-title">
+                        <span class="title">选择交易策略:</span>
+                        <span>网格交易V1.0</span>
+                    </div>
+                    <div class="set-strategy-title">
+                        <div class="strategy-parameters-top">
+                            <span class="title">设置策略参数:</span>
+                            <span class="deal-account">交易账户</span>
+                            <span>EXX账户</span>
+                            <span class="resistance">阻力位:</span>
+                            <span class="">93.45 usdt</span>
+                            <span class="support-level">支撑位:</span>
+                            <span class="">93.45 usdt</span>
+                            <span class="girding-num">网格数量:</span>
+                            <span class="">68</span>
+                        </div>
+                        <div class="strategy-parameters-below">
+                            <span class="procudere-fee">单次交易手续费:</span>
+                            <span class="deal-account">0.1%</span>
+                            <span class="girding-profit">单网格利润:</span>
+                            <span class="resistance">0.21%-0.46%</span>
+
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="trading-footer">
                 <div class="trading-button">
-                    <button class="prevent-btn">上一步</button>
-                    <button class="next-btn">下一步</button>
+                    <button class="prevent-btn  " id="btnPre">上一步</button>
+                    <button class="next-btn" id="btnNext">下一步</button>
+                    <button class="complete -btn hidden" id="btnComplete ">完成</button>
                 </div>
             </div>
         </div>

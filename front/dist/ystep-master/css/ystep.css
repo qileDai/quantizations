@@ -156,6 +156,7 @@
 .ystep-blue .ystep-step-done {
     background-image: url("./images/pointes_blue.png");
     background-repeat: no-repeat;
+    /*color: #3276b1;*/
 }
 
 .ystep-blue .ystep-step-undone {

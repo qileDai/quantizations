@@ -113,25 +113,86 @@ $(function () {
     gird.run();
 })
 
-//根据jQuery选择器找到需要加载ystep的容器
+
+function Robot() {
+    var self = this;
+    self.robotWrapper = $('.robot-wrapper');
+    self.tradingOnWrapper = $('.trading-on');
+    self.tradingStrategyWrapper = $('.trading-strategy');
+    self.setStrategyWrapper = $('.set-strategy');
+    self.setRiskWrapper = $('.set-risk-strategy');
+
+};
+
+Robot.prototype.run = function () {
+    var self = this;
+    // self.initYstepEvent();
+    self.listenClickRobotEvent();
+};
+
+Robot.prototype.initYstepEvent = function () {
+    //根据jQuery选择器找到需要加载ystep的容器
 //loadStep 方法可以初始化ystep
-$(".ystep").loadStep({
-    size: "large",
-    color: "green",
-    steps: [{
-        title: "选择交易对",
-    }, {
-        title: "选择交易策略",
-    }, {
-        title: "设置策略参数",
-    }, {
-        title: "设置风险策略",
-    },]
-});
+    $(".ystep").loadStep({
+        size: "large",
+        color: "green",
+        steps: [{
+            title: "选择交易对",
+        }, {
+            title: "选择交易策略",
+        }, {
+            title: "设置策略参数",
+        }, {
+            title: "设置风险策略",
+        },]
+    });
+    $(".ystep").setStep(1);
 
-$(".ystep").setStep(4);
+};
 
-console.log($(".ystep").getStep())
+Robot.prototype.listenClickRobotEvent = function () {
+
+    var self = this;
+    var num = 0;
+    var btnPre = $("#btnPre")
+    var btnNext = $("#btnNext")
+    var robotDataArray = new Array(self.tradingOnWrapper, self.tradingStrategyWrapper, self.setStrategyWrapper, self.setRiskWrapper)
+    var arrayLength = robotDataArray.length
+    console.log(arrayLength)
+    // if (arrayLength <= 1)
+    //     return;
+    $('#create-robot').on('click', function () {
+        // self.robotWrapper.show()
+        self.initYstepEvent();
+        robotDataArray[0].show()
+        btnPre.click(function () {
+            //跳转到上一个步骤
+            $(".ystep").prevStep();
+            var stepNum = $(".ystep").getStep();
+            console.log(typeof(stepNum))
+            robotDataArray[stepNum]
+
+        });
+
+        btnNext.click(function () {
+            //跳转到下一个步骤
+            $(".ystep").nextStep();
+            var stepNum = $(".ystep").getStep();
+            // robotDataArray[stepNum+1].show()
+            console.log(stepNum)
+
+        });
+
+
+    })
+
+}
+
+$(function () {
+    var robot = new Robot();
+    robot.run();
+})
+
 
 
 

@@ -310,6 +310,28 @@ def add_permission(request):
         return restful.ok()
     else:
         return restful.params_error(form.get_errors())
+class edit_permission(View):
+    def get(self,request):
+        permission_id = request.POST.get('permission_id')
+        permissionss = Permission.objects.get(pk=permission_id)
+        context = {
+            'menus':Menu.objects.all(),
+            'permissionss':permissionss
+        }
+        return render(request,'cms/permission.html',context=context)
+
+    def post(self,request):
+        pass
+
+def delete_permission(request):
+    pk = request.POST.get('pk')
+    try:
+        Permission.objects.filter(pk=pk).delete()
+        return restful.ok()
+    except:
+        return restful.params_error(message="该权限不存在")
+
+
 
 
 

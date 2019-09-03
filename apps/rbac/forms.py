@@ -8,19 +8,17 @@ from utils.forms import FormMixin
 from django import forms
 
 
-class UserInfoModelForm(ModelForm):
-
+class UserInfoModelForm(forms.ModelForm,FormMixin):
+    # role = forms.IntegerField()
     class Meta:
-        model = UserInfo              # 对应模型类
-        fields = '__all__'            # 所有字段
+        model = UserInfo
+        fields = '__all__'
+        # fields = ('username','password','email')
         labels = {
             'username': '用户名',
             'password': '密码',
-            'phone_number': '手机号',
-            'nickname': '昵称',
             'email': '邮箱',
-            'roles': '角色',
-            'status': '状态',
+            'role': '角色',
         }
 
 

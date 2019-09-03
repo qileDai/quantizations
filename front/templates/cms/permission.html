@@ -23,13 +23,15 @@
                 <div class="box-header">
                     <form action="" class="form-inline">
                         <div class="form-group left-group">
-                            <input type="text" class="form-control" name="permission-seach" placeholder="搜索权限名称" style="border-radius: 5px" value="">
+                            <span class="permission-title">权限名称</span>
+                            <input type="text"  class="form-control" name="permission-seach" placeholder="搜索权限名称"
+                                   style="border-radius: 5px;margin-left: 10px" value="">
                         </div>
                         <div class="form-group left-group">
-{#                            <a href="{% url 'rbac:RolesListView' %}" class="btn btn-info" id="search">搜索</a>#}
+                            {#                            <a href="{% url 'rbac:RolesListView' %}" class="btn btn-info" id="search">搜索</a>#}
                         </div>
-                         <div class="form-group left-group">
-                            <a class="btn btn-info" id="permission-search">搜索</a>
+                        <div class="form-group left-group">
+                            <a class="btn btn-info" id="permission-search" style="margin-left: 10px">搜索</a>
                         </div>
                         <div class="permission-btn">
                             <a class="btn btn-info pull-right" id="permission-add-btn">添加权限</a>
@@ -56,7 +58,7 @@
                                 <td>{{ permission.menu.title }}</td>
                                 <td>
                                     <a href="" class="btn btn-info btn-xs">编辑</a>
-                                    <a class="btn btn-info btn-xs" id="delete-RoleBtn" data_news_id="">删除
+                                    <a class="btn btn-info btn-xs delete-PermissioneBtn" id="delete-PermissioneBtn" data_news_id="">删除
                                     </a>
                                 </td>
                             </tr>
@@ -117,22 +119,33 @@
                     <span class="close-btn icon-close iconfont"></span>
                 </div>
                 <div class="permission-modal-header">
-                    <div class="role-modal-header-inner">添加权限</div>
+                    {% if permissionss %}
+                        <div class="role-modal-header-inner">编辑权限</div>
+                    {% else %}
+                        <div class="role-modal-header-inner">添加权限</div>
+                    {% endif %}
                 </div>
                 <div class="permission-modal-body ">
                     <div class="form-group permission">
                         <lable class="role-label-body" for="title">权限:</lable>
-                        <input type="text" class="form-control" name="permission" placeholder="请输入角色" value="">
+                        {% if permissionss %}
+                            <input type="text" class="form-control" name="permission" placeholder="请输入权限"
+                                   value="{{ permissionss.title  }}">
+                            {% else %}
+                             <input type="text" class="form-control" name="permission" placeholder="请输入权限">
+                        {% endif %}
+
                     </div>
                     <div class="form-group-permission-url">
                         <lable class="role-label-url" for="title">url:</lable>
-                        <input type="text" class="form-control" name="url" placeholder="请输入角色" value="">
+                        <input type="text" class="form-control" name="url" placeholder="请输入url" value="">
                     </div>
                     <div class="form-group ">
                         <lable class="role-label-body-select" for="permission">菜单:</lable>
                         <select name="menu" id="permission" class="form-control-select">
+                            <option value="" selected style="text-align: center">--请选择菜单--</option>
                             {% for metu in menus %}
-                                <option value="{{ metu.pk }}">{{ metu.caption }}</option>
+                                <option value="{{ metu.pk }}">{{ metu.title }}</option>
                             {% endfor %}
                         </select>
                     </div>
