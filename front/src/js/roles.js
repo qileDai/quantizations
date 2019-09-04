@@ -39,7 +39,6 @@ Role.prototype.listenDeleteRolesEvent = function () {
 Role.prototype.listRoleSubmitEvent = function () {
     roleGroup = $('.role-modal-body ');
     var roleBtn = $('#role-confirm');
-
     roleBtn.click(function () {
         rolename = roleGroup.find("input[name='rolename']").val()
         permission = roleGroup.find("select[name='permission']").val()
