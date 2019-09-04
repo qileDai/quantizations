@@ -111,17 +111,6 @@ def users_list(request):
 
 
 @is_login
-def roles(request):
-    roles = Role.objects.all()
-    permissions = Permission.objects.all()
-    context = {
-        'roles': roles,
-        'permissions': permissions
-    }
-    return render(request, 'cms/role.html', context=context)
-
-
-@is_login
 def add_roles(request):
     form = RoleModelForm(request.POST)
     print('*'*20)
@@ -157,24 +146,29 @@ def delete_users(request):
 
 class RolesListView(View):
     def get(self, request):
+        print("sfsfsafasdfas")
         # request.GET：获取出来的所有数据，都是字符串类型
         page = int(request.GET.get('p', 1))
         rolename = request.GET.get('rolename-seach')
-        roles = Role.objects.all()
         print(rolename)
+        roles = Role.objects.all()
         # request.GET.get(参数,默认值)
         # 这个默认值是只有这个参数没有传递的时候才会使用
-        # 如果传递了，但是是一个空的字符串，那么也不会使用默认值
+        # 如果传递了，但是是一个空的字
+        # 符串，那么也不会使用默认值
         if rolename:
-            roles = Role.filter(rolename__icontains=rolename)
+            roles = Role.objects.filter(rolename__icontains=rolename)
+            print(roles)
         paginator = Paginator(roles, 10)
+        print(paginator)
         page_obj = paginator.page(page)
-
-        context_data = self.get_pagination_data(paginator, page_obj)
+        context_data = get_pagination_data(paginator, page_obj)
         context = {
             'roles': page_obj.object_list,
             'page_obj': page_obj,
             'paginator': paginator,
+            'rolename': rolename,
+            'permissions': Permission.objects.all(),
             'url_query': '&' + parse.urlencode({
                 'rolename': rolename or '',
             })
@@ -183,36 +177,6 @@ class RolesListView(View):
 
         return render(request, 'cms/role.html', context=context)
 
-    def get_pagination_data(self, paginator, page_obj, around_count=2):
-        current_page = page_obj.number
-        num_pages = paginator.num_pages
-
-        left_has_more = False
-        right_has_more = False
-
-        if current_page <= around_count + 2:
-            left_pages = range(1, current_page)
-        else:
-            left_has_more = True
-            left_pages = range(current_page - around_count, current_page)
-
-        if current_page >= num_pages - around_count - 1:
-            right_pages = range(current_page + 1, num_pages + 1)
-        else:
-            right_has_more = True
-            right_pages = range(current_page + 1, current_page + around_count + 1)
-
-        return {
-            # left_pages：代表的是当前这页的左边的页的页码
-            'left_pages': left_pages,
-            # right_pages：代表的是当前这页的右边的页的页码
-            'right_pages': right_pages,
-            'current_page': current_page,
-            'left_has_more': left_has_more,
-            'right_has_more': right_has_more,
-            'num_pages': num_pages
-        }
-
 
 class userListView(View):
     def get(self, request):
@@ -220,23 +184,23 @@ class userListView(View):
         print(page)
         username = request.GET.get('username')
         status = request.GET.get('status')
-        print(username,status)
-        print("asdfdas")
+        users = UserInfo.objects.all()
 
         if username:
-            users = UserInfo.filter(username__icontains=username)
+            users = UserInfo.objects.filter(username__icontains=username)
         if status:
-            users = UserInfo.filter(status__icontains=status)
+            users = UserInfo.objects.filter(status__icontains=status)
 
         paginator = Paginator(users, 10)
         page_obj = paginator.page(page)
-
-        context_data = self.get_pagination_data(paginator, page_obj)
-
+        context_data = get_pagination_data(paginator, page_obj)
         context = {
             'users': page_obj.object_list,
+            'username':username,
+            'status': status,
             'page_obj': page_obj,
             'paginator': paginator,
+            'roles': Role.objects.all(),
             'url_query': '&' + parse.urlencode({
                 'username': username or '',
                 'status': status or '',
@@ -246,35 +210,51 @@ class userListView(View):
 
         return render(request, 'cms/account.html', context=context)
 
-    def get_pagination_data(self, paginator, page_obj, around_count=2):
-        current_page = page_obj.number
-        num_pages = paginator.num_pages
 
-        left_has_more = False
-        right_has_more = False
-
-        if current_page <= around_count + 2:
-            left_pages = range(1, current_page)
-        else:
-            left_has_more = True
-            left_pages = range(current_page - around_count, current_page)
-
-        if current_page >= num_pages - around_count - 1:
-            right_pages = range(current_page + 1, num_pages + 1)
-        else:
-            right_has_more = True
-            right_pages = range(current_page + 1, current_page + around_count + 1)
-
-        return {
-            # left_pages：代表的是当前这页的左边的页的页码
-            'left_pages': left_pages,
-            # right_pages：代表的是当前这页的右边的页的页码
-            'right_pages': right_pages,
-            'current_page': current_page,
-            'left_has_more': left_has_more,
-            'right_has_more': right_has_more,
-            'num_pages': num_pages
+class PermissionListView(View):
+    def get(self,request):
+        page = int(request.GET.get('p', 1))
+        permission = request.GET.get('permission-seach')
+        permissions = Permission.objects.all()
+        if permission:
+            permissions = Permission.objects.filter(title__icontains=permission)
+        paginator = Paginator(permissions, 10)
+        page_obj = paginator.page(page)
+        context_data = get_pagination_data(paginator, page_obj)
+        context = {
+            'permissions': page_obj.object_list,
+            'page_obj': page_obj,
+            'paginator': paginator,
+            'permission': permission,
+            'menus': Menu.objects.all(),
+            'url_query': '&' + parse.urlencode({
+                'permission': permission or '',
+            })
         }
+        context.update(context_data)
+        return render(request, 'cms/permission.html', context=context)
+
+class MenuListView(View):
+    def get(self,request):
+        page = int(request.GET.get('p', 1))
+        menu = request.GET.get('munu')
+        menus = Menu.objects.all()
+        if menu:
+            menus = Menu.objects.filter(title__icontains=menu)
+        paginator = Paginator(menus, 10)
+        page_obj = paginator.page(page)
+        context_data = get_pagination_data(paginator, page_obj)
+        context = {
+            'menus': page_obj.object_list,
+            'page_obj': page_obj,
+            'paginator': paginator,
+            'menu': menu,
+            'url_query': '&' + parse.urlencode({
+                'menu': menu or '',
+            })
+        }
+        context.update(context_data)
+        return render(request, 'cms/menu.html', context=context)
 
 
 def delete_menu(request):
@@ -332,25 +312,32 @@ def delete_permission(request):
         return restful.params_error(message="该权限不存在")
 
 
+def get_pagination_data( paginator, page_obj, around_count=2):
+    current_page = page_obj.number
+    num_pages = paginator.num_pages
 
+    left_has_more = False
+    right_has_more = False
 
+    if current_page <= around_count + 2:
+        left_pages = range(1, current_page)
+    else:
+        left_has_more = True
+        left_pages = range(current_page - around_count, current_page)
 
+    if current_page >= num_pages - around_count - 1:
+        right_pages = range(current_page + 1, num_pages + 1)
+    else:
+        right_has_more = True
+        right_pages = range(current_page + 1, current_page + around_count + 1)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return {
+        # left_pages：代表的是当前这页的左边的页的页码
+        'left_pages': left_pages,
+        # right_pages：代表的是当前这页的右边的页的页码
+        'right_pages': right_pages,
+        'current_page': current_page,
+        'left_has_more': left_has_more,
+        'right_has_more': right_has_more,
+        'num_pages': num_pages
+    }

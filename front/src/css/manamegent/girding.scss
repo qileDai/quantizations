@@ -8,20 +8,24 @@
   text-align: center;
 }
 
-.deal-management{
+.deal-management {
   overflow: hidden;
-  .deal-left-group{
+
+  .deal-left-group {
     float: left;
-    .left-group{
+
+    .left-group {
       padding: 0px 10px;
-      .form-control{
+
+      .form-control {
         width: 120px;
         border-radius: 5px;
       }
     }
 
   }
-  .deal-right-group{
+
+  .deal-right-group {
     float: right;
   }
 
@@ -35,7 +39,7 @@
   right: 0;
   background: rgba(0, 0, 0, 0.2);
   z-index: 100;
-  display: none;
+  //display: none;
 
 
   .robot-content {
@@ -280,6 +284,11 @@
         }
 
       }
+
+      .set-risk-strategy {
+        margin-top: 30px;
+        //display: none;
+      }
     }
 
     .trading-footer {
@@ -288,7 +297,8 @@
 
       .trading-button {
         text-align: center;
-        button{
+
+        button {
           margin-left: 40px;
           margin-right: 40px;
         }

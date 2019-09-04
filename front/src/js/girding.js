@@ -128,6 +128,7 @@ Robot.prototype.run = function () {
     var self = this;
     // self.initYstepEvent();
     self.listenClickRobotEvent();
+    self.listenCloseRobotEvent();
 };
 
 Robot.prototype.initYstepEvent = function () {
@@ -162,7 +163,8 @@ Robot.prototype.listenClickRobotEvent = function () {
     // if (arrayLength <= 1)
     //     return;
     $('#create-robot').on('click', function () {
-        // self.robotWrapper.show()
+        self.robotWrapper.show()
+        console.log("daiqe")
         self.initYstepEvent();
         robotDataArray[0].show()
         btnPre.click(function () {
@@ -187,6 +189,13 @@ Robot.prototype.listenClickRobotEvent = function () {
     })
 
 }
+Robot.prototype.listenCloseRobotEvent = function(){
+    var closeBtn = $('.close-btn');
+    var robotWrapper = $('.robot-wrapper');
+    closeBtn.click(function () {
+        robotWrapper.hide();
+    })
+};
 
 $(function () {
     var robot = new Robot();

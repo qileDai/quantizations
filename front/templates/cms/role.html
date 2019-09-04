@@ -21,12 +21,18 @@
         <div class="col-md-12">
             <div class="box role-box">
                 <div class="box-header">
-                    <form action="" class="form-inline">
+                    <form action="" method="get" class="form-inline">
                         <div class="role-left-group">
                             <div class="form-group left-group">
                                 <label class="rolename-label" for="role">角色</label>
-                                <input type="text" class="form-control rolename-input" name="rolename-seach"
-                                       placeholder="搜索角色名称" value="">
+                                {% if rolename %}
+                                    <input type="text" class="form-control rolename-input" name="rolename-seach"
+                                           placeholder="搜索角色名称" value="{{ rolename }}">
+                                {% else %}
+                                    <input type="text" class="form-control rolename-input" name="rolename-seach"
+                                           placeholder="搜索角色名称">
+                                {% endif %}
+
                             </div>
                             <div class="form-group left-group">
                                 <button href="#" class="btn btn-info rolename-serach" id="search">搜索</button>
@@ -59,12 +65,6 @@
                                         {{ permission.title }} &nbsp;
                                     {% endfor %}
                                 </td>
-                                {#                                {% for permission in role.permissions.all%}#}
-                                {#                                    <td>{{ permission.title }}</td>#}
-                                {##}
-                                {#                                {% endfor %}#}
-
-
                                 <td>
                                     <a href="#" class="btn btn-info btn-xs">编辑</a>
                                     <a class="btn btn-info btn-xs delete-roles-btn" id="delete-RoleBtn"
@@ -76,49 +76,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="box-footer">
-                    <p class="page_count pull-left">第{{ current_page }}/总共{{ num_pages }}页</p>
-                    <ul class="pagination pull-right">
-                        {#上一页#}
-                        {% if page_obj.has_previous %}
-                            <li><a href="?p={{ page_obj.previous_page_number }}{{ url_query }}">上一页</a></li>
-                        {% else %}
-                            <li class="disabled"><a href="javascript:void(0);">上一页</a></li>
-                        {% endif %}
-
-                        {# 是否需要出现三个点 #}
-                        {% if left_has_more %}
-                            <li><a href="?p=1">1</a></li>
-                            <li><a href="javascript:void(0);">...</a></li>
-                        {% endif %}
-
-                        {# 左边的页码 #}
-                        {% for left_page in left_pages %}
-                            <li><a href="?p={{ left_page }}{{ url_query }}">{{ left_page }}</a></li>
-                        {% endfor %}
-
-                        {# 当前的页面 #}
-                        <li class="active"><a href="?p={{ current_page }}{{ url_query }}">{{ current_page }}</a></li>
-
-                        {# 右边的页码 #}
-                        {% for right_page in right_pages %}
-                            <li><a href="?p={{ right_page }}{{ url_query }}">{{ right_page }}</a></li>
-                        {% endfor %}
-
-                        {# 用来控制右边三个点 #}
-                        {% if right_has_more %}
-                            <li><a href="javascript:void(0);">...</a></li>
-                            <li><a href="?p={{ num_pages }}{{ url_query }}">{{ num_pages }}</a></li>
-                        {% endif %}
-
-                        {#下一页#}
-                        {% if page_obj.has_next %}
-                            <li><a href="?p={{ page_obj.next_page_number }}{{ url_query }}">下一页</a></li>
-                        {% else %}
-                            <li class="disabled"><a href="javascript:void(0);">下一页</a></li>
-                        {% endif %}
-                    </ul>
-                </div>
+                {% include 'cms/box_footer.html' %}
             </div>
         </div>
     </div>

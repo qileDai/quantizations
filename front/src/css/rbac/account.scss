@@ -42,9 +42,7 @@
 }
 
 .mask-wrapper {
-  //$authWrapperHeight: 4px;
   $authWrapperWidth: 400px;
-  //height: 550px;
   position: fixed;
   left: 0;
   right: 0;
@@ -52,7 +50,6 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid #F2F2F2;
-  //background: #F2F2F2;
   display: none;
   z-index: 100;
 
@@ -60,7 +57,6 @@
   .author-wrapper {
     height: 550px;
     width: $authWrapperWidth;
-    //height: $authWrapperHeight;
     position: absolute;
     top: 20%;
     left: 40%;
