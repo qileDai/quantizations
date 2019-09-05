@@ -1,0 +1,2 @@
+*/30 * * * * F:\trade_management\venv\Scripts\python.exe F:\trade_management\manage.py crontab run 0fc19029047889fcef0a2f2a4960917e >> /run.log # django-cronjobs for trade_management
+*/30 * * * * F:\trade_management\venv\Scripts\python.exe F:\trade_management\manage.py crontab run f1acb7cb35258b7b02438bfdba108fab >> /run.log # django-cronjobs for trade_management
