@@ -83,6 +83,8 @@ class Menu(models.Model):
     title = models.CharField(max_length=32, unique=True)
     url = models.CharField(max_length=32)
     parent = models.ForeignKey("Menu", on_delete=models.CASCADE, null=True, blank=True)
+
+
     # 定义菜单间的自引用关系
     # 权限url 在 菜单下；菜单可以有父级菜单；还要支持用户创建菜单，因此需要定义parent字段（parent_id）
     # blank=True 意味着在后台管理中填写可以为空，根菜单没有父级菜单
@@ -105,6 +107,7 @@ class Permission(models.Model):
     url = models.CharField(max_length=128, unique=True)
     menu = models.ForeignKey("Menu", on_delete=models.CASCADE, null=True, blank=True)
 
+
     def __str__(self):
         # 显示带菜单前缀的权限
         return '{menu}---{permission}'.format(menu=self.menu, permission=self.title)
@@ -116,6 +119,8 @@ class Role(models.Model):
     """
     rolename = models.CharField(max_length=32, unique=True)
     permissions = models.ManyToManyField("Permission")
+
+
     # 定义角色和权限的多对多关系
 
     def __str__(self):
@@ -135,7 +140,10 @@ class UserInfo(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
 
     roles = models.ManyToManyField("Role")
+
     # 定义用户和角色的多对多关系
+    class Meta:
+        ordering = ['-create_time']
 
     def __str__(self):
         return self.nickname
@@ -161,5 +169,3 @@ class User(AbstractUser):
         return self.username
 
 '''
-
-
