@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, reverse, HttpResponse
 from django.views.generic import View
 from .models import Account, TradingPlatform, Property
 from django.core.paginator import Paginator
-from apps.deal.API.exx.exxService import ExxService
+from apps.deal.dealapi.exx.exxService import ExxService
 from apps.deal.API.exx.exxMarket import MarketCondition
 from .forms import AccountModelForm
 # Create your views here.

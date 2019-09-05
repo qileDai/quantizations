@@ -1,6 +1,6 @@
+
+from apps.deal.dealapi.exx.exxService import ExxService
 import time
-from apps.deal.API.exx.exxService import ExxService
-from apps.deal.API.exx.exxMarket import MarketCondition
 from pymysql import *
 
 
@@ -60,7 +60,8 @@ def exx_scheduled_job():
 def huobi_scheduled_job():
     print('huobi-------------------------')
 
-# exx_scheduled_job()
+
+exx_scheduled_job()
 
 
 

@@ -7,6 +7,5 @@ class ApiPlatform(object):
 
     def api(self):
         if self.platform == 'EXX':
-            from .exx.exxService import ExxService
-            from .exx.exxMarket import MarketCondition
+            pass
 
