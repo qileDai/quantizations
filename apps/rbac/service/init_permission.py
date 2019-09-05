@@ -43,7 +43,7 @@ def init_permission(request, user_obj):
     }
 
     request.session[settings.LOGIN] = True
-    request.session.pop('ADMIN', None)
+    request.session['user_id'] = user_obj.id
     request.session.set_expiry(300)
 
     print('request.session[settings.SESSION_PERMISSION_URL_KEY] ------------------- ',

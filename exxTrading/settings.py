@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.exx',
     'apps.rbac',
+    'apps.deal',
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -151,11 +153,16 @@ SAFE_URL = [
     '/test/',
     '/rbac/index/',
     '^/rbac/',
-    r'/exx/'
+    r'/exx/',
+    '/account/accountlist/',
 ]
 
 # 用户是否登陆
 LOGIN = 'is_login'
 
-
+# 分钟(0-59) 小时(0-23) 每个月的哪一天(1-31) 月份(1-12) 周几(0-6) shell脚本或者命令
+CRONJOBS = [
+    ('*/30 * * * *', 'app02.cron.exx_scheduled_job', '>> /run.log'),
+    ('*/30 * * * *', 'app02.cron.huobi_scheduled_job', '>> /run.log')
+]
 

@@ -14,7 +14,7 @@ from django.conf import settings
 # 用户登录装饰器
 def is_login(func):
     def wrapper(request, *args, **kwargs):
-        if 'ADMIN' in request.session or 'is_login' in request.session:
+        if 'is_login' in request.session:
             res = func(request, *args, **kwargs)
             return res
         else:
@@ -38,7 +38,8 @@ def login(request):
             return render(request, "cms/login.html", {'error': '用户已被禁用，请联系管理员！'})
         elif username == 'admin':               # 管理员
             request.session.clear()
-            request.session['ADMIN'] = 'is_login'
+            request.session['is_login'] = True
+            request.session['user_id'] = user_obj.id
             request.session.set_expiry(600)
             return render(request, 'cms/index.html')
         else:                                   # 普通用户
@@ -196,7 +197,7 @@ class userListView(View):
         context_data = get_pagination_data(paginator, page_obj)
         context = {
             'users': page_obj.object_list,
-            'username':username,
+            'username': username,
             'status': status,
             'page_obj': page_obj,
             'paginator': paginator,
@@ -212,7 +213,7 @@ class userListView(View):
 
 
 class PermissionListView(View):
-    def get(self,request):
+    def get(self, request):
         page = int(request.GET.get('p', 1))
         permission = request.GET.get('permission-seach')
         permissions = Permission.objects.all()
@@ -234,8 +235,9 @@ class PermissionListView(View):
         context.update(context_data)
         return render(request, 'cms/permission.html', context=context)
 
+
 class MenuListView(View):
-    def get(self,request):
+    def get(self, request):
         page = int(request.GET.get('p', 1))
         menu = request.GET.get('munu')
         menus = Menu.objects.all()
@@ -290,18 +292,21 @@ def add_permission(request):
         return restful.ok()
     else:
         return restful.params_error(form.get_errors())
+
+
 class edit_permission(View):
-    def get(self,request):
+    def get(self, request):
         permission_id = request.POST.get('permission_id')
         permissionss = Permission.objects.get(pk=permission_id)
         context = {
-            'menus':Menu.objects.all(),
-            'permissionss':permissionss
+            'menus': Menu.objects.all(),
+            'permissionss': permissionss
         }
         return render(request,'cms/permission.html',context=context)
 
     def post(self,request):
         pass
+
 
 def delete_permission(request):
     pk = request.POST.get('pk')
@@ -312,7 +317,7 @@ def delete_permission(request):
         return restful.params_error(message="该权限不存在")
 
 
-def get_pagination_data( paginator, page_obj, around_count=2):
+def get_pagination_data(paginator, page_obj, around_count=2):
     current_page = page_obj.number
     num_pages = paginator.num_pages
 

@@ -1,6 +1,7 @@
 
 from django.urls import path
 from . import views
+
 app_name = 'rbac'
 urlpatterns = [
     # path('login/', views.login, name='login'),
@@ -19,6 +20,6 @@ urlpatterns = [
     path('delete_menu/', views.delete_menu, name='delete_menu'),
     path('edit_permission/', views.edit_permission.as_view(), name='edit_permission'),
     path('delete_permission/', views.delete_permission, name='delete_permission'),
-    path('rolesList/',views.RolesListView.as_view(),name='rolesList'),
+    path('rolesList/', views.RolesListView.as_view(), name='rolesList'),
 
 ]
