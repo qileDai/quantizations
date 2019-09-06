@@ -70,7 +70,7 @@ class MarketCondition(object):
     low           : 最低价
     monthRiseRate : 30日涨跌幅
     """
-    def get_ticker(self,currency):
+    def get_ticker(self, currency):
         url = ticker_url + "?" + "currency=" + currency
         try:
             response = requests.get(url)

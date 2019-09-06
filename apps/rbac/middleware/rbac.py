@@ -31,9 +31,7 @@ class RbacMiddleware(MiddlewareMixin):
         print('权限--', permission_url)
         # 如果请求url在白名单，放行
         for url in settings.SAFE_URL:
-            print(url)
             if re.match(url, request_url):
-                print('*'*30)
                 return None
 
         # 如果未取到permission_url, 重定向至登录；为了可移植性，将登录url写入配置

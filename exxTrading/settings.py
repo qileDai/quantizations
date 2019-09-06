@@ -154,7 +154,7 @@ SAFE_URL = [
     '/rbac/index/',
     '^/rbac/',
     r'/exx/',
-    '/account/accountlist/',
+    '/account/.*',
 ]
 
 # 用户是否登陆

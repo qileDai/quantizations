@@ -304,7 +304,7 @@ class edit_permission(View):
         }
         return render(request,'cms/permission.html',context=context)
 
-    def post(self,request):
+    def post(self, request):
         pass
 
 

@@ -48,6 +48,7 @@ class Property(models.Model):
     withdraw_record = models.CharField(max_length=32, default='0')
     lastday_assets = models.CharField(max_length=32)
 
+    currency_status = models.CharField(max_length=10, default='0')
     # 账户与资产信息一对多关系
     account = models.ForeignKey("Account", on_delete=models.CASCADE, null=True, blank=True)
     update_time = models.DateTimeField(auto_now=True)
