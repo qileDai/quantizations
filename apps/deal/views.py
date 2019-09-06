@@ -138,7 +138,7 @@ class ChargeAccount(View):
         currency = request.POST.get('currency')
         num = request.POST.get('currency-number')
         if currency:
-
+            pass
 
 
 class WithDraw(View):
