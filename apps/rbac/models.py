@@ -117,7 +117,7 @@ class Role(models.Model):
     角色：绑定权限
     """
     rolename = models.CharField(max_length=32, unique=True)
-    permission = models.ManyToManyField("Permission")
+    permissions = models.ManyToManyField("Permission")
 
     # 定义角色和权限的多对多关系
     def __str__(self):

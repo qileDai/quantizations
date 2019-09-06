@@ -7,6 +7,7 @@ from urllib import parse
 from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, PermissionModelForm, MenuModelForm
 import hashlib
 from django.conf import settings
+from .service.init_permission import init_permission
 # Create your views here.
 
 
