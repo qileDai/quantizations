@@ -1,6 +1,9 @@
 
 .account-management {
+  overflow: hidden;
+
   .form-group {
+
 
     .account {
       margin-right: 20px;
@@ -9,6 +12,7 @@
       height: 40px;
       line-height: 30px;
       width: 120px;
+      float: right;
     }
 
     .curry {
@@ -16,6 +20,7 @@
       height: 40px;
       line-height: 30px;
       width: 120px;
+      float: right;
     }
 
     .property {
@@ -23,8 +28,11 @@
       height: 40px;
       line-height: 30px;
       width: 120px;
+      float: right;
     }
   }
+
+
 }
 
 .account-box {
@@ -48,7 +56,8 @@
   .delete-property {
     margin-right: 10px;
   }
-  .mention-money{
+
+  .mention-money {
     margin-left: 10px;
   }
 

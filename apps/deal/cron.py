@@ -1,7 +1,10 @@
+
 import time
-from apps.deal.API.exx.exxService import ExxService
-from apps.deal.API.exx.exxMarket import MarketCondition
+from API.exx.exxService import ExxService
 from pymysql import *
+
+
+
 
 
 def main(sql, params=None):

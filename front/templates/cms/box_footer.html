@@ -1,5 +1,8 @@
 <div class="box-footer">
-    <p class="page_count pull-left">第{{ current_page }}/总共{{ num_pages }}页</p>
+    <div class="page_count pull-left" style="margin-top: 25px";>
+        <p class="page_count pull-left" style="font-size: 16px">
+            第{{ current_page }}/总共{{ num_pages }}页</p>
+    </div>
     <ul class="pagination pull-right">
         {#上一页#}
         {% if page_obj.has_previous %}

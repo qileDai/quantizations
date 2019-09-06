@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, reverse, HttpResponse
 from .models import UserInfo, Role, Menu, Permission
-from apps.rbac.service.init_permission import init_permission
 from django.views.generic import View
 from utils import restful
 from django.core.paginator import Paginator
@@ -115,6 +114,7 @@ def users_list(request):
 def add_roles(request):
     form = RoleModelForm(request.POST)
     print('*'*20)
+    print("sdf")
     if form.is_valid():
         form.save()
         return restful.ok()

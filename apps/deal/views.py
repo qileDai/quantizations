@@ -12,15 +12,19 @@ class AccountList(View):
     def get(self, request):
         page = int(request.GET.get('p', 1))
         user_id = request.session.get("user_id")
+        print("-"*20)
+        print(user_id)
         # 获取账户信息
-        account_obj = Account.objects.filter(users__id=user_id)
+        accounts = Account.objects.filter(users__id=user_id)
+        print(accounts)
 
         # 分页
-        paginator = Paginator(account_obj, 10)
+        paginator = Paginator(accounts, 10)
         page_obj = paginator.page(page)
         context_data = get_pagination_data(paginator, page_obj)
         context = {
-            'accounts_list': account_obj,
+            'accounts_list': page_obj.object_list,
+            'accounts': accounts,
             'page_obj': page_obj,
             'paginator': paginator,
         }
