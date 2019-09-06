@@ -1,6 +1,6 @@
 import time
-from apps.deal.API.exx.exxService import ExxService
-from apps.deal.API.exx.exxMarket import MarketCondition
+from dealapi.exx.exxService import ExxService
+from dealapi.exx.exxMarket import MarketCondition
 from pymysql import *
 
 
