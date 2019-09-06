@@ -37,7 +37,7 @@ var xfzajax = {
                 }
             }else{
                 var messageObject = result['message'];
-                if(typeof messageObject == 'string' || messageObject.constructor == String){
+                if( messageObject.constructor == String){
                     window.messageBox.showError(messageObject);
                 }else{
                     // {"password":['密码最大长度不能超过20为！','xxx'],"telephone":['xx','x']}

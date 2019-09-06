@@ -44,7 +44,7 @@ def init_permission(request, user_obj):
 
     request.session[settings.LOGIN] = True
     request.session['user_id'] = user_obj.id
-    request.session.set_expiry(300)
+    # request.session.set_expiry(600)
 
     print('request.session[settings.SESSION_PERMISSION_URL_KEY] ------------------- ',
           request.session[settings.SESSION_PERMISSION_URL_KEY])
