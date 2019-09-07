@@ -72,24 +72,24 @@ class DeleteAccount(View):
 
 class ShowAssert(View):
     def get(self, request, id):
-        account_obj = Account.objects.get(id=id)
-        platform = account_obj.platform
+        account_obj = Account.objects.get(id=id)    # 获取账户信息
+        platform = account_obj.platform             # 账户对应的平台
         # TradingPlatform.objects.filter(Account__id=1)
         if platform.Platform_name == 'EXX':
             service_api = ExxService(platform.Platform_name, account_obj.secretkey, account_obj.accesskey)      # 创建接口对象
-            res = service_api.get_balance()  # 获取用户的资产信息
+            res = service_api.get_balance()     # 获取用户的资产信息
             market_api = MarketCondition()
-            res1 = market_api.get_tickers()   # 获取所有行情信息
+            res1 = market_api.get_tickers()     # 获取所有行情信息
         elif platform.Platform_name == 'HUOBI':
             pass
 
         show_currency = Property.objects.filter(Q(account_id=id) & Q(currency_status='1'))
-        lastday_assets = 0
-        current_assets = 0
-        original_assets = 0
-        withdraw_record = 0
-        currency_list = list()
-        transaction_pair = list()
+        lastday_assets = 0              # 昨日24时资产
+        current_assets = 0              # 当前资产
+        original_assets = 0             # 初始资产
+        withdraw_record = 0             # 提币
+        currency_list = list()          # 币种列表
+        transaction_pair = list()       # 交易对
         assets_dict = dict()
         profit_loss_dict = dict()
 
@@ -163,9 +163,11 @@ class ConfigCurrency(View):
             for obj in accounts:
                 LastdayAssets.objects.create(currency='currency', account_id=obj.id)
                 Property.objects.create(currency='currency', account_id=obj.id)
-        currency_dict = dict()
-        currency_dict[currency] = currency
-
+        currency_info = LastdayAssets.objects.all()
+        context = {
+            'currency_info': currency_info,
+        }
+        return render(request, context=context)
 
 def get_pagination_data(paginator, page_obj, around_count=2):
     current_page = page_obj.number
