@@ -8,7 +8,7 @@ def main(sql, params=None):
     # 创建Connection连接
     conn = connect(host='192.168.4.201',
                    port=3306,
-                   database='exx_quantitative_trading',
+                   database='exx_quantitative_admin',
                    user='root',
                    password='password',
                    charset='utf8')
@@ -37,14 +37,14 @@ def exx_scheduled_job():
             data = service_api.get_balance()
         except:
             return '调用接口失败'
-
+        # 循环用户信息接口币种数据，并在数据库中更新资产信息
         for key, value in data['funds'].items():
             lastday_assets = value['total']
             try:
-                sql = "select id from deal_property where currency=%s and accountid_id=%s"
+                sql = "select id from deal_lastdayassets where currency=%s and accountid_id=%s"
                 params1 = (key, accountid)
                 res = main(sql, params1)
-                sql = "insert into deal_property(id, lastday_assets)" \
+                sql = "insert into deal_lastdayassets(id, lastday_assets)" \
                       "value(%s, %s) on duplicate key update lastday_assets=%s"
                 params2 = (res, lastday_assets)
                 main(sql, params2)
@@ -55,7 +55,7 @@ def exx_scheduled_job():
 def huobi_scheduled_job():
     print('huobi-------------------------')
 
-# exx_scheduled_job()
+exx_scheduled_job()
 
 
 

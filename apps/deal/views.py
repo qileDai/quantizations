@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.views.generic import View
-from .models import Account, Property
+from .models import Account, Property, LastdayAssets
 from django.core.paginator import Paginator
 from dealapi.exx.exxService import ExxService
 from dealapi.exx.exxMarket import MarketCondition
@@ -161,6 +161,7 @@ class ConfigCurrency(View):
             # 获取账户信息
             accounts = Account.objects.filter(users__id=user_id)
             for obj in accounts:
+                LastdayAssets.objects.create(currency='currency', account_id=obj.id)
                 Property.objects.create(currency='currency', account_id=obj.id)
         currency_dict = dict()
         currency_dict[currency] = currency
