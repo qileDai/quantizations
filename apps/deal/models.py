@@ -43,10 +43,10 @@ class Property(models.Model):
     资产信息
     """
     currency = models.CharField(max_length=32)
-    original_assets = models.DecimalField(max_digits=10, decimal_places=2)
-    charge_record = models.CharField(max_length=32, default='0')
-    withdraw_record = models.CharField(max_length=32, default='0')
-    lastday_assets = models.CharField(max_length=32)
+    original_assets = models.DecimalField(max_digits=18, decimal_places=8, default=0)
+    charge_record = models.DecimalField(max_digits=18, decimal_places=8, default=0)
+    withdraw_record = models.DecimalField(max_digits=18, decimal_places=8, default=0)
+    lastday_assets = models.DecimalField(max_digits=18, decimal_places=8, default=0)
 
     currency_status = models.CharField(max_length=10, default='0')
     # 账户与资产信息一对多关系
