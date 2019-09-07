@@ -14,8 +14,6 @@ class AccountList(View):
     def get(self, request):
         page = int(request.GET.get('p', 1))
         user_id = request.session.get("user_id")
-        print("-"*20)
-        print(user_id)
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
         print(accounts)
@@ -137,12 +135,35 @@ class ChargeAccount(View):
     def post(self, request, id):
         currency = request.POST.get('currency')
         num = request.POST.get('currency-number')
+
         if currency:
-            pass
+            property_obj = Property.objects.filter(Q(account_id=id) & Q(currency=currency))
+            original_assets = property_obj.original_assets + float(num)
+            Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
 
 
 class WithDraw(View):
-    pass
+    def post(self, request, id):
+        currency = request.POST.get('currency')
+        num = request.POST.get('currency-number')
+
+        if currency:
+            property_obj = Property.objects.filter(Q(account_id=id) & Q(currency=currency))
+            original_assets = property_obj.original_assets + float(num)
+            Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
+
+
+class ConfigCurrency(View):
+    def post(self, request):
+        currency = request.POST.get('currency')
+        if currency:
+            user_id = request.session.get("user_id")
+            # 获取账户信息
+            accounts = Account.objects.filter(users__id=user_id)
+            for obj in accounts:
+                Property.objects.create(currency='currency', account_id=obj.id)
+        currency_dict = dict()
+        currency_dict[currency] = currency
 
 
 def get_pagination_data(paginator, page_obj, around_count=2):
