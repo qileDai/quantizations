@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.views.generic import View
 from .models import Account, Property, LastdayAssets
+from apps.rbac.models import UserInfo
 from django.core.paginator import Paginator
 from dealapi.exx.exxService import ExxService
 from dealapi.exx.exxMarket import MarketCondition
@@ -19,6 +20,9 @@ class AccountList(LoginRequireMixin, View):
         user_id = request.session.get("user_id")
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
+        # 获取用户所有币种
+        currency_list = ''
+
         print(accounts)
 
         # 分页
@@ -47,6 +51,7 @@ class AddAccount(View):
             return redirect('../accountlist/')
         else:
             return render(request, 'management/tradingaccount.html', {'model_form': model_form, 'title': '新增用户'})
+
 
 
 class EditAccount(View):

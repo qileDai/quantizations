@@ -9,7 +9,7 @@ def init_permission(request, user_obj):
     :param user_obj: 
     :return: 
     """
-    # user_obj是UserInfo模型类对象，user_obj.roles关联Role模型类
+    # user_obj是UserInfo模型类对象，user_obj.roles关联Role模型类,values将返回的qureyset中的model转换为字典
     permission_item_list = user_obj.roles.values('permissions__url',
                                                  'permissions__title',
                                                  'permissions__menu_id').distinct()

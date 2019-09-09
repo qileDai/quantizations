@@ -215,7 +215,7 @@ class userListView(LoginRequireMixin, View):
         return render(request, 'cms/account.html', context=context)
 
 
-class PermissionListView(LoginRequireMixin,View):
+class PermissionListView(LoginRequireMixin, View):
     def get(self, request):
         page = int(request.GET.get('p', 1))
         permission = request.GET.get('permission-seach')
