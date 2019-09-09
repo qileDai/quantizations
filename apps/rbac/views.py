@@ -210,6 +210,7 @@ class userListView(LoginRequireMixin, View):
                 'status': status or '',
             })
         }
+        # 更新context数据
         context.update(context_data)
 
         return render(request, 'cms/account.html', context=context)
