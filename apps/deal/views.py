@@ -160,6 +160,9 @@ class ShowAssert(View):
 
 
 class ShowCollectAsset(View):
+    """
+    汇总资产信息
+    """
     pass
 
 
