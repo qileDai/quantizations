@@ -6,11 +6,6 @@ from dealapi import accountConfig
 """
 市场行情类
 """
-# host_url = "http://192.168.4.171:9008"
-# markets_url = host_url + "/data/v1/markets"  # Exx所有市场url
-# tickers_url = host_url + "/data/v1/tickers"  # 所有行情url
-# ticker_url = host_url + "/data/v1/ticker"    # 单一市场行情url
-# depth_url = host_url + "/data/v1/depth"       # 市场深度
 
 
 class MarketCondition(object):
