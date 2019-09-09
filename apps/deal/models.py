@@ -61,3 +61,26 @@ class LastdayAssets(models.Model):
     account = models.ForeignKey("Account", on_delete=models.CASCADE, null=True, blank=True)
     update_time = models.DateTimeField(auto_now=True)
 
+class Market(models.Model):
+    name = models.CharField(max_length=32)   #市场名称
+
+class Robot(models.Model):
+    Robot_Status = (
+        ("运行中", 1),
+        ("已停止", 0),
+    )
+    trading_account = models.ForeignKey('Account',on_delete=models.CASCADE) #交易账户外键account
+    currency = models.CharField(max_length=32)                              #交易币种
+    market = models.CharField(max_length=32)                                #交易市场
+    trading_strategy = models.CharField(max_length=32)                      #交易策略
+    total_money = models.DecimalField(max_digits=19,decimal_places=2)       #总投入
+    float_profit = models.DecimalField(max_digits=19,decimal_places=2)      #浮动盈亏
+    realized_profit = models.DecimalField(max_digits=19,decimal_places=2)   #实现利润
+    total_profit = models.DecimalField(max_digits=19,decimal_places=2)      #总利润
+    annual_yield = models.DecimalField(max_digits=5,decimal_places=2)       #年化收益率
+    create_time = models.DateTimeField(auto_now_add=True)                   #创建时间
+    status = models.SmallIntegerField(choices=Robot_Status)                 #状态
+
+    class Meta:
+        ordering = ['-create_time']
+
