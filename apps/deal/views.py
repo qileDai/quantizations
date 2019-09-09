@@ -36,10 +36,9 @@ class AccountList(LoginRequireMixin, View):
 
 
 class AddAccount(View):
-    def get(self, request):
-        model_form = AccountModelForm()
-        return render(request, 'management/tradingaccount.html', {'model_form': model_form, 'title': '新增账户'})
-
+    """
+    添加账户
+    """
     def post(self, request):
         model_form = AccountModelForm(request.POST)
         print('-'*20, model_form)
@@ -51,11 +50,9 @@ class AddAccount(View):
 
 
 class EditAccount(View):
-    def get(self, request, id):
-        account_obj = Account.objects.filter(id=id).first()
-        model_form = AccountModelForm(instance=account_obj)
-        return render(request, 'management/tradingaccount.html', {'model_form': model_form, 'title': '编辑账户'})
-
+    """
+    编辑账户
+    """
     def post(self, request, id):
         account_obj = Account.objects.filter(id=id).first()
         model_form = AccountModelForm(request.POST, instance=account_obj)
@@ -67,6 +64,9 @@ class EditAccount(View):
 
 
 class DeleteAccount(View):
+    """
+    删除账户
+    """
     def get(self, id):
         account_obj = Account.objects.filter(id=id).first()
         account_obj.delete()
@@ -74,6 +74,9 @@ class DeleteAccount(View):
 
 
 class ShowAssert(View):
+    """
+    显示账户资产信息
+    """
     def get(self, request, id):
         account_obj = Account.objects.get(id=id)    # 获取账户信息
         platform = account_obj.platform             # 账户对应的平台

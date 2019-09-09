@@ -12,5 +12,6 @@ urlpatterns = [
     path('showassert/<int:id>', views.ShowAssert.as_view(), name='showassert'),
     path('chargeaccount/<int:id>', views.ChargeAccount.as_view(), name='chargeaccount'),
     path('withdraw/<int:id>', views.WithDraw.as_view(), name='withdraw'),
+    path('configcurrency/', views.ConfigCurrency.as_view(), name='configcurrency'),
 
 ]
