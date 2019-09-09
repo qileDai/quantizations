@@ -228,6 +228,7 @@ class ConfigCurrency(View):
         return render(request, 'management/tradingaccount.html', context)
 
 
+# 分页
 def get_pagination_data(paginator, page_obj, around_count=2):
     current_page = page_obj.number
     num_pages = paginator.num_pages
