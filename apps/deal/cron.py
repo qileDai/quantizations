@@ -8,7 +8,7 @@ def main(sql, params=None):
     # 创建Connection连接
     conn = connect(host='192.168.4.201',
                    port=3306,
-                   database='exx_quantitative_trading',
+                   database='exx_quantitative_admin',
                    user='root',
                    password='password',
                    charset='utf8')
@@ -26,8 +26,8 @@ def main(sql, params=None):
 
 def exx_scheduled_job():
     print('启动定时任务', "当前时间::"+time.strftime("%H:%M:%S", time.localtime(time.time())))
-    # 获取用户所有的账户信息
-    sql = "select acc.id,accesskey,secretkey from deal_account as acc INNER JOIN app02_tradingplatform as tr " \
+    # 获取用户所有的EXX账户信息
+    sql = "select acc.id,accesskey,secretkey from deal_account as acc INNER JOIN deal_tradingplatform as tr " \
           "on acc.platform_id = tr.id where Platform_name = 'EXX';"
     ret = main(sql)
     # 遍历账户信息
@@ -35,32 +35,29 @@ def exx_scheduled_job():
         try:
             service_api = ExxService('EXX', secretkey, accesskey)
             data = service_api.get_balance()
+            print(data)
         except:
             return '调用接口失败'
-
+        # 循环用户信息接口币种数据，并在数据库中更新资产信息
         for key, value in data['funds'].items():
-            # if key == 'QC':
-            #     value['total'] = '666'
             lastday_assets = value['total']
             try:
-                sql = "select id from deal_property where currency=%s and accountid_id=%s"
+                sql = "select id from deal_lastdayassets where currency=%s and account_id=%s"
                 params1 = (key, accountid)
                 res = main(sql, params1)
-                sql = "insert into deal_property(id, currency, lastday_assets, accountid_id)" \
-                      "value(%s, %s, '0', %s) on duplicate key update lastday_assets=%s"
-                params2 = (res, key, accountid, lastday_assets)
-                main(sql, params2)
+                if res:
+                    print(key)
+                    sql = "update deal_lastdayassets set lastday_assets=%s where currency=%s and account_id=%s"
+                    params2 = (float(lastday_assets), key, accountid)
+                    main(sql, params2)
             except:
-                sql = "insert into deal_property(currency, lastday_assets, accountid_id)" \
-                      "value(%s, '0', %s) on duplicate key update lastday_assets=%s"
-                params = (key, accountid, lastday_assets)
-                main(sql, params)
+                print('该币种不存在，请添加')
 
 
 def huobi_scheduled_job():
     print('huobi-------------------------')
 
-# exx_scheduled_job()
+exx_scheduled_job()
 
 
 
