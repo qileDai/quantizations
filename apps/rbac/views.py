@@ -8,6 +8,7 @@ from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, Permi
 import hashlib
 from django.conf import settings
 from .service.init_permission import init_permission
+from utils.mixin import LoginRequireMixin
 # Create your views here.
 
 
@@ -180,7 +181,7 @@ class RolesListView(View):
         return render(request, 'cms/role.html', context=context)
 
 
-class userListView(View):
+class userListView(LoginRequireMixin, View):
     def get(self, request):
         page = int(request.GET.get('p', 1))
         print(page)
@@ -213,7 +214,7 @@ class userListView(View):
         return render(request, 'cms/account.html', context=context)
 
 
-class PermissionListView(View):
+class PermissionListView(LoginRequireMixin,View):
     def get(self, request):
         page = int(request.GET.get('p', 1))
         permission = request.GET.get('permission-seach')
@@ -237,7 +238,7 @@ class PermissionListView(View):
         return render(request, 'cms/permission.html', context=context)
 
 
-class MenuListView(View):
+class MenuListView(LoginRequireMixin, View):
     def get(self, request):
         page = int(request.GET.get('p', 1))
         menu = request.GET.get('munu')

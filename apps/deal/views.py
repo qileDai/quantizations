@@ -6,11 +6,14 @@ from dealapi.exx.exxService import ExxService
 from dealapi.exx.exxMarket import MarketCondition
 from .forms import AccountModelForm
 from django.db.models import Q
-
+from utils.mixin import LoginRequireMixin
 # Create your views here.
 
 
-class AccountList(View):
+class AccountList(LoginRequireMixin, View):
+    """
+    显示用户所有账户信息
+    """
     def get(self, request):
         page = int(request.GET.get('p', 1))
         user_id = request.session.get("user_id")

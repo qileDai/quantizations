@@ -35,7 +35,7 @@ class ExxService(object):
     """
     委托下单
     :param: amount 交易数量
-    :param: currency:eth_usdt 交易的对
+    :param: currency:eth_usdt 交易对
     :param: price:1024 价格
     :param: type:buy/sell 交易类型
     :return: int 交易id
