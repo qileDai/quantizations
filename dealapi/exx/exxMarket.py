@@ -1,15 +1,16 @@
 # _*_ coding:utf-8 _*_
 import logging
 import requests
-from requests import ReadTimeout,ConnectionError
+from dealapi import accountConfig
+
 """
 市场行情类
 """
-host_url = "http://192.168.4.171:9008"
-markets_url = host_url + "/data/v1/markets"  # Exx所有市场url
-tickers_url = host_url + "/data/v1/tickers"  # 所有行情url
-ticker_url = host_url + "/data/v1/ticker"    # 单一市场行情url
-depth_url = host_url + "/data/v1/depth"       # 市场深度
+# host_url = "http://192.168.4.171:9008"
+# markets_url = host_url + "/data/v1/markets"  # Exx所有市场url
+# tickers_url = host_url + "/data/v1/tickers"  # 所有行情url
+# ticker_url = host_url + "/data/v1/ticker"    # 单一市场行情url
+# depth_url = host_url + "/data/v1/depth"       # 市场深度
 
 
 class MarketCondition(object):
@@ -29,7 +30,7 @@ class MarketCondition(object):
 
     def get_markets(self):
         try:
-            response = requests.get(markets_url)
+            response = requests.get(accountConfig.EXX_MARKET['markets_url'])
             res = response.json()
         except requests.exceptions.RequestException as e:
             print("获取市场失败", e)
@@ -50,7 +51,7 @@ class MarketCondition(object):
     """
     def get_tickers(self):
         try:
-            response = requests.get(tickers_url)
+            response = requests.get(accountConfig.EXX_MARKET['tickers_url'])
             res = response.json()
         except requests.exceptions.RequestException as e:
             print("获取市场行情失败", e)
@@ -71,7 +72,7 @@ class MarketCondition(object):
     monthRiseRate : 30日涨跌幅
     """
     def get_ticker(self, currency):
-        url = ticker_url + "?" + "currency=" + currency
+        url = accountConfig.EXX_MARKET['ticker_url'] + "?" + "currency=" + currency
         try:
             response = requests.get(url)
             res = response.json()
@@ -85,10 +86,9 @@ class MarketCondition(object):
     asks : 卖方深度
     bids : 买方深度
     timestamp : 此次深度的产生时间戳
-
     """
     def get_depth(self, currency):
-        url = depth_url + "?" + "currency=" + currency
+        url = accountConfig.EXX_MARKET['depth_url'] + "?" + "currency=" + currency
         try:
             response = requests.get(url)
             res = response.json()

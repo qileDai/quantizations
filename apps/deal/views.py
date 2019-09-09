@@ -74,7 +74,7 @@ class ShowAssert(View):
     def get(self, request, id):
         account_obj = Account.objects.get(id=id)    # 获取账户信息
         platform = account_obj.platform             # 账户对应的平台
-        # TradingPlatform.objects.filter(Account__id=1)
+        # 根据平台调用对应的接口
         if platform.Platform_name == 'EXX':
             service_api = ExxService(platform.Platform_name, account_obj.secretkey, account_obj.accesskey)      # 创建接口对象
             res = service_api.get_balance()     # 获取用户的资产信息
@@ -84,6 +84,7 @@ class ShowAssert(View):
             pass
 
         show_currency = Property.objects.filter(Q(account_id=id) & Q(currency_status='1'))
+        lastday_obj = LastdayAssets.objects.filter(account_id=id)
         lastday_assets = 0              # 昨日24时资产
         current_total = 0               # 当前资产
         original_total = 0              # 初始资产
@@ -92,9 +93,12 @@ class ShowAssert(View):
         transaction_pair = list()       # 交易对
         assets_dict = dict()
         profit_loss_dict = dict()
+        # 计算账户所有币种的昨日资产
+        for lastday_asset in lastday_obj:
+            lastday_assets += float(lastday_asset.lastday_assets)
 
+        # 计算账户总初始资产/总提币，获取币种初始资产
         for queryset in show_currency:
-            lastday_assets += float(queryset.lastday_assets)
             original_total += float(queryset.original_assets)
             withdraw_record += float(queryset.withdraw_record)
             currency_list.append(queryset.currency)
@@ -102,7 +106,7 @@ class ShowAssert(View):
             assets_dict[queryset.currency] = dict()
             assets_dict[queryset.currency]['original_assets'] = str(queryset.original_assets)  # 初始资产
             profit_loss_dict[queryset.currency] = dict()
-            assets_dict[queryset.currency]['original_assets'] = str(queryset.original_assets)
+            profit_loss_dict[queryset.currency]['original_assets'] = str(queryset.original_assets)
 
         print(transaction_pair)
         # 计算当前总资产
@@ -113,15 +117,16 @@ class ShowAssert(View):
                 assets_dict[key]['freeze'] = value['freeze']
                 assets_dict[key]['balance'] = value['balance']
                 profit_loss_dict[key]['current_assets'] = value['total']
-                profit_loss_dict[key]['gap'] = str(int(profit_loss_dict[key]['current_assets'])-int(profit_loss_dict[key]['original_assets']))
+                profit_loss_dict[key]['gap'] = str(float(profit_loss_dict[key]['current_assets']) -
+                                                   float(profit_loss_dict[key]['original_assets']))
 
         # 获取当前参考价
         for key1, value1 in res1.items():
             if key1 in transaction_pair:
                 key = key1.split('_')[0].upper()
-                assets_dict[key]['last'] = value['last']
-                profit_loss_dict[key]['last'] = value['last']
-                profit_loss_dict[key]['convert'] = str(int(profit_loss_dict[key]['gap'])*int(profit_loss_dict[key]['last']))
+                assets_dict[key]['last'] = value1['last']
+                profit_loss_dict[key]['last'] = value1['last']
+                profit_loss_dict[key]['convert'] = str(float(profit_loss_dict[key]['gap'])*float(profit_loss_dict[key]['last']))
                 transaction_pair.remove(key1)
 
         for item in transaction_pair:
@@ -139,6 +144,7 @@ class ShowAssert(View):
         history_profit['percent'] = (current_total + withdraw_record - original_total)/original_total
         print(lastday_assets, currency_list, current_total)
         print(assets_dict)
+        print(profit_loss_dict)
         # asset_dict格式{'币种': {'参考价':""，'可用':""，'冻结':""，'当前总资产':""，'初始资产':""}}
         # profit_loss_dict格式{'币种':{'当前总资产':"", '初始总资产':"", '差额':"", '参考价':"", '折合价':""}}
         context = {

@@ -4,18 +4,18 @@ import time
 import hmac
 import hashlib
 from requests import ConnectionError, ReadTimeout
+from dealapi import accountConfig
 
 
-
-baseurl = {"SERVICE_API": "http://192.168.4.66:8804/api/",
-       }
+# baseurl = {"SERVICE_API": "http://192.168.4.66:8804/api/",
+#        }
 
 
 class ExxService(object):
 
     def __init__(self, platform, secretkey, accesskey):
         self.platform = platform
-        self.baseUrl = baseurl["SERVICE_API"]
+        self.baseUrl = accountConfig.EXX_SERVICE["SERVICE_API"]
         self.secretkey = secretkey
         self.accesskey = "accesskey=" + accesskey
 
