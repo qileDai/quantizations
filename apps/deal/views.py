@@ -99,7 +99,7 @@ class ShowAssert(View):
         transaction_pair = list()       # 交易对
         assets_dict = dict()
         profit_loss_dict = dict()
-        # 计算账户所有币种的昨日资产
+        # 计算账户所有币种的昨日24时总资产
         for lastday_asset in lastday_obj:
             lastday_assets += float(lastday_asset.lastday_assets)
 
@@ -169,7 +169,7 @@ class ShowAssert(View):
             # 损益表
             'profit_loss_dict': profit_loss_dict,
         }
-        return HttpResponse(context)
+        render(request, 'management/tradingaccount.html', context)
 
 
 class ShowCollectAsset(View):
@@ -225,7 +225,7 @@ class ConfigCurrency(View):
             # 币种信息
             'currency_info': currency_info,
         }
-        return render(request, context=context)
+        return render(request, 'management/tradingaccount.html', context)
 
 
 def get_pagination_data(paginator, page_obj, around_count=2):
