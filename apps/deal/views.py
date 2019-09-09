@@ -174,6 +174,9 @@ class ShowCollectAsset(View):
 
 
 class ChargeAccount(View):
+    """
+    增资
+    """
     def post(self, request, id):
         currency = request.POST.get('currency')
         num = request.POST.get('currency-number')
@@ -185,6 +188,9 @@ class ChargeAccount(View):
 
 
 class WithDraw(View):
+    """
+    提币
+    """
     def post(self, request, id):
         currency = request.POST.get('currency')
         num = request.POST.get('currency-number')
@@ -196,6 +202,9 @@ class WithDraw(View):
 
 
 class ConfigCurrency(View):
+    """
+    币种新增/配置
+    """
     def post(self, request):
         currency = request.POST.get('currency')
         if currency:
