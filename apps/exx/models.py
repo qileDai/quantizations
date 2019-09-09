@@ -7,7 +7,7 @@ class Account(models.Model):
     platform = models.CharField(max_length=32)
     pub_time = models.DateTimeField(auto_now_add=True)
 
-class Girdding(models.Model):
+class RobotManagement(models.Model):
     Girdding_Status = (
         ("运行中", 1),
         ("已停止", 0),
