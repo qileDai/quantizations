@@ -37,7 +37,7 @@ def login(request):
             return render(request, "cms/login.html", {'error': '用户名或密码错误！'})
         elif user_obj.status == 0:
             return render(request, "cms/login.html", {'error': '用户已被禁用，请联系管理员！'})
-        elif username == 'admin':               # 管理员
+        elif user_obj.type == 1:               # 管理员
             request.session.clear()
             request.session['is_login'] = True
             request.session['user_id'] = user_obj.id

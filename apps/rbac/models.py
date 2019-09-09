@@ -134,6 +134,7 @@ class UserInfo(models.Model):
     nickname = models.CharField(max_length=32)
     email = models.EmailField()
     status = models.CharField(max_length=10)
+    type = models.SmallIntegerField(max_length=10, default=0)
     create_time = models.DateTimeField(auto_now_add=True)
 
     roles = models.ManyToManyField("Role")
