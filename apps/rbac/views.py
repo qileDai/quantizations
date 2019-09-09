@@ -148,7 +148,7 @@ def delete_users(request):
         return restful.params_error(message="该用户不存在")
 
 
-class RolesListView(View):
+class RolesListView(LoginRequireMixin, View):
     def get(self, request):
         print("sfsfsafasdfas")
         # request.GET：获取出来的所有数据，都是字符串类型
