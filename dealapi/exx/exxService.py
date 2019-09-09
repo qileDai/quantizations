@@ -4,7 +4,7 @@ import time
 import hmac
 import hashlib
 from requests import ConnectionError, ReadTimeout
-from utils import Logger
+
 
 
 baseurl = {"SERVICE_API": "http://192.168.4.66:8804/api/",
@@ -12,7 +12,7 @@ baseurl = {"SERVICE_API": "http://192.168.4.66:8804/api/",
 
 
 class ExxService(object):
-    log = Logger.MylogHandler("exxdeal")
+
 
     def __init__(self, platform, secretkey, accesskey):
         self.platform = platform
