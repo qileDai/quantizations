@@ -148,12 +148,19 @@ class ShowAssert(View):
         # asset_dict格式{'币种': {'参考价':""，'可用':""，'冻结':""，'当前总资产':""，'初始资产':""}}
         # profit_loss_dict格式{'币种':{'当前总资产':"", '初始总资产':"", '差额':"", '参考价':"", '折合价':""}}
         context = {
+            # 平台名称
             'Platform_name': platform.Platform_name,
+            # 今日资产变化
             'asset_change': asset_change,
+            # 初始总资产
             'original_assets': original_total,
+            # 历史盈亏
             'history_profit': history_profit,
+            # 总提币
             'withdraw_record': withdraw_record,
+            # 资产表
             'assets_dict': assets_dict,
+            # 损益表
             'profit_loss_dict': profit_loss_dict,
         }
         return HttpResponse(context)
@@ -200,6 +207,7 @@ class ConfigCurrency(View):
                 Property.objects.create(currency='currency', account_id=obj.id)
         currency_info = LastdayAssets.objects.all()
         context = {
+            # 币种信息
             'currency_info': currency_info,
         }
         return render(request, context=context)
