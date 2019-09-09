@@ -140,7 +140,7 @@ def add_users(request):
 @is_login
 def delete_users(request):
     pk = request.POST.get('pk')
-    print(pk)
+    # print(pk)
     try:
         UserInfo.objects.filter(pk=pk).delete()
         return restful.ok()
@@ -150,7 +150,6 @@ def delete_users(request):
 
 class RolesListView(LoginRequireMixin, View):
     def get(self, request):
-        print("sfsfsafasdfas")
         # request.GET：获取出来的所有数据，都是字符串类型
         page = int(request.GET.get('p', 1))
         rolename = request.GET.get('rolename-seach')
