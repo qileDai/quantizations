@@ -13,7 +13,6 @@ baseurl = {"SERVICE_API": "http://192.168.4.66:8804/api/",
 
 class ExxService(object):
 
-
     def __init__(self, platform, secretkey, accesskey):
         self.platform = platform
         self.baseUrl = baseurl["SERVICE_API"]

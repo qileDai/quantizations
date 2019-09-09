@@ -85,8 +85,8 @@ class ShowAssert(View):
 
         show_currency = Property.objects.filter(Q(account_id=id) & Q(currency_status='1'))
         lastday_assets = 0              # 昨日24时资产
-        current_assets = 0              # 当前资产
-        original_assets = 0             # 初始资产
+        current_total = 0               # 当前资产
+        original_total = 0              # 初始资产
         withdraw_record = 0             # 提币
         currency_list = list()          # 币种列表
         transaction_pair = list()       # 交易对
@@ -95,40 +95,66 @@ class ShowAssert(View):
 
         for queryset in show_currency:
             lastday_assets += float(queryset.lastday_assets)
-            original_assets += float(queryset.original_assets)
+            original_total += float(queryset.original_assets)
             withdraw_record += float(queryset.withdraw_record)
             currency_list.append(queryset.currency)
             transaction_pair.append(queryset.currency.lower() + '_usdt')  # 不同平台参考币种不一样，此处不能写死
-            assets_dict[queryset.currency] = list()
-            assets_dict[queryset.currency].append(str(queryset.original_assets))  # 初始资产
+            assets_dict[queryset.currency] = dict()
+            assets_dict[queryset.currency]['original_assets'] = str(queryset.original_assets)  # 初始资产
+            profit_loss_dict[queryset.currency] = dict()
+            assets_dict[queryset.currency]['original_assets'] = str(queryset.original_assets)
+
         print(transaction_pair)
         # 计算当前总资产
         for key, value in res['funds'].items():
             if key in currency_list:
-                current_assets += float(value['total'])
-                assets_dict[key].insert(0, str(float(value['balance']) + float(value['freeze'])))
-                assets_dict[key].insert(0, value['freeze'])
-                assets_dict[key].insert(0, value['balance'])
+                current_total += float(value['total'])
+                assets_dict[key]['current_assets'] = value['total']
+                assets_dict[key]['freeze'] = value['freeze']
+                assets_dict[key]['balance'] = value['balance']
+                profit_loss_dict[key]['current_assets'] = value['total']
+                profit_loss_dict[key]['gap'] = str(int(profit_loss_dict[key]['current_assets'])-int(profit_loss_dict[key]['original_assets']))
 
         # 获取当前参考价
         for key1, value1 in res1.items():
             if key1 in transaction_pair:
                 key = key1.split('_')[0].upper()
-                assets_dict[key].insert(0, value1.get('last', 0))
+                assets_dict[key]['last'] = value['last']
+                profit_loss_dict[key]['last'] = value['last']
+                profit_loss_dict[key]['convert'] = str(int(profit_loss_dict[key]['gap'])*int(profit_loss_dict[key]['last']))
+                transaction_pair.remove(key1)
 
-        asset_change = current_assets - lastday_assets
-        print(lastday_assets, currency_list, current_assets)
+        for item in transaction_pair:
+            key = item.split('_')[0].upper()
+            assets_dict[key]['last'] = '0'
+            profit_loss_dict[key]['convert'] = '0'
+
+        # 资产变化
+        asset_change = dict()
+        asset_change['number'] = current_total - lastday_assets
+        asset_change['percent'] = (current_total - lastday_assets)/lastday_assets
+        # 历史盈亏
+        history_profit = dict()
+        history_profit['number'] = current_total + withdraw_record - original_total
+        history_profit['percent'] = (current_total + withdraw_record - original_total)/original_total
+        print(lastday_assets, currency_list, current_total)
         print(assets_dict)
-        # asset_dict格式{'币种': [参考价，可用，冻结，当前总资产，初始资产]}
-        # profit_loss_dict格式{}
+        # asset_dict格式{'币种': {'参考价':""，'可用':""，'冻结':""，'当前总资产':""，'初始资产':""}}
+        # profit_loss_dict格式{'币种':{'当前总资产':"", '初始总资产':"", '差额':"", '参考价':"", '折合价':""}}
         context = {
             'Platform_name': platform.Platform_name,
             'asset_change': asset_change,
-            'original_assets': original_assets,
+            'original_assets': original_total,
+            'history_profit': history_profit,
             'withdraw_record': withdraw_record,
-            'assets_dict': assets_dict
+            'assets_dict': assets_dict,
+            'profit_loss_dict': profit_loss_dict,
         }
-        return HttpResponse(res)
+        return HttpResponse(context)
+
+
+class ShowCollectAsset(View):
+    pass
 
 
 class ChargeAccount(View):
