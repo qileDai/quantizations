@@ -169,7 +169,7 @@ class ShowAssert(View):
             # 损益表
             'profit_loss_dict': profit_loss_dict,
         }
-        render(request, 'management/tradingaccount.html', context)
+        return render(request, 'management/tradingaccount.html', context)
 
 
 class ShowCollectAsset(View):
