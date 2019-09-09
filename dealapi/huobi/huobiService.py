@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from exchangeConnection.huobi.util import *
+from dealapi.huobi.util import *
 from utils.helper import *
 
 '''

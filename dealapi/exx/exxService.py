@@ -95,7 +95,6 @@ class ExxService(object):
     :param: currency :eth_btc  交易对 
     :return: json 对象
     """
-
     def get_order(self, currency, id):
         result = {}
         try:
@@ -139,7 +138,6 @@ class ExxService(object):
     :url: https://trade.exx.com/api/getBalance?accesskey=your_access_key&nonce=当前时间毫秒数&signature=请求加密签名串
     :return
     """
-
     def get_balance(self):
         params = ""
         current_time = str(int(time.time() * 1000))
