@@ -37,7 +37,7 @@
                         </thead>
                         <tbody>
                         {% for account in accounts %}
-                            <tr>
+                            <tr data-id="{{ account.pk }}">
                                 <td>{{ account.title }}</td>
                                 <td>{{ account.platform.Platform_name }}</td>
                                 <td>{{ account.createtime }}</td>
@@ -50,12 +50,10 @@
                                 </td>
                             </tr>
                         {% endfor %}
-
-
                         </tbody>
                     </table>
                 </div>
-            {% include 'cms/box_footer.html' %}
+                {% include 'cms/box_footer.html' %}
             </div>
         </div>
     </div>
@@ -99,7 +97,6 @@
             </div>
         </form>
     </div>
-
     <div class="account-curry-wrapper">
         <form action="">
             <div class="curry-wrapper">
@@ -360,14 +357,17 @@
                 <div class="property-body">
                     <div class="property-right">
                         <span class="property-account">账户</span>
-                        <spann class="property-total">火币账户</spann>
+                        <spann class="property-total">{{ data.Platform_name }} </spann>
                         <button class="refersh">刷新账户</button>
                     </div>
                     <div class="property-profit">
                         <div class="assets-change">
                             <span class="change">24小时资产变化</span>
-                            <span class="number">+657.29 USDT</span>
-                            <span class="percentage">+1.88%</span>
+                            {% for asss in asset_change %}
+                                <span class="number"></span>
+                                <span class="percentage">+1.88%</span>
+                            {% endfor %}
+
                         </div>
                         <div class="initial-asset">
                             <span class="init-total">初始总资产（折合)</span>
@@ -403,7 +403,7 @@
                                             </thead>
                                             <tbody>
                                             <tr>
-                                                <td>USDT</td>
+                                                <td>1546</td>
                                                 <td>1546.12</td>
                                                 <td>1546.12</td>
                                                 <td>1546.12</td>

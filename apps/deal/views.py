@@ -1,13 +1,16 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.views.generic import View
-from .models import Account, Property, LastdayAssets
+from .models import Account, Property, LastdayAssets, Market, Robot
 from apps.rbac.models import UserInfo
 from django.core.paginator import Paginator
+from urllib import parse
 from dealapi.exx.exxService import ExxService
 from dealapi.exx.exxMarket import MarketCondition
 from .forms import AccountModelForm
 from django.db.models import Q
 from utils.mixin import LoginRequireMixin
+
+
 # Create your views here.
 
 
@@ -15,6 +18,7 @@ class AccountList(LoginRequireMixin, View):
     """
     显示用户所有账户信息
     """
+
     def get(self, request):
         page = int(request.GET.get('p', 1))
         user_id = request.session.get("user_id")
@@ -48,9 +52,10 @@ class AddAccount(View):
     """
     添加账户
     """
+
     def post(self, request):
         model_form = AccountModelForm(request.POST)
-        print('-'*20, model_form)
+        print('-' * 20, model_form)
         if model_form.is_valid():
             model_form.save()
             return redirect('../accountlist/')
@@ -58,11 +63,11 @@ class AddAccount(View):
             return render(request, 'management/tradingaccount.html', {'model_form': model_form, 'title': '新增用户'})
 
 
-
 class EditAccount(View):
     """
     编辑账户
     """
+
     def post(self, request, id):
         account_obj = Account.objects.filter(id=id).first()
         model_form = AccountModelForm(request.POST, instance=account_obj)
@@ -77,6 +82,7 @@ class DeleteAccount(View):
     """
     删除账户
     """
+
     def get(self, id):
         account_obj = Account.objects.filter(id=id).first()
         account_obj.delete()
@@ -87,26 +93,27 @@ class ShowAssert(View):
     """
     显示账户资产信息
     """
+
     def get(self, request, id):
-        account_obj = Account.objects.get(id=id)    # 获取账户信息
-        platform = account_obj.platform             # 账户对应的平台
+        account_obj = Account.objects.get(id=id)  # 获取账户信息
+        platform = account_obj.platform  # 账户对应的平台
         # 根据平台调用对应的接口
         if platform.Platform_name == 'EXX':
-            service_api = ExxService(platform.Platform_name, account_obj.secretkey, account_obj.accesskey)      # 创建接口对象
-            res = service_api.get_balance()     # 获取用户的资产信息
+            service_api = ExxService(platform.Platform_name, account_obj.secretkey, account_obj.accesskey)  # 创建接口对象
+            res = service_api.get_balance()  # 获取用户的资产信息
             market_api = MarketCondition()
-            res1 = market_api.get_tickers()     # 获取所有行情信息
+            res1 = market_api.get_tickers()  # 获取所有行情信息
         elif platform.Platform_name == 'HUOBI':
             pass
 
         show_currency = Property.objects.filter(Q(account_id=id) & Q(currency_status='1'))
         lastday_obj = LastdayAssets.objects.filter(account_id=id)
-        lastday_assets = 0              # 昨日24时资产
-        current_total = 0               # 当前资产
-        original_total = 0              # 初始资产
-        withdraw_record = 0             # 提币
-        currency_list = list()          # 币种列表
-        transaction_pair = list()       # 交易对
+        lastday_assets = 0  # 昨日24时资产
+        current_total = 0  # 当前资产
+        original_total = 0  # 初始资产
+        withdraw_record = 0  # 提币
+        currency_list = list()  # 币种列表
+        transaction_pair = list()  # 交易对
         assets_dict = dict()
         profit_loss_dict = dict()
         # 计算账户所有币种的昨日24时总资产
@@ -142,7 +149,8 @@ class ShowAssert(View):
                 key = key1.split('_')[0].upper()
                 assets_dict[key]['last'] = value1['last']
                 profit_loss_dict[key]['last'] = value1['last']
-                profit_loss_dict[key]['convert'] = str(float(profit_loss_dict[key]['gap'])*float(profit_loss_dict[key]['last']))
+                profit_loss_dict[key]['convert'] = str(
+                    float(profit_loss_dict[key]['gap']) * float(profit_loss_dict[key]['last']))
                 transaction_pair.remove(key1)
 
         for item in transaction_pair:
@@ -153,14 +161,15 @@ class ShowAssert(View):
         # 资产变化
         asset_change = dict()
         asset_change['number'] = current_total - lastday_assets
-        asset_change['percent'] = (current_total - lastday_assets)/lastday_assets
+        asset_change['percent'] = (current_total - lastday_assets) / lastday_assets
         # 历史盈亏
         history_profit = dict()
         history_profit['number'] = current_total + withdraw_record - original_total
-        history_profit['percent'] = (current_total + withdraw_record - original_total)/original_total
+        history_profit['percent'] = (current_total + withdraw_record - original_total) / original_total
         print(lastday_assets, currency_list, current_total)
         print(assets_dict)
-        print(profit_loss_dict)
+        print \
+            (profit_loss_dict)
         # asset_dict格式{'币种': {'参考价':""，'可用':""，'冻结':""，'当前总资产':""，'初始资产':""}}
         # profit_loss_dict格式{'币种':{'当前总资产':"", '初始总资产':"", '差额':"", '参考价':"", '折合价':""}}
         context = {
@@ -193,6 +202,7 @@ class ChargeAccount(View):
     """
     增资
     """
+
     def post(self, request, id):
         currency = request.POST.get('currency')
         num = request.POST.get('currency-number')
@@ -207,6 +217,7 @@ class WithDraw(View):
     """
     提币
     """
+
     def post(self, request, id):
         currency = request.POST.get('currency')
         num = request.POST.get('currency-number')
@@ -221,6 +232,7 @@ class ConfigCurrency(View):
     """
     币种新增/配置
     """
+
     def post(self, request):
         currency = request.POST.get('currency')
         if currency:
@@ -236,6 +248,45 @@ class ConfigCurrency(View):
             'currency_info': currency_info,
         }
         return render(request, 'management/tradingaccount.html', context)
+
+
+"""
+机器人管理列表页面
+"""
+class RobotList(View):
+    def get(self, request):
+        page = int(request.GET.get('p', 1))
+        curry = request.GET.get('deal-curry')  # 拿到下拉框交易币种值
+
+        market = request.GET.get('deal_market')  # 拿到下拉框交易市场值
+        status = request.GET.get('deal_status')  # 拿到交易状态
+        if curry:
+            robots = Robot.objects.filter(currency__icontains= curry )
+        if market:
+            robots = Robot.objects.filter(market__icontains= market )
+        if status:
+            robots = Robot.objects.filter( status= status)
+
+        paginator = Paginator( robots, 10)
+        page_obj = paginator.page(page)
+        context_data = get_pagination_data(paginator, page_obj)
+
+        context = {
+            'robots': page_obj.object_list,
+            'page_obj': page_obj,
+            'paginator': paginator,
+            'properties': Property.objects.all() ,
+            'markets': Market.objects.all(),
+            'url_query': '&' + parse.urlencode({
+                'curry': curry or '',
+                'market': market or '',
+                'status': status or ''
+            })
+        }
+        context.update(context_data)
+
+        return render(request, 'management/gridding.html' , context=context )
+
 
 
 # 分页
