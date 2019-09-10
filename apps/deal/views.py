@@ -155,7 +155,8 @@ class ShowAssert(View):
         history_profit['percent'] = (current_total + withdraw_record - original_total)/original_total
         print(lastday_assets, currency_list, current_total)
         print(assets_dict)
-        print(profit_loss_dict)
+        print\
+            (profit_loss_dict)
         # asset_dict格式{'币种': {'参考价':""，'可用':""，'冻结':""，'当前总资产':""，'初始资产':""}}
         # profit_loss_dict格式{'币种':{'当前总资产':"", '初始总资产':"", '差额':"", '参考价':"", '折合价':""}}
         context = {

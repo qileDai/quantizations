@@ -22,5 +22,5 @@ urlpatterns = [
     path('rbac/', include('apps.rbac.urls')),
     path('exx/', include('apps.exx.urls')),
     path('login/', views.login),
-    path('account/', include('apps.deal.urls', namespace='account')),
+    path('deal/', include('apps.deal.urls', namespace='deal')),
 ]
