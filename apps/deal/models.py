@@ -66,6 +66,8 @@ class LastdayAssets(models.Model):
     currency = models.CharField(max_length=32)
     # 昨日24时资产信息
     lastday_assets = models.DecimalField(max_digits=18, decimal_places=8, default=0)
+    # 昨日24时参考价
+    last = models.DecimalField(max_digits=18, decimal_places=8, default=0)
     # 与用户表时多对一关系
     account = models.ForeignKey("Account", on_delete=models.CASCADE, null=True, blank=True)
     update_time = models.DateTimeField(auto_now=True)

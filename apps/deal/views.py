@@ -211,13 +211,14 @@ class ShowCollectAsset(View):
             context = con.showassets()
             context_list.append(context)
 
-        for key in context_list[0]:
+        for key in context_list[0]['assets_dict']:
             for elem in context_list[1:]:
                 for key1, value1 in elem[key].items():
                     if key1 in context_list[0][key]:
                         context_list[0][key][key1] = float(context_list[0][key][key1]) + float(value1)
                     else:
                         context_list[0][key][key1] = value1
+        return render(request, 'management/tradingaccount.html', context_list[0])
 
 
 class ChargeAccount(View):
