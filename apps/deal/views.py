@@ -200,14 +200,24 @@ class ShowCollectAsset(View):
     汇总资产信息
     """
     def post(self, request):
+        # 多个账户
         ids = request.POST.get("pk")
+        context_list = list()
         for id in ids:
             account_obj = Account.objects.get(id=id)  # 获取账户信息
             platform = account_obj.platform  # 账户对应的平台
             # 创建对象
             con = GetAssets(account_obj, platform)
             context = con.showassets()
+            context_list.append(context)
 
+        for key in context_list[0]:
+            for elem in context_list[1:]:
+                for key1, value1 in elem[key].items():
+                    if key1 in context_list[0][key]:
+                        context_list[0][key][key1] = float(context_list[0][key][key1]) + float(value1)
+                    else:
+                        context_list[0][key][key1] = value1
 
 
 class ChargeAccount(View):
