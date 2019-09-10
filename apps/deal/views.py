@@ -5,6 +5,7 @@ from apps.rbac.models import UserInfo
 from django.core.paginator import Paginator
 from urllib import parse
 from dealapi.exx.exxService import ExxService
+from apps.deal.asset.get_assets import GetAssets
 from dealapi.exx.exxMarket import MarketCondition
 from .forms import AccountModelForm
 from django.db.models import Q
@@ -65,7 +66,8 @@ class EditAccount(View):
     编辑账户
     """
 
-    def post(self, request, id):
+    def post(self, request):
+        id = request.POST.get('pk')
         account_obj = Account.objects.filter(id=id).first()
         model_form = AccountModelForm(request.POST, instance=account_obj)
         if model_form.is_valid():
@@ -80,7 +82,8 @@ class DeleteAccount(View):
     删除账户
     """
 
-    def get(self, id):
+    def post(self, request):
+        id = request.POST.get('pk')
         account_obj = Account.objects.filter(id=id).first()
         account_obj.delete()
         return redirect('../accountlist/')
@@ -91,100 +94,104 @@ class ShowAssert(View):
     显示账户资产信息
     """
 
-    def get(self, request, id):
+    def post(self, request):
+        id = request.POST.get('pk')
         account_obj = Account.objects.get(id=id)  # 获取账户信息
         platform = account_obj.platform  # 账户对应的平台
+        # 创建对象
+        con = GetAssets(account_obj, platform)
+        context = con.showassets()
         # 根据平台调用对应的接口
-        if platform.Platform_name == 'EXX':
-            service_api = ExxService(platform.Platform_name, account_obj.secretkey, account_obj.accesskey)  # 创建接口对象
-            res = service_api.get_balance()  # 获取用户的资产信息
-            market_api = MarketCondition()
-            res1 = market_api.get_tickers()  # 获取所有行情信息
-        elif platform.Platform_name == 'HUOBI':
-            pass
-
-        show_currency = Property.objects.filter(Q(account_id=id) & Q(currency_status='1'))
-        lastday_obj = LastdayAssets.objects.filter(account_id=id)
-        lastday_assets = 0  # 昨日24时资产
-        current_total = 0  # 当前资产
-        original_total = 0  # 初始资产
-        withdraw_record = 0  # 提币
-        currency_list = list()  # 币种列表
-        transaction_pair = list()  # 交易对
-        assets_dict = dict()
-        profit_loss_dict = dict()
-        # 计算账户所有币种的昨日24时总资产
-        for lastday_asset in lastday_obj:
-            lastday_assets += float(lastday_asset.lastday_assets)
-
-        # 计算账户总初始资产/总提币，获取币种初始资产
-        for queryset in show_currency:
-            original_total += float(queryset.original_assets)
-            withdraw_record += float(queryset.withdraw_record)
-            currency_list.append(queryset.currency)
-            transaction_pair.append(queryset.currency.lower() + '_usdt')  # 不同平台参考币种不一样，此处不能写死
-            assets_dict[queryset.currency] = dict()
-            assets_dict[queryset.currency]['original_assets'] = str(queryset.original_assets)  # 初始资产
-            profit_loss_dict[queryset.currency] = dict()
-            profit_loss_dict[queryset.currency]['original_assets'] = str(queryset.original_assets)
-
-        print(transaction_pair)
-        # 计算当前总资产
-        for key, value in res['funds'].items():
-            if key in currency_list:
-                current_total += float(value['total'])
-                assets_dict[key]['current_assets'] = value['total']
-                assets_dict[key]['freeze'] = value['freeze']
-                assets_dict[key]['balance'] = value['balance']
-                profit_loss_dict[key]['current_assets'] = value['total']
-                profit_loss_dict[key]['gap'] = str(float(profit_loss_dict[key]['current_assets']) -
-                                                   float(profit_loss_dict[key]['original_assets']))
-
-        # 获取当前参考价
-        for key1, value1 in res1.items():
-            if key1 in transaction_pair:
-                key = key1.split('_')[0].upper()
-                assets_dict[key]['last'] = value1['last']
-                profit_loss_dict[key]['last'] = value1['last']
-                profit_loss_dict[key]['convert'] = str(
-                    float(profit_loss_dict[key]['gap']) * float(profit_loss_dict[key]['last']))
-                transaction_pair.remove(key1)
-
-        for item in transaction_pair:
-            key = item.split('_')[0].upper()
-            assets_dict[key]['last'] = '0'
-            profit_loss_dict[key]['convert'] = '0'
-
-        # 资产变化
-        asset_change = dict()
-        asset_change['number'] = current_total - lastday_assets
-        asset_change['percent'] = (current_total - lastday_assets) / lastday_assets
-        # 历史盈亏
-        history_profit = dict()
-        history_profit['number'] = current_total + withdraw_record - original_total
-        history_profit['percent'] = (current_total + withdraw_record - original_total) / original_total
-        print(lastday_assets, currency_list, current_total)
-        print(assets_dict)
-        print \
-            (profit_loss_dict)
+        # if platform.Platform_name == 'EXX':
+        #     service_api = ExxService(platform.Platform_name, account_obj.secretkey, account_obj.accesskey)  # 创建接口对象
+        #     res = service_api.get_balance()  # 获取用户的资产信息
+        #     market_api = MarketCondition()
+        #     res1 = market_api.get_tickers()  # 获取所有行情信息
+        # elif platform.Platform_name == 'HUOBI':
+        #     pass
+        #
+        # show_currency = Property.objects.filter(Q(account_id=id) & Q(currency_status='1'))
+        # lastday_obj = LastdayAssets.objects.filter(account_id=id)
+        # lastday_assets = 0  # 昨日24时资产
+        # current_total = 0  # 当前资产
+        # original_total = 0  # 初始资产
+        # withdraw_record = 0  # 提币
+        # currency_list = list()  # 币种列表
+        # transaction_pair = list()  # 交易对
+        # assets_dict = dict()
+        # profit_loss_dict = dict()
+        # # 计算账户所有币种的昨日24时总资产
+        # for lastday_asset in lastday_obj:
+        #     lastday_assets += float(lastday_asset.lastday_assets)
+        #
+        # # 计算账户总初始资产/总提币，获取币种初始资产
+        # for queryset in show_currency:
+        #     original_total += float(queryset.original_assets)
+        #     withdraw_record += float(queryset.withdraw_record)
+        #     currency_list.append(queryset.currency)
+        #     transaction_pair.append(queryset.currency.lower() + '_usdt')  # 不同平台参考币种不一样，此处不能写死
+        #     assets_dict[queryset.currency] = dict()
+        #     assets_dict[queryset.currency]['original_assets'] = str(queryset.original_assets)  # 初始资产
+        #     profit_loss_dict[queryset.currency] = dict()
+        #     profit_loss_dict[queryset.currency]['original_assets'] = str(queryset.original_assets)
+        #
+        # print(transaction_pair)
+        # # 计算当前总资产
+        # for key, value in res['funds'].items():
+        #     if key in currency_list:
+        #         current_total += float(value['total'])
+        #         assets_dict[key]['current_assets'] = value['total']
+        #         assets_dict[key]['freeze'] = value['freeze']
+        #         assets_dict[key]['balance'] = value['balance']
+        #         profit_loss_dict[key]['current_assets'] = value['total']
+        #         profit_loss_dict[key]['gap'] = str(float(profit_loss_dict[key]['current_assets']) -
+        #                                            float(profit_loss_dict[key]['original_assets']))
+        #
+        # # 获取当前参考价
+        # for key1, value1 in res1.items():
+        #     if key1 in transaction_pair:
+        #         key = key1.split('_')[0].upper()
+        #         assets_dict[key]['last'] = value1['last']
+        #         profit_loss_dict[key]['last'] = value1['last']
+        #         profit_loss_dict[key]['convert'] = str(
+        #             float(profit_loss_dict[key]['gap']) * float(profit_loss_dict[key]['last']))
+        #         transaction_pair.remove(key1)
+        #
+        # for item in transaction_pair:
+        #     key = item.split('_')[0].upper()
+        #     assets_dict[key]['last'] = '0'
+        #     profit_loss_dict[key]['convert'] = '0'
+        #
+        # # 资产变化
+        # asset_change = dict()
+        # asset_change['number'] = current_total - lastday_assets
+        # asset_change['percent'] = (current_total - lastday_assets) / lastday_assets
+        # # 历史盈亏
+        # history_profit = dict()
+        # history_profit['number'] = current_total + withdraw_record - original_total
+        # history_profit['percent'] = (current_total + withdraw_record - original_total) / original_total
+        # print(lastday_assets, currency_list, current_total)
+        # print(assets_dict)
+        # print(profit_loss_dict)
         # asset_dict格式{'币种': {'参考价':""，'可用':""，'冻结':""，'当前总资产':""，'初始资产':""}}
         # profit_loss_dict格式{'币种':{'当前总资产':"", '初始总资产':"", '差额':"", '参考价':"", '折合价':""}}
-        context = {
-            # 平台名称
-            'Platform_name': platform.Platform_name,
-            # 今日资产变化
-            'asset_change': asset_change,
-            # 初始总资产
-            'original_assets': original_total,
-            # 历史盈亏
-            'history_profit': history_profit,
-            # 总提币
-            'withdraw_record': withdraw_record,
-            # 资产表
-            'assets_dict': assets_dict,
-            # 损益表
-            'profit_loss_dict': profit_loss_dict,
-        }
+        # context = {
+        #     # 平台名称
+        #     'Platform_name': platform.Platform_name,
+        #     # 今日资产变化
+        #     'asset_change': asset_change,
+        #     # 初始总资产
+        #     'original_assets': original_total,
+        #     # 历史盈亏
+        #     'history_profit': history_profit,
+        #     # 总提币
+        #     'withdraw_record': withdraw_record,
+        #     # 资产表
+        #     'assets_dict': assets_dict,
+        #     # 损益表
+        #     'profit_loss_dict': profit_loss_dict,
+        # }
+        print(context)
         return render(request, 'management/tradingaccount.html', context)
 
 
@@ -192,7 +199,15 @@ class ShowCollectAsset(View):
     """
     汇总资产信息
     """
-    pass
+    def post(self, request):
+        ids = request.POST.get("pk")
+        for id in ids:
+            account_obj = Account.objects.get(id=id)  # 获取账户信息
+            platform = account_obj.platform  # 账户对应的平台
+            # 创建对象
+            con = GetAssets(account_obj, platform)
+            context = con.showassets()
+
 
 
 class ChargeAccount(View):
@@ -200,7 +215,8 @@ class ChargeAccount(View):
     增资
     """
 
-    def post(self, request, id):
+    def post(self, request):
+        id = request.POST.get('pk')
         currency = request.POST.get('currency')
         num = request.POST.get('currency-number')
 
@@ -215,7 +231,8 @@ class WithDraw(View):
     提币
     """
 
-    def post(self, request, id):
+    def post(self, request):
+        id = request.POST.get('pk')
         currency = request.POST.get('currency')
         num = request.POST.get('currency-number')
 
@@ -247,10 +264,10 @@ class ConfigCurrency(View):
         return render(request, 'management/tradingaccount.html', context)
 
 
-"""
-机器人管理列表页面
-"""
 class RobotList(View):
+    """
+    机器人管理列表页面
+    """
     def get(self, request):
         page = int(request.GET.get('p', 1))
         curry = request.GET.get('deal-curry')  # 拿到下拉框交易币种值
@@ -263,7 +280,7 @@ class RobotList(View):
         if status:
             robots = Robot.objects.filter( status= status)
 
-        paginator = Paginator( robots, 10)
+        paginator = Paginator(robots, 10)
         page_obj = paginator.page(page)
         context_data = get_pagination_data(paginator, page_obj)
 
@@ -271,7 +288,7 @@ class RobotList(View):
             'robots': page_obj.object_list,
             'page_obj': page_obj,
             'paginator': paginator,
-            'properties': Property.objects.all() ,
+            'properties': Property.objects.all(),
             'markets': Market.objects.all(),
             'url_query': '&' + parse.urlencode({
                 'curry': curry or '',
@@ -281,8 +298,7 @@ class RobotList(View):
         }
         context.update(context_data)
 
-        return render(request, 'management/gridding.html' , context=context )
-
+        return render(request, 'management/gridding.html', context=context)
 
 
 # 分页
