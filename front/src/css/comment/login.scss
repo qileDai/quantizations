@@ -1,3 +1,45 @@
-.login-page{
+.login-page {
   background-image: url("/static/images/1.58fab4d.jpg");
+  background-repeat: no-repeat;
+  background-size: 100%;
+
+  .login-box{
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .login-box-body{
+    border-radius: 6px;
+    width: 400px;
+    height: 350px;
+    padding: 25px 25px 25px;
+    position: absolute;
+    //left: 50%;
+    top: 20%;
+
+    .login-content{
+      margin-top: 20px;
+
+      .form-control{
+        border-radius: 6px;
+        height: 40px;
+        background-color: white;
+        margin-top: 10px;
+        //width: 315px;
+      }
+      .submit-btn{
+        margin-top: 30px;
+        .btn-flat{
+          height: 40px;
+          border-radius: 6px;
+          background-color:#409eff ;
+          color: white;
+          border-color: #409eff;
+        }
+      }
+    }
+  }
 }
