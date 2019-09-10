@@ -26,9 +26,6 @@ class AccountList(LoginRequireMixin, View):
         accounts = Account.objects.filter(users__id=user_id)
         # 获取用户所有币种
         currency_list = Property.objects.filter(account__users__id=user_id).distinct()
-        for i in currency_list:
-            print(i.currency)
-
         print(accounts)
 
         # 分页
