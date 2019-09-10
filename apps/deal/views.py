@@ -21,7 +21,9 @@ class AccountList(LoginRequireMixin, View):
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
         # 获取用户所有币种
-        currency_list = ''
+        currency_list = Property.objects.filter(account__users__id=user_id).distinct()
+        for i in currency_list:
+            print(i.currency)
 
         print(accounts)
 
@@ -30,10 +32,13 @@ class AccountList(LoginRequireMixin, View):
         page_obj = paginator.page(page)
         context_data = get_pagination_data(paginator, page_obj)
         context = {
+            # 用户信息分页列表
             'accounts_list': page_obj.object_list,
             'accounts': accounts,
             'page_obj': page_obj,
             'paginator': paginator,
+            # 用户所有账户币种信息
+            'currency_list': currency_list,
         }
         context.update(context_data)
         return render(request, 'management/tradingaccount.html', context)
