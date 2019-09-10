@@ -254,7 +254,6 @@ class RobotList(View):
     def get(self, request):
         page = int(request.GET.get('p', 1))
         curry = request.GET.get('deal-curry')  # 拿到下拉框交易币种值
-
         market = request.GET.get('deal_market')  # 拿到下拉框交易市场值
         status = request.GET.get('deal_status')  # 拿到交易状态
         if curry:
