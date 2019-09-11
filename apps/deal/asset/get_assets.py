@@ -14,7 +14,7 @@ class GetAssets(object):
         self.platform = platform
 
     def showassets(self):
-        # 根据平台调用对应平台API
+        # 调用对应平台API
         if self.platform.Platform_name == 'EXX':
             service_api = ExxService(self.platform.Platform_name,
                                      self.account_obj.secretkey,

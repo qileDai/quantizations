@@ -111,7 +111,7 @@ class ShowCollectAsset(View):
     """
     def post(self, request):
         # 多个账户
-        ids = request.POST.get("pk")
+        # ids = request.POST.get("pk")
         ids = [1, 2]
         context_list = list()
         for id in ids:
