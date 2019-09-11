@@ -112,6 +112,7 @@ class ShowCollectAsset(View):
     def post(self, request):
         # 多个账户
         ids = request.POST.get("pk")
+        ids = [1, 2]
         context_list = list()
         for id in ids:
             account_obj = Account.objects.get(id=id)  # 获取账户信息
@@ -120,15 +121,19 @@ class ShowCollectAsset(View):
             con = GetAssets(id, account_obj, platform)
             context = con.showassets()
             context_list.append(context)
-
+        # 汇总资产表数据
         for key in context_list[0]['assets_dict']:
             for elem in context_list[1:]:
-                for key1, value1 in elem[key].items():
-                    if key1 in context_list[0][key]:
-                        context_list[0][key][key1] = float(context_list[0][key][key1]) + float(value1)
+                print(key)
+                for key1, value1 in elem['assets_dict'][key].items():
+                    if key1 in context_list[0]['assets_dict'][key]:
+                        context_list[0]['assets_dict'][key][key1] = float(context_list[0]['assets_dict'][key][key1]) \
+                                                                    + float(value1)
                     else:
-                        context_list[0][key][key1] = value1
-        return render(request, 'management/tradingaccount.html', context_list[0])
+                        context_list[0]['assets_dict'][key][key1] = value1
+        # return render(request, 'management/tradingaccount.html', context_list[0])
+        print(context_list[0])
+        return HttpResponse('ok')
 
 
 class ChargeAccount(View):
@@ -140,10 +145,15 @@ class ChargeAccount(View):
         id = request.POST.get('pk')
         currency = request.POST.get('currency')
         num = request.POST.get('currency-number')
-
+        try:
+            currency = currency.lower() + '_usdt'
+            market_api = MarketCondition(currency)
+            info = market_api.get_ticker()  # 获取单个交易对行情信息
+        except:
+            info = 0
         if currency:
             property_obj = Property.objects.filter(Q(account_id=id) & Q(currency=currency))
-            original_assets = property_obj.original_assets + float(num)
+            original_assets = property_obj.original_assets + float(num)*info['ticker']['last']
             Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
 
 
@@ -180,6 +190,7 @@ class ConfigCurrency(View):
             user_id = request.session.get("user_id")
             # 获取账户信息
             accounts = Account.objects.filter(users__id=user_id)
+            # 保存币种信息
             for obj in accounts:
                 LastdayAssets.objects.create(currency='currency', account_id=obj.id)
                 Property.objects.create(currency='currency', account_id=obj.id)
@@ -201,11 +212,11 @@ class RobotList(View):
         market = request.GET.get('deal_market')  # 拿到下拉框交易市场值
         status = request.GET.get('deal_status')  # 拿到交易状态
         if curry:
-            robots = Robot.objects.filter(currency__icontains= curry )
+            robots = Robot.objects.filter(currency__icontains=curry)
         if market:
-            robots = Robot.objects.filter(market__icontains= market )
+            robots = Robot.objects.filter(market__icontains=market)
         if status:
-            robots = Robot.objects.filter( status= status)
+            robots = Robot.objects.filter(status=status)
 
         paginator = Paginator(robots, 10)
         page_obj = paginator.page(page)
