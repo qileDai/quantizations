@@ -222,7 +222,7 @@ class PermissionListView(LoginRequireMixin, View):
         permissions = Permission.objects.all()
         if permission:
             permissions = Permission.objects.filter(title__icontains=permission)
-        paginator = Paginator(permissions, 10)
+        paginator = Paginator(permissions, 2)
         page_obj = paginator.page(page)
         context_data = get_pagination_data(paginator, page_obj)
         context = {

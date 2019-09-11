@@ -45,7 +45,7 @@
                                     <a class="check-property" id="check-property-total" href="#">查看资产</a>
                                     <a class="update-property" href="">修改</a>
                                     <a class="delete-property" href="#">删除</a>
-                                    <a class="edit-property" href="#">编辑</a>
+                                    <a class="edit-property" href="#">增资</a>
                                     <a class="mention-money" href="#">提币</a>
                                 </td>
                             </tr>
@@ -67,25 +67,26 @@
                     <div class="role-modal-header-inner">添加API账户</div>
                 </div>
                 <div class="account-body">
-                    <div class="form-group ">
+                    <div class="account-content ">
                         <label class="platform-label" for="">账户所属平台</label>
                         <select class="account-controlt platform" name="platform" id="platform">
                             <option value="" selected>请选择平台</option>
-                            <option value="">exx</option>
-                            <option value="">exx</option>
+                            {% for platform in platfotms %}
+                                <option value="">{{ platform.Platform_name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
-                    <div class="form-group ">
+                    <div class="account-content ">
                         <label class="accountname-label" for="">账户名称</label>
-                        <input class="account-controlt name " type="text">
+                        <input class="account-controlt name " name="account-name" type="text">
                     </div>
-                    <div class="form-group ">
+                    <div class="account-content  ">
                         <label class="access-label" for="">Access Key</label>
-                        <input class="account-controlt access-key" type="text">
+                        <input class="account-controlt access-key" name="access" type="text">
                     </div>
-                    <div class="form-group ">
+                    <div class="account-content ">
                         <label class="platform-label" for="">Scrent Key</label>
-                        <input class="account-controlt scrent-key" type="text">
+                        <input class="account-controlt scrent-key" name="scrent" type="text">
                     </div>
                 </div>
                 <div class="account-modal-footer">

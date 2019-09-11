@@ -112,9 +112,10 @@
     .account-body {
       margin-top: 10px;
       padding: 30px;
-      overflow: hidden;
+      text-align: right;
 
-      .form-group {
+      .account-content {
+        margin-bottom: 10px;
         label {
           font-weight: 400;
           //margin-top: 20px;
@@ -125,10 +126,10 @@
         .account-controlt {
           width: 280px;
           height: 40px;
-          border-radius: 4px;
+          border-radius: 0px;
           margin-left: 10px;
-          float: right;
-          border-bottom: 1px solid #F2F2F2;
+          //float: right;
+          //border-bottom: 1px solid #F2F2F2;
 
 
         }
@@ -214,23 +215,23 @@
 
     .curry-body {
       margin-top: 10px;
-      padding: 30px;
-      overflow: hidden;
+      padding: 20px;
+      text-align: right;
 
       .form-group {
         label {
           font-weight: 400;
-          //margin-top: 20px;
+          margin-top: 10px;
           margin-bottom: 30px;
         }
 
         .curry-controlt {
           width: 280px;
           height: 40px;
-          border-radius: 4px;
+          //border-radius: 4px;
           margin-left: 10px;
           float: right;
-          border-bottom: 1px solid #F2F2F2;
+          //border-bottom: 1px solid #F2F2F2;
 
 
         }
