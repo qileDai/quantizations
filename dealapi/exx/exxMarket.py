@@ -10,8 +10,8 @@ from dealapi import accountConfig
 
 class MarketCondition(object):
 
-    def __init__(self):
-        pass
+    def __init__(self, currency=None):
+        self.currency = currency
 
     """
     获取所有市场
@@ -66,8 +66,8 @@ class MarketCondition(object):
     low           : 最低价
     monthRiseRate : 30日涨跌幅
     """
-    def get_ticker(self, currency):
-        url = accountConfig.EXX_MARKET['ticker_url'] + "?" + "currency=" + currency
+    def get_ticker(self):
+        url = accountConfig.EXX_MARKET['ticker_url'] + "?" + "currency=" + self.currency
         try:
             response = requests.get(url)
             res = response.json()
@@ -82,8 +82,8 @@ class MarketCondition(object):
     bids : 买方深度
     timestamp : 此次深度的产生时间戳
     """
-    def get_depth(self, currency):
-        url = accountConfig.EXX_MARKET['depth_url'] + "?" + "currency=" + currency
+    def get_depth(self):
+        url = accountConfig.EXX_MARKET['depth_url'] + "?" + "currency=" + self.currency
         try:
             response = requests.get(url)
             res = response.json()
@@ -93,14 +93,14 @@ class MarketCondition(object):
     """
     
     """
-    def get_ticker_buy1_price(self, currency):
-        res = MarketCondition.get_ticker(currency)
+    def get_ticker_buy1_price(self):
+        res = MarketCondition.get_ticker(self.currency)
         # 处理买一价格
         buy1_price = res["buy"]
         return buy1_price
 
-    def get_ticker_sell1_price(self, currency):
-        res = MarketCondition.get_ticker(currency)
+    def get_ticker_sell1_price(self):
+        res = MarketCondition.get_ticker(self.currency)
         # 处理卖一价格
         sell1_price = res["buy"]
         return sell1_price

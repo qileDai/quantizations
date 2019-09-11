@@ -98,7 +98,7 @@ class ShowAssert(View):
         account_obj = Account.objects.get(id=id)  # 获取账户信息
         platform = account_obj.platform  # 账户对应的平台
         # 创建对象
-        con = GetAssets(account_obj, platform)
+        con = GetAssets(id, account_obj, platform)
         context = con.showassets()
 
         print(context)
@@ -117,7 +117,7 @@ class ShowCollectAsset(View):
             account_obj = Account.objects.get(id=id)  # 获取账户信息
             platform = account_obj.platform  # 账户对应的平台
             # 创建对象
-            con = GetAssets(account_obj, platform)
+            con = GetAssets(id, account_obj, platform)
             context = con.showassets()
             context_list.append(context)
 
@@ -156,10 +156,16 @@ class WithDraw(View):
         id = request.POST.get('pk')
         currency = request.POST.get('currency')
         num = request.POST.get('currency-number')
-
+        try:
+            currency = currency.lower() + '_usdt'
+            market_api = MarketCondition(currency)
+            info = market_api.get_ticker()  # 获取单个交易对行情信息
+        except:
+            info = 0
         if currency:
             property_obj = Property.objects.filter(Q(account_id=id) & Q(currency=currency))
-            original_assets = property_obj.original_assets + float(num)
+            # 提币折合成usdt
+            original_assets = property_obj.original_assets + float(num)*info['ticker']['last']
             Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
 
 
