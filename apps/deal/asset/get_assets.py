@@ -16,9 +16,10 @@ class GetAssets(object):
     def showassets(self):
         # 调用对应平台API
         if self.platform.Platform_name == 'EXX':
+            # 创建接口对象
             service_api = ExxService(self.platform.Platform_name,
-                                     self.account_obj.secretkey,
-                                     self.account_obj.accesskey)  # 创建接口对象
+                                     self.account_obj.secretkey,    # key解码
+                                     self.account_obj.accesskey)
             # 获取用户的资产信息
             balance_info = service_api.get_balance()
             balance_info = balance_info['funds']
@@ -26,6 +27,7 @@ class GetAssets(object):
             market_api = MarketCondition()
             market_info = market_api.get_tickers()
         elif self.platform.Platform_name == 'HUOBI':
+            # 返回数据格式需要统一
             pass
 
         show_currency = Property.objects.filter(Q(account_id=self.id) & Q(currency_status='1'))

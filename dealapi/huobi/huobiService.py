@@ -102,8 +102,6 @@ def sell(coinType, price, amount, tradePassword, tradeid, market, method):
 @param tradePassword
 @param tradeid
 '''
-
-
 def buyMarket(coinType, amount, tradePassword, tradeid, market, method):
     params = {"method": method}
     params['coin_type'] = coinType
@@ -123,8 +121,6 @@ def buyMarket(coinType, amount, tradePassword, tradeid, market, method):
 @param tradePassword
 @param tradeid
 '''
-
-
 def sellMarket(coinType, amount, tradePassword, tradeid, market, method):
     params = {"method": method}
     params['coin_type'] = coinType
@@ -141,8 +137,6 @@ def sellMarket(coinType, amount, tradePassword, tradeid, market, method):
 查询个人最新10条成交订单
 @param coinType
 '''
-
-
 def getNewDealOrders(coinType, market, method):
     params = {"method": method}
     params['coin_type'] = coinType
@@ -157,8 +151,6 @@ def getNewDealOrders(coinType, market, method):
 @param coinType
 @param tradeid
 '''
-
-
 def getOrderIdByTradeId(coinType, tradeid, market, method):
     params = {"method": method}
     params['coin_type'] = coinType
@@ -174,8 +166,6 @@ def getOrderIdByTradeId(coinType, tradeid, market, method):
 @param coinType
 @param id
 '''
-
-
 def cancelOrder(coinType, id, market, method):
     params = {"method": method}
     params['coin_type'] = coinType
@@ -190,8 +180,6 @@ def cancelOrder(coinType, id, market, method):
 获取实时行情
 @param coinType #币种 1 比特币 2 莱特币
 '''
-
-
 def getTicker(coinType, market):
     if market == COIN_TYPE_CNY:
         if coinType == HUOBI_COIN_TYPE_BTC:
@@ -213,8 +201,6 @@ def getTicker(coinType, market):
 @param coinType:币种 1 比特币 2 莱特币
 @param depth_size:指定深度
 '''
-
-
 def getDepth(coinType, market, depth_size=5):
     if market == COIN_TYPE_CNY:
         if coinType == HUOBI_COIN_TYPE_BTC:
@@ -237,8 +223,6 @@ def getDepth(coinType, market, depth_size=5):
 火币上比特币交易及莱特币交易都是0.0001的整数倍
 比特币最小交易数量：0.001,莱特币最小交易数量：0.01
 '''
-
-
 def getMinimumOrderQty(coinType):
     if coinType == HUOBI_COIN_TYPE_BTC:
         return 0.001

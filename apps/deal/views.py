@@ -4,7 +4,6 @@ from .models import Account, Property, LastdayAssets, Market, Robot,TradingPlatf
 from apps.rbac.models import UserInfo
 from django.core.paginator import Paginator
 from urllib import parse
-from dealapi.exx.exxService import ExxService
 from apps.deal.asset.get_assets import GetAssets
 from dealapi.exx.exxMarket import MarketCondition
 from .forms import AccountModelForm
@@ -143,12 +142,18 @@ class ChargeAccount(View):
 
     def post(self, request):
         id = request.POST.get('pk')
+        account_obj = Account.objects.get(id=id)  # 获取账户信息
+        platform = account_obj.platform  # 账户对应的平台
         currency = request.POST.get('currency')
         num = request.POST.get('currency-number')
+        # 根据平台调用对应接口（待完成）---------------------------------------
         try:
-            currency = currency.lower() + '_usdt'
-            market_api = MarketCondition(currency)
-            info = market_api.get_ticker()  # 获取单个交易对行情信息
+            if platform == 'EXX':
+                currency = currency.lower() + '_usdt'
+                market_api = MarketCondition(currency)
+                info = market_api.get_ticker()  # 获取单个交易对行情信息
+            elif platform == 'HUOBI':
+                pass
         except:
             info = 0
         if currency:
@@ -164,12 +169,18 @@ class WithDraw(View):
 
     def post(self, request):
         id = request.POST.get('pk')
+        account_obj = Account.objects.get(id=id)  # 获取账户信息
+        platform = account_obj.platform  # 账户对应的平台
         currency = request.POST.get('currency')
         num = request.POST.get('currency-number')
+        # 根据平台调用对应接口（待完成）---------------------------------------
         try:
-            currency = currency.lower() + '_usdt'
-            market_api = MarketCondition(currency)
-            info = market_api.get_ticker()  # 获取单个交易对行情信息
+            if platform == 'EXX':
+                currency = currency.lower() + '_usdt'
+                market_api = MarketCondition(currency)
+                info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
+            elif platform == 'HUOBI':
+                pass
         except:
             info = 0
         if currency:
