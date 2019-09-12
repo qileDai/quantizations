@@ -129,12 +129,22 @@ Robot.prototype.run = function () {
     // self.initYstepEvent();
     self.listenClickRobotEvent();
     self.listenCloseRobotEvent();
+    self.loadstepEvent();
+    self.listenTradingRobotEvent();
+    self.listenCreatTradingEvent();
+    self.listenparameterEven();
+
 };
 
 Robot.prototype.initYstepEvent = function () {
     //根据jQuery选择器找到需要加载ystep的容器
 //loadStep 方法可以初始化ystep
-    $(".ystep").loadStep({
+
+    $(".ystep").setStep(1);
+
+};
+Robot.prototype.loadstepEvent =function(){
+     $(".ystep").loadStep({
         size: "large",
         color: "green",
         steps: [{
@@ -148,9 +158,7 @@ Robot.prototype.initYstepEvent = function () {
             title: "设置风险策略",
         },]
     });
-    $(".ystep").setStep(1);
-
-};
+}
 
 Robot.prototype.listenClickRobotEvent = function () {
 
@@ -160,21 +168,30 @@ Robot.prototype.listenClickRobotEvent = function () {
     var btnNext = $("#btnNext")
     var robotDataArray = new Array(self.tradingOnWrapper, self.tradingStrategyWrapper, self.setStrategyWrapper, self.setRiskWrapper)
     var arrayLength = robotDataArray.length
-
+    var num = 0;
+    var creatrobotclick = 0
     // console.log(arrayLength)
     // if (arrayLength <= 1)
     //     return;
     $('#create-robot').on('click', function () {
-        var num = 0;
-        console.log('open')
-        self.robotWrapper.show()
+        if (creatrobotclick==0){
+             self.robotWrapper.show();
+              robotDataArray[num].show()
+             creatrobotclick++
+        }else{
+            console.log(creatrobotclick)
+             self.robotWrapper.show()
+        }
+
+        console.log('open1')
+
         // console.log("daiqe")
-        self.initYstepEvent();
-        robotDataArray[0].show()
+        // self.initYstepEvent();
+
         // var li = document.querySelectorAll('li')
         // var lilength = li.length;
         // console.log(lilength)
-
+        $("#btnPre").unbind();
         btnPre.click(function () {
              console.log('num')
             if (num<=0){
@@ -182,11 +199,12 @@ Robot.prototype.listenClickRobotEvent = function () {
                // li[num].show().sibling().hide();
             }else {
                 num--;
+                 $('#btnNext').text('下一步')
                // li[num].show().sibling().hide();
 
             }
             //跳转到上一个步骤
-            // $(".ystep").prevStep();
+            $(".ystep").prevStep();
             // var stepNum = $(".ystep").getStep();
             // console.log(stepNum)
             // robotDataArray[stepNum-1]
@@ -210,16 +228,20 @@ Robot.prototype.listenClickRobotEvent = function () {
 
 
         });
-
+        $("#btnNext").unbind();
         btnNext.click(function () {
             console.log('next')
-            if (num>=3){
+            if (num>=2){
+                $('#btnNext').text('完成')
                 num=3;
+
+
             }else{
                 num++;
+                $('#btnNext').text('下一步')
             }
             //跳转到下一个步骤
-            // $(".ystep").nextStep();
+            $(".ystep").nextStep();
             // var stepNum = $(".ystep").getStep();
             // robotDataArray[stepNum+1].show()
             // console.log(stepNum)
@@ -232,25 +254,84 @@ Robot.prototype.listenClickRobotEvent = function () {
             })
 
         });
+        $('.warninguser label').on('click', function () {
+           $(this).toggleClass('btn-success')
+        })
 
     })
 
 
-
-
 }
+
+
 Robot.prototype.listenCloseRobotEvent = function(){
     var closeBtn = $('.close-btn');
     var robotWrapper = $('.robot-wrapper');
     closeBtn.click(function () {
         robotWrapper.hide();
 
+
+
     })
 };
+Robot.prototype.listenCreatTradingEvent = function(){
+    $('.update-property').on('click', function () {
+        $('.tradingParticulars').show();
+        $('.tradingShade').show();
+    })
+
+}
+
+Robot.prototype.listenTradingRobotEvent = function () {
+    var tradingclosebtn = $('.trading-close-btn');
+    var tradingParticulars = $('.tradingParticulars');
+    var tradingShade = $('.tradingShade')
+    var tradingloading = $('.trading-loading')
+    var tradingending = $('.trading-ending')
+    var tradingcontainer = $('.trading-container')
+    var tradingendingtable = $('.trading-ending-table')
+    tradingclosebtn.click(function () {
+        tradingParticulars.hide();
+        tradingShade.hide();
+    })
+    tradingending.click(function () {
+
+        tradingcontainer.hide();
+        tradingendingtable.show();
+        tradingloading.toggleClass('green')
+        tradingending.toggleClass('green')
+
+    })
+    tradingloading.click(function () {
+        tradingcontainer.show();
+        tradingendingtable.hide();
+        tradingending.toggleClass('green')
+        tradingloading.toggleClass('green')
+    })
+
+}
+Robot.prototype.listenparameterEven = function(){
+    var parameterconfiguration = $('.parameter-configuration');
+    var parameterclosebtn = $('.parameter-close-btn');
+    var deleteproperty = $('.delete-property');
+    var tradingShade = $('.tradingShade')
+    deleteproperty.click(function () {
+        parameterconfiguration.show();
+        tradingShade.show();
+
+    })
+    parameterclosebtn.click(function () {
+        parameterconfiguration.hide();
+        tradingShade.hide();
+    })
+}
+
+
 
 $(function () {
     var robot = new Robot();
     robot.run();
+
 });
 
 
