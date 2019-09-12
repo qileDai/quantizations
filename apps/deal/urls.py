@@ -14,5 +14,6 @@ urlpatterns = [
     path('withdraw/', views.WithDraw.as_view(), name='withdraw'),
     path('configcurrency/', views.ConfigCurrency.as_view(), name='configcurrency'),
     path('showcollectasset/', views.ShowCollectAsset.as_view(), name='showcollectasset'),
+    path('robotList/', views.RobotList.as_view(), name='robotList'),
 
 ]

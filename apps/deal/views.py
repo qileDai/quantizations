@@ -222,6 +222,7 @@ class RobotList(View):
         curry = request.GET.get('deal-curry')  # 拿到下拉框交易币种值
         market = request.GET.get('deal_market')  # 拿到下拉框交易市场值
         status = request.GET.get('deal_status')  # 拿到交易状态
+        robots = Robot.objects.all()
         if curry:
             robots = Robot.objects.filter(currency__icontains=curry)
         if market:
@@ -248,6 +249,7 @@ class RobotList(View):
         context.update(context_data)
 
         return render(request, 'management/gridding.html', context=context)
+
 
 
 # 分页

@@ -1,6 +1,6 @@
 import re
 from django.forms import ModelForm
-from apps.deal.models import Account, TradingPlatform, Property
+from apps.deal.models import Account, TradingPlatform, Property,Robot
 from django.forms import fields
 from django.core.exceptions import ValidationError
 
@@ -26,3 +26,13 @@ class AccountModelForm(ModelForm):
             raise ValidationError('该平台名已经存在,请重新输入!')  # 验证名字是否存在
         else:
             return title
+
+
+class RobotFrom(ModelForm):
+
+    class Meta:
+        model = Robot
+        fields = '__all__'
+
+
+
