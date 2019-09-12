@@ -9,7 +9,7 @@ from dealapi.exx.exxMarket import MarketCondition
 from .forms import AccountModelForm
 from django.db.models import Q
 from utils.mixin import LoginRequireMixin
-
+from utils import restful
 
 # Create your views here.
 
@@ -108,16 +108,17 @@ class ShowCollectAsset(View):
     """
     汇总资产信息
     """
-    def post(self, request):
+    def get(self, request):
         # 多个账户
         # ids = request.POST.get("pk")
         ids = [1, 2]
+        flag = True
         context_list = list()
         for id in ids:
             account_obj = Account.objects.get(id=id)  # 获取账户信息
             platform = account_obj.platform  # 账户对应的平台
             # 创建对象
-            con = GetAssets(id, account_obj, platform)
+            con = GetAssets(id, account_obj, platform, flag)
             context = con.showassets()
             context_list.append(context)
         # 汇总资产表数据
@@ -146,12 +147,12 @@ class ChargeAccount(View):
         platform = account_obj.platform  # 账户对应的平台
         currency = request.POST.get('currency')
         num = request.POST.get('currency-number')
-        # 根据平台调用对应接口（待完成）---------------------------------------
+        # 根据平台调用对应接口
         try:
             if platform == 'EXX':
                 currency = currency.lower() + '_usdt'
                 market_api = MarketCondition(currency)
-                info = market_api.get_ticker()  # 获取单个交易对行情信息
+                info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
             elif platform == 'HUOBI':
                 pass
         except:
@@ -173,7 +174,7 @@ class WithDraw(View):
         platform = account_obj.platform  # 账户对应的平台
         currency = request.POST.get('currency')
         num = request.POST.get('currency-number')
-        # 根据平台调用对应接口（待完成）---------------------------------------
+        # 根据平台调用对应接口
         try:
             if platform == 'EXX':
                 currency = currency.lower() + '_usdt'
@@ -203,6 +204,10 @@ class ConfigCurrency(View):
             accounts = Account.objects.filter(users__id=user_id)
             # 保存币种信息
             for obj in accounts:
+                # 账户存在此币种则不添加
+                property_obj = Property.objects.filter(Q(account_id=obj.id) & Q(currency=currency))
+                if property_obj:
+                    continue
                 LastdayAssets.objects.create(currency='currency', account_id=obj.id)
                 Property.objects.create(currency='currency', account_id=obj.id)
         currency_info = LastdayAssets.objects.all()

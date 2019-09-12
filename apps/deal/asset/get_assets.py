@@ -8,10 +8,11 @@ class GetAssets(object):
     """
     计算资产表和损益表各类数据
     """
-    def __init__(self, id, account_obj, platform):
+    def __init__(self, id, account_obj, platform, flag=None):
         self.id = id
         self.account_obj = account_obj
         self.platform = platform
+        self.flag = flag
 
     def showassets(self):
         # 调用对应平台API
@@ -27,8 +28,12 @@ class GetAssets(object):
             market_api = MarketCondition()
             market_info = market_api.get_tickers()
         elif self.platform.Platform_name == 'HUOBI':
-            # 返回数据格式需要统一
+            # 返回数据格式需要统一, 待完成-----------------------------------------------
             pass
+        elif self.flag:
+            # self.flag为True，表示账户数据汇总，不同平台需获取EXX参考价进行折算
+            market_api = MarketCondition()
+            exx_market_info = market_api.get_tickers()
 
         show_currency = Property.objects.filter(Q(account_id=self.id) & Q(currency_status='1'))
         lastday_obj = LastdayAssets.objects.filter(account_id=self.id)
@@ -51,13 +56,17 @@ class GetAssets(object):
             withdraw_record += float(queryset.withdraw_record)
             # 损益表字典
             profit_loss_dict[queryset.currency] = dict()
-            # 参考币种
+            # 交易市场
             transaction_pair = queryset.currency.lower() + '_usdt'
-            # 自查表-初始资产
+            # 资产表-初始资产
             assets_dict[queryset.currency] = dict()
             assets_dict[queryset.currency]['original_assets'] = str(queryset.original_assets)
             # 当前参考价
-            last = market_info.get(transaction_pair, None)
+            if self.flag:
+                # 资产汇总，所有平台参考价以EXX为准
+                last = exx_market_info.get(transaction_pair, None)
+            else:
+                last = market_info.get(transaction_pair, None)
             if last:
                 # 资产表-参考价
                 assets_dict[queryset.currency]['last'] = last.get('last')
@@ -66,11 +75,11 @@ class GetAssets(object):
             else:
                 assets_dict[queryset.currency]['last'] = 0
                 profit_loss_dict[queryset.currency]['last'] = 0
-            # 资产表-单币种总资产
+            # 资产表-交易币种总资产
             assets_dict[queryset.currency]['current_assets'] = balance_info[queryset.currency]['total']
-            # 资产表-单币种冻结
+            # 资产表-交易币种冻结
             assets_dict[queryset.currency]['freeze'] = balance_info[queryset.currency]['freeze']
-            # 资产表-单币种可用
+            # 资产表-交易币种可用
             assets_dict[queryset.currency]['balance'] = balance_info[queryset.currency]['balance']
             # 多币种总资产
             current_total += float(balance_info[queryset.currency]['total']) * \
@@ -89,11 +98,17 @@ class GetAssets(object):
         # 资产变化
         asset_change = dict()
         asset_change['number'] = current_total - lastday_assets
-        asset_change['percent'] = (current_total - lastday_assets) / lastday_assets
+        if self.flag:
+            asset_change['lastday_assets'] = lastday_assets
+        else:
+            asset_change['percent'] = (current_total - lastday_assets) / lastday_assets
         # 历史盈亏
         history_profit = dict()
         history_profit['number'] = current_total + withdraw_record - original_total
-        history_profit['percent'] = (current_total + withdraw_record - original_total) / original_total
+        if self.flag:
+            history_profit['original_total'] = original_total
+        else:
+            history_profit['percent'] = (current_total + withdraw_record - original_total) / original_total
         print(lastday_assets, current_total)
         print(assets_dict)
         print(profit_loss_dict)
