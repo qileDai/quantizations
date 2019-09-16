@@ -10,7 +10,9 @@ EXX_MARKET = {
     "tickers_url": "http://192.168.4.171:9008/data/v1/tickers",  # 所有行情url
     "ticker_url": "http://192.168.4.171:9008/data/v1/ticker",   # 单一市场行情url
     "depth_url": "http://192.168.4.171:9008/data/v1/depth",      # 市场深度
+    'klines_url': "https://192.168.4.171:9008/data/v1/klines",         # K线
 }
+
 # huobi config
 HUOBI = {
     "CNY_1":

@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.views.generic import View
-from .models import Account, Property, LastdayAssets, Market, Robot,TradingPlatform
+from .models import Account, Property, LastdayAssets, Market, Robot, TradingPlatform
 from apps.rbac.models import UserInfo
 from django.core.paginator import Paginator
 from urllib import parse
 from apps.deal.asset.get_assets import GetAssets
 from dealapi.exx.exxMarket import MarketCondition
-from .forms import AccountModelForm
+from dealapi.exx.exxService import ExxService
+from .forms import AccountModelForm, RobotFrom
 from django.db.models import Q
 from utils.mixin import LoginRequireMixin
 from utils import restful
@@ -68,6 +69,7 @@ class EditAccount(View):
     def post(self, request):
         id = request.POST.get('pk')
         account_obj = Account.objects.filter(id=id).first()
+        # instance表示一个模型类对象，确定编辑哪一条数据
         model_form = AccountModelForm(request.POST, instance=account_obj)
         if model_form.is_valid():
             model_form.save()
@@ -151,8 +153,8 @@ class ChargeAccount(View):
         # 根据平台调用对应接口
         try:
             if platform == 'EXX':
-                currency = currency.lower() + '_usdt'
-                market_api = MarketCondition(currency)
+                currency_pair = currency.lower() + '_usdt'
+                market_api = MarketCondition(currency_pair)
                 info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
             elif platform == 'HUOBI':
                 pass
@@ -178,9 +180,11 @@ class WithDraw(View):
         # 根据平台调用对应接口
         try:
             if platform == 'EXX':
-                currency = currency.lower() + '_usdt'
-                market_api = MarketCondition(currency)
+                currency_pair = currency.lower() + '_usdt'
+                market_api = MarketCondition(currency_pair)
                 info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
+                # 调用提币接口
+                withdraw_info = market_api.xx
             elif platform == 'HUOBI':
                 pass
         except:
@@ -202,7 +206,7 @@ class ConfigCurrency(View):
         if currency:
             user_id = request.session.get("user_id")
             # 获取账户信息
-            accounts = Account.objects.filter(users__id=user_id)
+            accounts = Account.objects.filter(id=user_id)
 
             for obj in accounts:
                 # 账户存在此币种则不添加
@@ -222,25 +226,63 @@ class ConfigCurrency(View):
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 创建机器人
-class GetCurrency(View):
+class GetParams(View):
+    """
+    获取配置策略的参数
+    """
     def post(self, request):
-        currency = request.POST.get('deal-curry')
-        market = request.POST.get('deal_market')
-        cur = Property.objects.filter(currency=currency)
-        mar = Property.objects.filter(market=market)
-        if cur and mar:
-            context = {
-                'currency': currency,   # 交易币种
-                'market': market,   # 交易市场
-            }
-            return render(request, 'management/tradingaccount.html', context)
+        model_form = RobotFrom(request.POST)
+        print('-' * 30, model_form)
+        # is_valid()方法会根据model字段的类型以及自定义方法来验证提交的数据
+        if model_form.is_valid():
+            model_form.save()
+            return redirect('../robotList/')
         else:
-            return restful.params_error(message="该交易币种或者交易市场不存在")
+            return render(request, 'management/gridding.html', {'model_form': model_form, 'title': '创建机器人'})
 
 
+class GetAccountInfo(View):
+    """
+    获取账户可用额度/当前价
+    """
+    def post(self, request):
+        currency = request.POST.get('curry-title')
+        market = request.POST.get('market-title')
+        id = request.POST.get('pk')
+        # 获取账户所属的用户信息
+        account_obj = Account.objects.filter(id=id)
+        platform = account_obj.platform  # 账户对应的平台
+        if platform == 'EXX':
+            # 创建交易接口对象
+            con = ExxService(account_obj.platform, account_obj.accesskey, account_obj.secretkey)
+            info = con.get_balance()
+            info = info['funds']
+            # 创建行情接口对象
+            currency_pair = currency.lower() + '_' + market.lower()
+            con1 = MarketCondition(currency_pair, '1day', '30')
+            info1 = con1.get_ticker()
+            info2 = con1.get_klines()
+        elif platform == 'HUOBI':
+            pass
 
+        # 计算阻力位/支撑位的默认值
+        if float(info2['limit']) == 30:
+            max = 0
+            min = 0
+            for i in info2['datas']['data']:
+                max += float(i[2])
+                min += float(i[3])
 
-
+        context = {
+            'currency': info[currency.upper()].get('balance'),
+            'market': info[market.upper()].get('balance'),
+            'last': info1['ticker'].get('last'),
+            'resistance': max/30,
+            'support_level': min/30,
+        }
+        print(info, info1, info2)
+        print(context)
+        return render(request, 'management/tradingaccount.html', context)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 机器人管理
@@ -280,7 +322,6 @@ class RobotList(View):
         context.update(context_data)
 
         return render(request, 'management/gridding.html', context=context)
-
 
 
 # 分页

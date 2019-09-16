@@ -10,8 +10,10 @@ from dealapi import accountConfig
 
 class MarketCondition(object):
 
-    def __init__(self, currency=None):
+    def __init__(self, currency=None, *args):
         self.currency = currency
+        self.ktype = args[0]
+        self.ksize = args[1]
 
     """
     获取所有市场
@@ -74,6 +76,7 @@ class MarketCondition(object):
         except requests.exceptions.RequestException as e:
             print("获取市场行情失败", e)
         return res
+
     """
     获取市场深度
     :param 交易对
@@ -90,9 +93,20 @@ class MarketCondition(object):
         except requests.exceptions.RequestException as e:
             print("获取市场行情失败", e)
         return res
+
     """
-    
+    获取K线
     """
+    def get_klines(self):
+        url = accountConfig.EXX_MARKET['klines_url'] + "?" + "market=" + self.currency + \
+              "&type=" + self.ktype + "&size=" + self.ksize
+        try:
+            response = requests.get(url)
+            res = response.json()
+        except requests.exceptions.RequestException as e:
+            print("获取K线失败", e)
+        return res
+
     def get_ticker_buy1_price(self):
         res = MarketCondition.get_ticker(self.currency)
         # 处理买一价格

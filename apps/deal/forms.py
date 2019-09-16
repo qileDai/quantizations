@@ -34,5 +34,20 @@ class RobotFrom(ModelForm):
         model = Robot
         fields = '__all__'
 
+    def clean_resistance(self):
+        resistance = self.cleaned_data.get('resistance')
+        print(resistance)
+        last = self.cleaned_data.get('current_price')
+        if float(resistance) < float(last):
+            raise ValidationError('阻力位不能低于当前价,请重新输入!')
+        else:
+            return resistance
 
+    def clean_support_level(self):
+        support_level = self.cleaned_data.get('support_level')
+        last = self.cleaned_data.get('current_price')
+        if float(support_level) > float(last):
+            raise ValidationError('支撑位不能高于当前价,请重新输入!')
+        else:
+            return support_level
 
