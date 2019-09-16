@@ -30,10 +30,11 @@ class GetAssets(object):
         elif self.platform.Platform_name == 'HUOBI':
             # 返回数据格式需要统一, 待完成-----------------------------------------------
             pass
-        elif self.flag:
+
+        if self.flag:
             # self.flag为True，表示账户数据汇总，不同平台需获取EXX参考价进行折算
-            market_api = MarketCondition()
-            exx_market_info = market_api.get_tickers()
+            exx_market_api = MarketCondition()
+            exx_market_info = exx_market_api.get_tickers()
 
         show_currency = Property.objects.filter(Q(account_id=self.id) & Q(currency_status='1'))
         lastday_obj = LastdayAssets.objects.filter(account_id=self.id)
@@ -46,6 +47,7 @@ class GetAssets(object):
 
         # 计算账户所有币种的昨日24时总资产
         for lastday_asset in lastday_obj:
+            print(lastday_asset.lastday_assets)
             lastday_assets += float(lastday_asset.lastday_assets)*float(lastday_asset.last)
 
         # 计算账户总初始资产/总提币，获取币种初始资产
@@ -110,8 +112,8 @@ class GetAssets(object):
         else:
             history_profit['percent'] = (current_total + withdraw_record - original_total) / original_total
         print(lastday_assets, current_total)
-        print(assets_dict)
-        print(profit_loss_dict)
+        # print(assets_dict)
+        # print(profit_loss_dict)
 
         context = {
             # 平台名称
@@ -129,7 +131,7 @@ class GetAssets(object):
             # 损益表
             'profit_loss_dict': profit_loss_dict,
         }
-
+        print(context)
         return context
 
 

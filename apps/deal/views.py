@@ -124,14 +124,15 @@ class ShowCollectAsset(View):
         # 汇总资产表数据
         for key in context_list[0]['assets_dict']:
             for elem in context_list[1:]:
-                print(key)
                 for key1, value1 in elem['assets_dict'][key].items():
                     if key1 in context_list[0]['assets_dict'][key]:
                         context_list[0]['assets_dict'][key][key1] = float(context_list[0]['assets_dict'][key][key1]) \
                                                                     + float(value1)
                     else:
                         context_list[0]['assets_dict'][key][key1] = value1
+        # 汇总资产变化/初始总资产/历史盈亏/
         # return render(request, 'management/tradingaccount.html', context_list[0])
+        print('资产汇总', '-'*20)
         print(context_list[0])
         return HttpResponse('ok')
 
@@ -202,14 +203,15 @@ class ConfigCurrency(View):
             user_id = request.session.get("user_id")
             # 获取账户信息
             accounts = Account.objects.filter(users__id=user_id)
-            # 保存币种信息
+
             for obj in accounts:
                 # 账户存在此币种则不添加
                 property_obj = Property.objects.filter(Q(account_id=obj.id) & Q(currency=currency))
                 if property_obj:
                     continue
-                LastdayAssets.objects.create(currency='currency', account_id=obj.id)
-                Property.objects.create(currency='currency', account_id=obj.id)
+                # 保存币种信息
+                LastdayAssets.objects.create(currency=currency, account_id=obj.id)
+                Property.objects.create(currency=currency, account_id=obj.id)
         currency_info = LastdayAssets.objects.all()
         context = {
             # 币种信息
@@ -218,6 +220,30 @@ class ConfigCurrency(View):
         return render(request, 'management/tradingaccount.html', context)
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+# 创建机器人
+class GetCurrency(View):
+    def post(self, request):
+        currency = request.POST.get('deal-curry')
+        market = request.POST.get('deal_market')
+        cur = Property.objects.filter(currency=currency)
+        mar = Property.objects.filter(market=market)
+        if cur and mar:
+            context = {
+                'currency': currency,   # 交易币种
+                'market': market,   # 交易市场
+            }
+            return render(request, 'management/tradingaccount.html', context)
+        else:
+            return restful.params_error(message="该交易币种或者交易市场不存在")
+
+
+
+
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# 机器人管理
 class RobotList(View):
     """
     机器人管理列表页面
