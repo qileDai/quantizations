@@ -5,7 +5,6 @@ import hmac
 import hashlib
 from requests import ConnectionError, ReadTimeout
 from dealapi import accountConfig
-from utils import Logger
 
 
 class ExxService(object):
@@ -14,7 +13,7 @@ class ExxService(object):
         self.baseUrl = accountConfig.EXX_SERVICE["SERVICE_API"]
         self.secretkey = secretkey
         self.accesskey = "accesskey=" + accesskey
-        self.log = Logger.MylogHandler("exxdeal")
+
 
     def sha512_signature(self, params):
         current_time = str(int(time.time() * 1000))

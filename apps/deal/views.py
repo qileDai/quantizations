@@ -106,10 +106,9 @@ class ShowAssert(View):
         platform = account_obj.platform  # 账户对应的平台
         # 创建对象
         con = GetAssets(id, account_obj, platform)
-        context = con.showassets()
-
-        print(context)
-        return render(request, 'management/tradingaccount.html', context)
+        data = con.showassets()
+        print(type(data))
+        return restful.result(data=data)
 
 
 class ShowCollectAsset(View):
