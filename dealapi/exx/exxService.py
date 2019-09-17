@@ -5,20 +5,20 @@ import hmac
 import hashlib
 from requests import ConnectionError, ReadTimeout
 from dealapi import accountConfig
+from utils import Logger
 
 
 class ExxService(object):
 
-    def __init__(self, platform, secretkey, accesskey):
-        self.platform = platform
+    def __init__(self, secretkey, accesskey):
         self.baseUrl = accountConfig.EXX_SERVICE["SERVICE_API"]
         self.secretkey = secretkey
         self.accesskey = "accesskey=" + accesskey
+        self.log = Logger.MylogHandler("exxdeal")
 
     def sha512_signature(self, params):
         current_time = str(int(time.time() * 1000))
         # 拼接加密参数assckey、时间、参数
-        # param = "&amount" + amount + "&currency" + currency + "&price" + price + "&type" + type
         str_params = self.accesskey + params + "&nonce=" + current_time
         list_parmas = str_params.split("&")
         sort_parmas = sorted(list_parmas)
@@ -39,9 +39,8 @@ class ExxService(object):
     def order(self, amount, currency, price, type):
         result = {}
         current_time = str(int(time.time() * 1000))
-        if isinstance(amount,int):
+        if isinstance(amount, int):
             amount = str(amount)
-        # print(current_time)
         try:
             params = "&amount=" + amount + "&currency=" + currency + "&price=" + price + "&type=" + type
             url = self.baseUrl + "order" + "?" + self.accesskey + params + \
@@ -144,7 +143,70 @@ class ExxService(object):
         return result
 
 
-# service_api = ExxService('EXX', 'c6b2ee35465dfddf535e8ddaeaaaf4ee8a90894e', '3b56369d-8072-461e-91f6-243b6277af01')
+    """
+    https://trade.exx.com/api/getChargeAddress?accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&signature=请求加密签名串
+    """
+    def get_chargeaddress(self, currency):
+        params = ""
+        current_time = str(int(time.time() * 1000))
+        url = self.baseUrl + "getChargeAddress?" + self.accesskey + "&currency=" + currency + \
+              "&nonce=" + current_time + "&signature=" + self.sha512_signature(params)
+        response = requests.get(url)
+        result = response.json()
+        return result
+
+    """
+    https://trade.exx.com/api/getChargeRecord?accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&pageIndex=页数&signature=请求加密签名串
+    
+    """
+    def get_chargerecord(self, currency):
+        params = ""
+        current_time = str(int(time.time() * 1000))
+        url = self.baseUrl + "getChargeRecord?" + self.accesskey + "&currency=" + currency + \
+              "&nonce=" + current_time + "&signature=" + self.sha512_signature(params)
+        response = requests.get(url)
+        result = response.json()
+        return result
+
+    """
+    https://trade.exx.com/api/getWithdrawAddress?accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&signature=请求加密签名串
+    """
+    def get_withdrawaddress(self, currency):
+        params = ""
+        current_time = str(int(time.time() * 1000))
+        url = self.baseUrl + "getWithdrawAddress?" + self.accesskey + "&currency=" + currency + \
+              "&nonce=" + current_time + "&signature=" + self.sha512_signature(params)
+        response = requests.get(url)
+        result = response.json()
+        return result
+
+    """
+    https://trade.exx.com/api/getWithdrawRecord?accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&pageIndex=页数&signature=请求加密签名串
+    """
+    def get_withdrawrecord(self, currency):
+        params = ""
+        current_time = str(int(time.time() * 1000))
+        url = self.baseUrl + "getWithdrawRecord?" + self.accesskey + "&currency=" + currency + \
+              "&nonce=" + current_time + "&signature=" + self.sha512_signature(params)
+        response = requests.get(url)
+        result = response.json()
+        return result
+
+    """
+    https://trade.exx.com/api/withdraw?accesskey=your_access_key&amount=10&currency=qtum&nonce=当前时间毫秒数&receiveAddr=提币地址&safePwd=提币密码&signature=请求加密签名串
+    """
+    def withdraw(self, currency, amount, pwd):
+        params = ""
+        current_time = str(int(time.time() * 1000))
+        url = self.baseUrl + "withdraw?" + self.accesskey + "&amount=" + amount + "&currency=" + currency + \
+              "&nonce=" + current_time + "&receiveAddr=" + "&safePwd=" + pwd\
+              + "&signature=" + self.sha512_signature(params)
+        response = requests.get(url)
+        result = response.json()
+        return result
+
+
+# service_api = ExxService('c6b2ee35465dfddf535e8ddaeaaaf4ee8a90894e', '3b56369d-8072-461e-91f6-243b6277af01')
 # data = service_api.get_balance()
 # print(data)
 

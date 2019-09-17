@@ -110,7 +110,7 @@ class ShowCollectAsset(View):
     """
     汇总资产信息
     """
-    def get(self, request):
+    def post(self, request):
         # 多个账户
         # ids = request.POST.get("pk")
         ids = [1, 2]
@@ -243,30 +243,31 @@ class GetParams(View):
 
 class GetAccountInfo(View):
     """
-    获取账户可用额度/当前价
+    获取交易对可用额度/当前价,计算默认值
     """
     def post(self, request):
         currency = request.POST.get('curry-title')
         market = request.POST.get('market-title')
+        last = request.POST.get('current-price')
         id = request.POST.get('pk')
         # 获取账户所属的用户信息
         account_obj = Account.objects.filter(id=id)
         platform = account_obj.platform  # 账户对应的平台
         if platform == 'EXX':
             # 创建交易接口对象
-            con = ExxService(account_obj.platform, account_obj.accesskey, account_obj.secretkey)
+            con = ExxService(account_obj.accesskey, account_obj.secretkey)
             info = con.get_balance()
             info = info['funds']
             # 创建行情接口对象
             currency_pair = currency.lower() + '_' + market.lower()
-            con1 = MarketCondition(currency_pair, '1day', '30')
+            con1 = MarketCondition(currency_pair)
             info1 = con1.get_ticker()
-            info2 = con1.get_klines()
+            info2 = con1.get_klines('1day', '30')
         elif platform == 'HUOBI':
             pass
 
         # 计算阻力位/支撑位的默认值
-        if float(info2['limit']) == 30:
+        if float(info2['limit']) <= 30:
             max = 0
             min = 0
             for i in info2['datas']['data']:
@@ -277,8 +278,8 @@ class GetAccountInfo(View):
             'currency': info[currency.upper()].get('balance'),
             'market': info[market.upper()].get('balance'),
             'last': info1['ticker'].get('last'),
-            'resistance': max/30,
-            'support_level': min/30,
+            'resistance': float(max/30),
+            'support_level': float(min/30),
         }
         print(info, info1, info2)
         print(context)

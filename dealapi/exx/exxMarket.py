@@ -10,10 +10,8 @@ from dealapi import accountConfig
 
 class MarketCondition(object):
 
-    def __init__(self, currency=None, *args):
+    def __init__(self, currency=None):
         self.currency = currency
-        self.ktype = args[0]
-        self.ksize = args[1]
 
     """
     获取所有市场
@@ -95,11 +93,23 @@ class MarketCondition(object):
         return res
 
     """
+     https://api.exx.com/data/v1/trades?currency=eth_hsr
+    """
+    def get_history(self):
+        url = accountConfig.EXX_MARKET['trades_url'] + "?" + "currency=" + self.currency
+        try:
+            response = requests.get(url)
+            res = response.json()
+        except requests.exceptions.RequestException as e:
+            print("获取历史成交失败", e)
+        return res
+
+    """
     获取K线
     """
-    def get_klines(self):
+    def get_klines(self, ktype, ksize):
         url = accountConfig.EXX_MARKET['klines_url'] + "?" + "market=" + self.currency + \
-              "&type=" + self.ktype + "&size=" + self.ksize
+              "&type=" + ktype + "&size=" + ksize
         try:
             response = requests.get(url)
             res = response.json()
@@ -121,8 +131,8 @@ class MarketCondition(object):
 
 
 # if __name__ == "__main__":
-#     market = MarketCondition()
-#     result = market.get_markets()
+#     market = MarketCondition('eth_usdt')
+#     result = market.get_klines('1day', '30')
 #     print(result)
 
 

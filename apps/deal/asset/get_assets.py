@@ -18,8 +18,7 @@ class GetAssets(object):
         # 调用对应平台API
         if self.platform.Platform_name == 'EXX':
             # 创建接口对象
-            service_api = ExxService(self.platform.Platform_name,
-                                     self.account_obj.secretkey,    # key解码
+            service_api = ExxService(self.account_obj.secretkey,    # key解码
                                      self.account_obj.accesskey)
             # 获取用户的资产信息
             balance_info = service_api.get_balance()
@@ -103,14 +102,20 @@ class GetAssets(object):
         if self.flag:
             asset_change['lastday_assets'] = lastday_assets
         else:
-            asset_change['percent'] = (current_total - lastday_assets) / lastday_assets
+            if lastday_assets != 0:
+                asset_change['percent'] = (current_total - lastday_assets) / lastday_assets
+            else:
+                asset_change['percent'] = 0
         # 历史盈亏
         history_profit = dict()
         history_profit['number'] = current_total + withdraw_record - original_total
         if self.flag:
             history_profit['original_total'] = original_total
         else:
-            history_profit['percent'] = (current_total + withdraw_record - original_total) / original_total
+            if original_total != 0:
+                history_profit['percent'] = (current_total + withdraw_record - original_total) / original_total
+            else:
+                history_profit['percent'] = 0
         print(lastday_assets, current_total)
         # print(assets_dict)
         # print(profit_loss_dict)
