@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.views.generic import View
-from .models import Account, Property, LastdayAssets, Market, Robot,TradingPlatform
+from .models import Account, Property, LastdayAssets, Market, Robot, TradingPlatform
 from apps.rbac.models import UserInfo
 from django.core.paginator import Paginator
 from urllib import parse
 from apps.deal.asset.get_assets import GetAssets
 from dealapi.exx.exxMarket import MarketCondition
-from .forms import AccountModelForm
+from dealapi.exx.exxService import ExxService
+from .forms import AccountModelForm, RobotFrom
 from django.db.models import Q
 from utils.mixin import LoginRequireMixin
 from utils import restful
@@ -72,6 +73,7 @@ class EditAccount(View):
     def post(self, request):
         id = request.POST.get('pk')
         account_obj = Account.objects.filter(id=id).first()
+        # instance表示一个模型类对象，确定编辑哪一条数据
         model_form = AccountModelForm(request.POST, instance=account_obj)
         if model_form.is_valid():
             model_form.save()
@@ -114,7 +116,7 @@ class ShowCollectAsset(View):
     """
     汇总资产信息
     """
-    def get(self, request):
+    def post(self, request):
         # 多个账户
         # ids = request.POST.get("pk")
         ids = [1, 2]
@@ -130,14 +132,15 @@ class ShowCollectAsset(View):
         # 汇总资产表数据
         for key in context_list[0]['assets_dict']:
             for elem in context_list[1:]:
-                print(key)
                 for key1, value1 in elem['assets_dict'][key].items():
                     if key1 in context_list[0]['assets_dict'][key]:
                         context_list[0]['assets_dict'][key][key1] = float(context_list[0]['assets_dict'][key][key1]) \
                                                                     + float(value1)
                     else:
                         context_list[0]['assets_dict'][key][key1] = value1
+        # 汇总资产变化/初始总资产/历史盈亏/
         # return render(request, 'management/tradingaccount.html', context_list[0])
+        print('资产汇总', '-'*20)
         print(context_list[0])
         return HttpResponse('ok')
 
@@ -156,8 +159,8 @@ class ChargeAccount(View):
         # 根据平台调用对应接口
         try:
             if platform == 'EXX':
-                currency = currency.lower() + '_usdt'
-                market_api = MarketCondition(currency)
+                currency_pair = currency.lower() + '_usdt'
+                market_api = MarketCondition(currency_pair)
                 info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
             elif platform == 'HUOBI':
                 pass
@@ -183,9 +186,11 @@ class WithDraw(View):
         # 根据平台调用对应接口
         try:
             if platform == 'EXX':
-                currency = currency.lower() + '_usdt'
-                market_api = MarketCondition(currency)
+                currency_pair = currency.lower() + '_usdt'
+                market_api = MarketCondition(currency_pair)
                 info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
+                # 调用提币接口
+                withdraw_info = market_api.xx
             elif platform == 'HUOBI':
                 pass
         except:
@@ -207,15 +212,16 @@ class ConfigCurrency(View):
         if currency:
             user_id = request.session.get("user_id")
             # 获取账户信息
-            accounts = Account.objects.filter(users__id=user_id)
-            # 保存币种信息
+            accounts = Account.objects.filter(id=user_id)
+
             for obj in accounts:
                 # 账户存在此币种则不添加
                 property_obj = Property.objects.filter(Q(account_id=obj.id) & Q(currency=currency))
                 if property_obj:
                     continue
-                LastdayAssets.objects.create(currency='currency', account_id=obj.id)
-                Property.objects.create(currency='currency', account_id=obj.id)
+                # 保存币种信息
+                LastdayAssets.objects.create(currency=currency, account_id=obj.id)
+                Property.objects.create(currency=currency, account_id=obj.id)
         currency_info = LastdayAssets.objects.all()
         context = {
             # 币种信息
@@ -224,6 +230,69 @@ class ConfigCurrency(View):
         return render(request, 'management/tradingaccount.html', context)
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+# 创建机器人
+class GetParams(View):
+    """
+    获取配置策略的参数
+    """
+    def post(self, request):
+        model_form = RobotFrom(request.POST)
+        print('-' * 30, model_form)
+        # is_valid()方法会根据model字段的类型以及自定义方法来验证提交的数据
+        if model_form.is_valid():
+            model_form.save()
+            return redirect('../robotList/')
+        else:
+            return render(request, 'management/gridding.html', {'model_form': model_form, 'title': '创建机器人'})
+
+
+class GetAccountInfo(View):
+    """
+    获取交易对可用额度/当前价,计算默认值
+    """
+    def post(self, request):
+        currency = request.POST.get('curry-title')
+        market = request.POST.get('market-title')
+        last = request.POST.get('current-price')
+        id = request.POST.get('pk')
+        # 获取账户所属的用户信息
+        account_obj = Account.objects.filter(id=id)
+        platform = account_obj.platform  # 账户对应的平台
+        if platform == 'EXX':
+            # 创建交易接口对象
+            con = ExxService(account_obj.accesskey, account_obj.secretkey)
+            info = con.get_balance()
+            info = info['funds']
+            # 创建行情接口对象
+            currency_pair = currency.lower() + '_' + market.lower()
+            con1 = MarketCondition(currency_pair)
+            info1 = con1.get_ticker()
+            info2 = con1.get_klines('1day', '30')
+        elif platform == 'HUOBI':
+            pass
+
+        # 计算阻力位/支撑位的默认值
+        if float(info2['limit']) <= 30:
+            max = 0
+            min = 0
+            for i in info2['datas']['data']:
+                max += float(i[2])
+                min += float(i[3])
+
+        context = {
+            'currency': info[currency.upper()].get('balance'),
+            'market': info[market.upper()].get('balance'),
+            'last': info1['ticker'].get('last'),
+            'resistance': float(max/30),
+            'support_level': float(min/30),
+        }
+        print(info, info1, info2)
+        print(context)
+        return render(request, 'management/tradingaccount.html', context)
+
+# ----------------------------------------------------------------------------------------------------------------------
+# 机器人管理
 class RobotList(View):
     """
     机器人管理列表页面
@@ -261,7 +330,6 @@ class RobotList(View):
         context.update(context_data)
 
         return render(request, 'management/gridding.html', context=context)
-
 
 
 # 分页

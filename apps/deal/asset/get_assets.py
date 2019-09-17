@@ -18,8 +18,7 @@ class GetAssets(object):
         # 调用对应平台API
         if self.platform.Platform_name == 'EXX':
             # 创建接口对象
-            service_api = ExxService(self.platform.Platform_name,
-                                     self.account_obj.secretkey,    # key解码
+            service_api = ExxService(self.account_obj.secretkey,    # key解码
                                      self.account_obj.accesskey)
             # 获取用户的资产信息
             balance_info = service_api.get_balance()
@@ -30,10 +29,11 @@ class GetAssets(object):
         elif self.platform.Platform_name == 'HUOBI':
             # 返回数据格式需要统一, 待完成-----------------------------------------------
             pass
-        elif self.flag:
+
+        if self.flag:
             # self.flag为True，表示账户数据汇总，不同平台需获取EXX参考价进行折算
-            market_api = MarketCondition()
-            exx_market_info = market_api.get_tickers()
+            exx_market_api = MarketCondition()
+            exx_market_info = exx_market_api.get_tickers()
 
         show_currency = Property.objects.filter(Q(account_id=self.id) & Q(currency_status='1'))
         lastday_obj = LastdayAssets.objects.filter(account_id=self.id)
@@ -46,6 +46,7 @@ class GetAssets(object):
 
         # 计算账户所有币种的昨日24时总资产
         for lastday_asset in lastday_obj:
+            print(lastday_asset.lastday_assets)
             lastday_assets += float(lastday_asset.lastday_assets)*float(lastday_asset.last)
 
         # 计算账户总初始资产/总提币，获取币种初始资产
@@ -101,17 +102,23 @@ class GetAssets(object):
         if self.flag:
             asset_change['lastday_assets'] = lastday_assets
         else:
-            asset_change['percent'] = (current_total - lastday_assets) / lastday_assets
+            if lastday_assets != 0:
+                asset_change['percent'] = (current_total - lastday_assets) / lastday_assets
+            else:
+                asset_change['percent'] = 0
         # 历史盈亏
         history_profit = dict()
         history_profit['number'] = current_total + withdraw_record - original_total
         if self.flag:
             history_profit['original_total'] = original_total
         else:
-            history_profit['percent'] = (current_total + withdraw_record - original_total) / original_total
+            if original_total != 0:
+                history_profit['percent'] = (current_total + withdraw_record - original_total) / original_total
+            else:
+                history_profit['percent'] = 0
         print(lastday_assets, current_total)
-        print(assets_dict)
-        print(profit_loss_dict)
+        # print(assets_dict)
+        # print(profit_loss_dict)
 
         context = {
             # 平台名称
@@ -129,7 +136,7 @@ class GetAssets(object):
             # 损益表
             'profit_loss_dict': profit_loss_dict,
         }
-
+        print(context)
         return context
 
 

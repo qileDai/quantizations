@@ -74,6 +74,7 @@ class MarketCondition(object):
         except requests.exceptions.RequestException as e:
             print("获取市场行情失败", e)
         return res
+
     """
     获取市场深度
     :param 交易对
@@ -90,9 +91,32 @@ class MarketCondition(object):
         except requests.exceptions.RequestException as e:
             print("获取市场行情失败", e)
         return res
+
     """
-    
+     https://api.exx.com/data/v1/trades?currency=eth_hsr
     """
+    def get_history(self):
+        url = accountConfig.EXX_MARKET['trades_url'] + "?" + "currency=" + self.currency
+        try:
+            response = requests.get(url)
+            res = response.json()
+        except requests.exceptions.RequestException as e:
+            print("获取历史成交失败", e)
+        return res
+
+    """
+    获取K线
+    """
+    def get_klines(self, ktype, ksize):
+        url = accountConfig.EXX_MARKET['klines_url'] + "?" + "market=" + self.currency + \
+              "&type=" + ktype + "&size=" + ksize
+        try:
+            response = requests.get(url)
+            res = response.json()
+        except requests.exceptions.RequestException as e:
+            print("获取K线失败", e)
+        return res
+
     def get_ticker_buy1_price(self):
         res = MarketCondition.get_ticker(self.currency)
         # 处理买一价格
@@ -107,8 +131,8 @@ class MarketCondition(object):
 
 
 # if __name__ == "__main__":
-#     market = MarketCondition()
-#     result = market.get_markets()
+#     market = MarketCondition('eth_usdt')
+#     result = market.get_klines('1day', '30')
 #     print(result)
 
 

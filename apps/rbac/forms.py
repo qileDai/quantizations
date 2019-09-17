@@ -97,7 +97,7 @@ class UserInfoAddModelForm(ModelForm):
         return self.cleaned_data    # 全局钩子要返回所有的数据
 
 
-class RoleModelForm(forms.ModelForm,FormMixin):
+class RoleModelForm(forms.ModelForm, FormMixin):
     class Meta:
         model = Role
         fields = '__all__'
@@ -108,13 +108,15 @@ class RoleModelForm(forms.ModelForm,FormMixin):
         }
 
 
-class PermissionModelForm(forms.ModelForm,FormMixin):
+class PermissionModelForm(forms.ModelForm, FormMixin):
     menu = forms.IntegerField()
+
     class Meta:
         model = Permission
-        fields = ('title','url')
+        fields = ('title', 'url')
 
-class MenuModelForm(ModelForm,FormMixin):
+
+class MenuModelForm(ModelForm, FormMixin):
     class Meta:
         model = Menu
         fields = '__all__'
