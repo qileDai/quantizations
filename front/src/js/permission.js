@@ -42,15 +42,17 @@ Permission.prototype.listenPermissionDeleteEvent = function () {
         console.log(pk);
         xfzalert.alertConfirm({
             'title': '您确定要删除这个权限吗',
-            'confirmCallback':function () {
+            'confirmCallback': function () {
                 xfzajax.post({
                     'url': '/rbac/delete_permission/',
-                    'data':{
+                    'data': {
                         'pk': pk
                     },
-                    'success':function (result) {
-                        if(result['code'] === 200 ){
-                            window.location.reload()
+                    'success': function (result) {
+                        if (result['code'] === 200) {
+                            xfzalert.alertSuccess("删除成功！", function () {
+                                window.location.reload()
+                            })
                         }
                     }
                 })

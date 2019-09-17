@@ -1,21 +1,18 @@
 import re
-from django.forms import ModelForm
+from django import forms
 from apps.deal.models import Account, TradingPlatform, Property,Robot
 from django.forms import fields
 from django.core.exceptions import ValidationError
+from utils.forms import FormMixin
 
 
-class AccountModelForm(ModelForm):
-
+class AccountModelForm(forms.ModelForm,FormMixin):
+    platform = forms.IntegerField()
     class Meta:
         model = Account
-        fields = ['users', 'platform', 'title', 'accesskey', 'secretkey']
+        fields = ['users', 'title', 'accesskey', 'secretkey']
         labels = {
-            'users': '用户',
-            'platform': '平台',
-            'title': '账户名',
-            'accesskey': 'Access Key',
-            'secretkey': 'Secret Key'
+            "title":"账户名称"
         }
 
     # 在类中定义 clean_字段名() 方法，就能够实现对特定字段进行校验。
@@ -28,7 +25,7 @@ class AccountModelForm(ModelForm):
             return title
 
 
-class RobotFrom(ModelForm):
+class RobotFrom(forms.ModelForm):
 
     class Meta:
         model = Robot

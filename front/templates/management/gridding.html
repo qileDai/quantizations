@@ -216,9 +216,11 @@
                                 <span>交易币种</span>
                             </div>
                             <select class="curry" name="curry" id="curry">
-                                <option value="">exx</option>
-                                <option value="">exx</option>
-                                <option value="">exx</option>
+                                <option value="" selected>---请选择---</option>
+                                {% for propertty in properties %}
+                                    <option value="">{{ propertty.currency }}</option>
+                                {% endfor %}
+
                             </select>
                         </div>
                         <div class="trading-market">
@@ -226,10 +228,11 @@
                                 <span>交易市场</span>
                             </div>
                             <select class="market" name="market" id="market">
-                                <option value="">exx-usdt</option>
-                                <option value="">exx-usdt</option>
-                                <option value="">exx-usdt</option>
-                                <option value="">exx-usdt</option>
+                                <option value="" selected>---请选择---</option>
+                                {% for market in markets %}
+                                    <option value="{{ market.pk }}">{{ market.name }}</option>
+                                {% endfor %}
+
                             </select>
                         </div>
                     </div>
@@ -240,12 +243,14 @@
                     <div class="strategy-curry">
                         <span class="title">选中交易对:</span>
                         <span class="curry">LTC/USDT</span>
+                        <img src="{% static 'images/1-1.png' %}" alt="">
                     </div>
                     <div class="strategy-title">
                         <span class="title">选择交易策略</span>
                     </div>
                     <div class="strategy-name">
                         <div class="strategy-button">
+
                             <button class="deal-strategy active girding">网格交易V1.0</button>
                             {#                            <img class="correctimg" src="{% static 'images/correct.png' %}" alt="">#}
                             <button class="deal-strategy triangle">三角套利V1.0</button>
@@ -268,11 +273,13 @@
                     </div>
                     <div class="strategy-parameters">
                         <div class="trading-parameters account-curry">
+
                             <span class="title">交易账户</span>
                             <select class="parameters-control" name="account" id="">
-                                <option value="">EXX</option>
-                                <option value="">EXX</option>
-                                <option value="">EXX</option>
+                                <option value="" selected>---请选择---</option>
+                                {% for account in accounts %}
+                                    <option value="{{ account.pk }}">{{ account.title }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         <div class="trading-parameters account-details">
@@ -353,7 +360,8 @@
                         </div>
                         <div class="riskstrategy">
                             <div>设置风险策略</div>
-                            <div class="stopLoss">止损价 <input class="parameters-control" type="text" value="66.82usdt">
+                            <div class="stopLoss">止损价 <input class="parameters-control" type="text"
+                                                             value="66.82usdt">
                             </div>
                             <div class="warning">预警价<input class="parameters-control" type="text" value="70.21usdt">
                             </div>
@@ -423,7 +431,6 @@
                     <button class="complete -btn hidden" id="btnComplete ">完成</button>
                 </div>
             </div>
-
         </div>
     </div>
     </div>

@@ -26,7 +26,7 @@ class Account(models.Model):
     账户信息
     """
     # 账户名称
-    title = models.CharField(max_length=32, unique=True)
+    title = models.CharField(max_length=32, unique=True,verbose_name="账户名称")
     accesskey = models.CharField(max_length=128, unique=True)
     secretkey = models.CharField(max_length=128, unique=True)
     # 创建时间
@@ -93,17 +93,18 @@ class Robot(models.Model):
     annual_yield = models.DecimalField(max_digits=5, decimal_places=2)          # 年化收益率
     create_time = models.DateTimeField(auto_now_add=True)                       # 创建时间
     status = models.SmallIntegerField(choices=Robot_Status)                     # 状态
-    current_price = models.DecimalField(max_digits=10, decimal_places=2)         # 当前价
+    current_price = models.DecimalField(max_digits=10, decimal_places=2)        # 当前价
     orders_frequency = models.IntegerField()                                    # 挂单频率
-    resistance = models.DecimalField(max_digits=10, decimal_places=2)            # 阻力位
-    support_level = models.DecimalField(max_digits=10, decimal_places=2)         # 支撑位
+    resistance = models.DecimalField(max_digits=10, decimal_places=2)           # 阻力位
+    support_level = models.DecimalField(max_digits=10, decimal_places=2)        # 支撑位
     girding_num = models.IntegerField()                                         # 网格数量
     procudere_fee = models.CharField(max_length=10)                             # 交易手续费
     min_num = models.IntegerField()                                             # 最小网格数量
     max_num = models.IntegerField()                                             # 最大的网格数量
     girding_profit = models.CharField(max_length=32)                            # 网格利润
-    stop_price = models.DecimalField(max_digits=19, decimal_places=2)            # 止损价
-    warning_price = models.DecimalField(max_digits=19, decimal_places=2)         # 预警价
+    stop_price = models.DecimalField(max_digits=19, decimal_places=2)           # 止损价
+    warning_price = models.DecimalField(max_digits=19, decimal_places=2)        # 预警价
+    warning_account = models.CharField(max_length=32)                           #预警账户
 
     class Meta:
         ordering = ['-create_time']

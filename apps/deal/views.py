@@ -27,7 +27,6 @@ class AccountList(LoginRequireMixin, View):
         # 获取用户所有币种
         currency_list = Property.objects.filter(account__users__id=user_id).distinct()
         print(accounts)
-
         # 分页
         paginator = Paginator(accounts, 10)
         page_obj = paginator.page(page)
@@ -52,12 +51,17 @@ class AddAccount(View):
     """
     def post(self, request):
         model_form = AccountModelForm(request.POST)
-        print('-' * 20, model_form)
         if model_form.is_valid():
-            model_form.save()
-            return redirect('../accountlist/')
+            user_id = request.session.get("user_id")
+            title = model_form.cleaned_data.get("title")
+            accesskey = model_form.cleaned_data.get("accesskey")
+            secretkey = model_form.cleaned_data.get("secretkey")
+            platform_id = request.POST.get("platform")
+            Account.objects.create(title=title,accesskey=accesskey,secretkey=secretkey
+                                   ,platform_id=platform_id,users_id=user_id)
+            return restful.ok()
         else:
-            return render(request, 'management/tradingaccount.html', {'model_form': model_form, 'title': '新增用户'})
+            return restful.params_error(model_form.get_errors())
 
 
 class EditAccount(View):
@@ -82,10 +86,12 @@ class DeleteAccount(View):
     """
 
     def post(self, request):
-        id = request.POST.get('pk')
-        account_obj = Account.objects.filter(id=id).first()
-        account_obj.delete()
-        return redirect('../accountlist/')
+        pk = request.POST.get('pk')
+        try:
+            Account.objects.filter(pk=pk).delete()
+            return restful.ok()
+        except:
+            return restful.params_error(message="该账户不存在")
 
 
 class ShowAssert(View):
@@ -245,6 +251,7 @@ class RobotList(View):
             'paginator': paginator,
             'properties': Property.objects.all(),
             'markets': Market.objects.all(),
+            'accounts': Account.objects.all(),
             'url_query': '&' + parse.urlencode({
                 'curry': curry or '',
                 'market': market or '',

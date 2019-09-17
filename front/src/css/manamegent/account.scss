@@ -116,6 +116,7 @@
 
       .account-content {
         margin-bottom: 10px;
+
         label {
           font-weight: 400;
           //margin-top: 20px;
@@ -141,25 +142,27 @@
       .account-button {
         text-align: center;
         margin-top: 20px;
+
+        .confirm {
+          width: 140px;
+          height: 40px;
+          background: #169BD5;
+          color: #F2F2F2;
+          border-radius: 5px;
+          margin-left: 20px;
+        }
+
+        .cancel {
+          width: 140px;
+          height: 40px;
+          background: #169BD5;
+          color: #F2F2F2;
+          border-radius: 5px;
+          margin-right: 20px;
+        }
       }
 
-      .confirm {
-        width: 140px;
-        height: 40px;
-        background: #169BD5;
-        color: #F2F2F2;
-        border-radius: 5px;
-        margin-left: 20px;
-      }
 
-      .cancel {
-        width: 140px;
-        height: 40px;
-        background: #169BD5;
-        color: #F2F2F2;
-        border-radius: 5px;
-        margin-right: 20px;
-      }
     }
 
 

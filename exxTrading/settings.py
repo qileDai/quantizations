@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'apps.rbac',
     'apps.deal',
     'django_crontab',
+    'rest_framework',
+
 ]
 
 MIDDLEWARE = [
