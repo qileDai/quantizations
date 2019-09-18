@@ -80,7 +80,7 @@ class EditAccount(View):
             model_form.save()
             return restful.ok()
         else:
-            return render(request, 'management/tradingaccount.html', {'model_form': model_form, 'title': '编辑用户'})
+            return restful.params_error(model_form.get_errors())
 
 
 class DeleteAccount(View):
@@ -145,7 +145,7 @@ class ShowCollectAsset(View):
         # 汇总资产变化/初始总资产/历史盈亏/
         print('资产汇总', '-'*20)
         print(context_list[0])
-        restful.result(data=context_list[0])
+        return restful.result(data=context_list[0])
 
 
 class ChargeAccount(View):
@@ -157,26 +157,25 @@ class ChargeAccount(View):
         id = request.POST.get('pk')
         account_obj = Account.objects.get(id=id)  # 获取账户信息
         platform = account_obj.platform  # 账户对应的平台
+        print(str(platform))
         currency = request.POST.get('currency')
-        num = request.POST.get('currency-number')
+        num = request.POST.get('num')
         # 根据平台调用对应接口
         try:
-            if platform == 'EXX':
+            if str(platform) == 'EXX':
                 currency_pair = currency.lower() + '_usdt'
                 market_api = MarketCondition(currency_pair)
                 info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
-            elif platform == 'HUOBI':
+            elif str(platform) == 'HUOBI':
                 pass
         except:
             info = 0
         if currency:
             property_obj = Property.objects.filter(Q(account_id=id) & Q(currency=currency))
-
-            print(property_obj.original_assets)
-            original_assets = property_obj.original_assets + float(num)*info['ticker']['last']
-            Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
+            for obj in property_obj:
+                original_assets = float(obj.original_assets) + float(num)*float(info['ticker']['last'])
+                Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
             return restful.ok()
-
 
 
 class WithDraw(View):
@@ -192,21 +191,23 @@ class WithDraw(View):
         num = request.POST.get('currency-number')
         # 根据平台调用对应接口
         try:
-            if platform == 'EXX':
+            if str(platform) == 'EXX':
                 currency_pair = currency.lower() + '_usdt'
                 market_api = MarketCondition(currency_pair)
                 info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
                 # 调用提币接口
                 withdraw_info = market_api.xx
-            elif platform == 'HUOBI':
+            elif str(platform) == 'HUOBI':
                 pass
         except:
             info = 0
         if currency:
             property_obj = Property.objects.filter(Q(account_id=id) & Q(currency=currency))
             # 提币折合成usdt
-            original_assets = property_obj.original_assets + float(num)*info['ticker']['last']
-            Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
+            for obj in property_obj:
+                original_assets = float(obj.original_assets) + float(num)*float(info['ticker']['last'])
+                Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
+            return restful.ok()
 
 
 class ConfigCurrency(View):
@@ -217,8 +218,8 @@ class ConfigCurrency(View):
     def post(self, request):
         currency = request.POST.get('currency')
         if currency:
-            user_id = request.session.get("user_id")
             # 获取账户信息
+            user_id = request.session.get("user_id")
             accounts = Account.objects.filter(id=user_id)
 
             for obj in accounts:
@@ -261,11 +262,12 @@ class GetAccountInfo(View):
     def post(self, request):
         currency = request.POST.get('curry-title')
         market = request.POST.get('market-title')
-        last = request.POST.get('current-price')
         id = request.POST.get('pk')
         # 获取账户所属的用户信息
         account_obj = Account.objects.filter(id=id)
         platform = account_obj.platform  # 账户对应的平台
+        # 获取用户信息
+        user_obj = UserInfo.objects.all()
         if platform == 'EXX':
             # 创建交易接口对象
             con = ExxService(account_obj.accesskey, account_obj.secretkey)
@@ -280,7 +282,7 @@ class GetAccountInfo(View):
             pass
 
         # 计算阻力位/支撑位的默认值
-        if float(info2['limit']) <= 30:
+        if int(info2['limit']) <= 30:
             max = 0
             min = 0
             for i in info2['datas']['data']:
@@ -293,10 +295,12 @@ class GetAccountInfo(View):
             'last': info1['ticker'].get('last'),
             'resistance': float(max/30),
             'support_level': float(min/30),
+            'users': user_obj,
         }
         print(info, info1, info2)
         print(context)
         return render(request, 'management/tradingaccount.html', context)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 机器人管理

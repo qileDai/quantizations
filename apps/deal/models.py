@@ -26,7 +26,7 @@ class Account(models.Model):
     账户信息
     """
     # 账户名称
-    title = models.CharField(max_length=32, unique=True,verbose_name="账户名称")
+    title = models.CharField(max_length=32, unique=True, verbose_name="账户名称")
     accesskey = models.CharField(max_length=128, unique=True)
     secretkey = models.CharField(max_length=128, unique=True)
     # 创建时间
@@ -104,7 +104,7 @@ class Robot(models.Model):
     girding_profit = models.CharField(max_length=32)                            # 网格利润
     stop_price = models.DecimalField(max_digits=19, decimal_places=2)           # 止损价
     warning_price = models.DecimalField(max_digits=19, decimal_places=2)        # 预警价
-    warning_account = models.CharField(max_length=32)                           #预警账户
+    warning_account = models.CharField(max_length=32)                           # 预警账户
 
     class Meta:
         ordering = ['-create_time']

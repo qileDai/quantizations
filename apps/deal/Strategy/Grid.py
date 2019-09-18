@@ -8,13 +8,13 @@ from dealapi.exx.exxMarket import MarketCondition
 
 
 class GridStrategy(Thread):
-    def __init__(self, *args):
+    def __init__(self, **kwargs):
         super().__init__()
-        self.starting_price = args[0]
-        self.grid_counts = args[1]
-        self.trade_amount = args[2]
-        self.currency_type = args[3]
-        self.order_type = args[4]
+        self.starting_price = kwargs['starting_price']
+        self.grid_counts = kwargs['grid_counts']
+        self.trade_amount = kwargs['trade_amount']     # 交易数量需校验
+        self.currency_type = kwargs['currency_type']
+        self.order_type = kwargs['order_type']
         self.id_list = list()
 
     def log_info(self, log_name):
@@ -34,8 +34,8 @@ class GridStrategy(Thread):
         获取市场行情数据
         :return:
         """
-        data_api = DataAPI()
-        markets_data = data_api.markets_api()[self.currency_type]
+        data_api = MarketCondition()
+        markets_data = data_api.get_markets()[self.currency_type]
         return markets_data
 
     def connect_db(self, sql):
