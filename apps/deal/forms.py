@@ -6,13 +6,13 @@ from django.core.exceptions import ValidationError
 from utils.forms import FormMixin
 
 
-class AccountModelForm(forms.ModelForm,FormMixin):
-    platform = forms.IntegerField()
+class AccountModelForm(forms.ModelForm, FormMixin):
+
     class Meta:
         model = Account
-        fields = ['users', 'title', 'accesskey', 'secretkey']
+        fields = ['users', 'platform', 'title', 'accesskey', 'secretkey']
         labels = {
-            "title":"账户名称"
+            "title": "账户名称",
         }
 
     # 在类中定义 clean_字段名() 方法，就能够实现对特定字段进行校验。

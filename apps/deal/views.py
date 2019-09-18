@@ -52,13 +52,13 @@ class AddAccount(View):
     def post(self, request):
         model_form = AccountModelForm(request.POST)
         if model_form.is_valid():
+            # save()返回一个还未保存至数据库的对象,用这个对象添加一些额外的数据，然后在用save()保存到数据库
+            obj = model_form.save(commit=False)
             user_id = request.session.get("user_id")
-            title = model_form.cleaned_data.get("title")
-            accesskey = model_form.cleaned_data.get("accesskey")
-            secretkey = model_form.cleaned_data.get("secretkey")
-            platform_id = request.POST.get("platform")
-            Account.objects.create(title=title,accesskey=accesskey,secretkey=secretkey
-                                   ,platform_id=platform_id,users_id=user_id)
+            user_obj = UserInfo.objects.get(id=user_id)
+            # 添加数据需为模型类对象
+            obj.users = user_obj
+            obj.save()
             return restful.ok()
         else:
             return restful.params_error(model_form.get_errors())
@@ -76,7 +76,7 @@ class EditAccount(View):
         model_form = AccountModelForm(request.POST, instance=account_obj)
         if model_form.is_valid():
             model_form.save()
-            return redirect('../accountlist/')
+            return restful.ok()
         else:
             return render(request, 'management/tradingaccount.html', {'model_form': model_form, 'title': '编辑用户'})
 
@@ -141,10 +141,9 @@ class ShowCollectAsset(View):
                     else:
                         context_list[0]['assets_dict'][key][key1] = value1
         # 汇总资产变化/初始总资产/历史盈亏/
-        # return render(request, 'management/tradingaccount.html', context_list[0])
         print('资产汇总', '-'*20)
         print(context_list[0])
-        return HttpResponse('ok')
+        restful.result(data=context_list[0])
 
 
 class ChargeAccount(View):
