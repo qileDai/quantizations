@@ -42,8 +42,7 @@ class AccountList(LoginRequireMixin, View):
             # 用户所有账户币种信息
             'currency_list': currency_list,
         }
-        context.update(context_data)
-        return render(request, 'management/tradingaccount.html', context)
+        return render(request, 'management/tradingaccount.html', context=context)
 
 
 class AddAccount(View):
@@ -108,7 +107,11 @@ class ShowAssert(View):
         con = GetAssets(id, account_obj, platform)
         data = con.showassets()
         print(type(data))
-        return restful.result(data=data)
+        return render(request,'management/tradingaccount.html')
+        # return restful.result(data=data)
+        # return render(request,'management/tradingaccount.html',context=data)
+
+
 
 
 class ShowCollectAsset(View):

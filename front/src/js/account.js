@@ -83,14 +83,17 @@ Account.prototype.listenPropertyDetailsShowEvent = function () {
             'data': {
                 'pk': pk
             },
-            'success': function (result) {
-                console.log("suceesee")
-                console.log(result)
-                if (result['code'] === 200) {
-                    console.log(result)
-                    data = result
-                }
-            }
+            // 'success': function (result) {
+            //     console.log("suceesee")
+            //     console.log(result)
+            //     if (result['code'] === 200) {
+            //         datas = result['data']
+            //         console.log(datas['Platform_name'])
+            //         console.log(datas['asset_change'])
+            //         console.log(datas['assets_dict'])
+            //         console.log(datas['history_profit'])
+            //     }
+            // }
         });
     });
     closeBtn.click(function () {
