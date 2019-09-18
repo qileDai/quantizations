@@ -48,8 +48,12 @@ Account.prototype.listPropertyTotalShowHideEvent = function () {
 Account.prototype.listenShowHideCurryWrapper = function () {
     var self = this;
     var closeBtn = $('.close-btn');
-    $('#account-curry-configuration').click(function () {
+    $('.add-property').click(function () {
         self.curryWrapper.show()
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var pk = tr.attr('data-id');
+        self.chargeAccountEvent(pk)
     });
     closeBtn.click(function () {
         self.curryWrapper.hide();
@@ -156,6 +160,31 @@ Account.prototype.listenSubmitAccount = function () {
             }
         });
     });
+}
+
+Account.prototype.chargeAccountEvent = function (pk) {
+    var confirmBtn = $('.curry-confirm')
+    confirmBtn.click(function () {
+        num = $('#currency-number').val()
+        currency = $('#currency').val()
+        console.log("*" )
+        console.log(num,currency,pk)
+        xfzajax.post({
+            'url': '/deal/chargeaccount/',
+            'data': {
+                'pk': pk,
+                'num': num,
+                'currency': currency,
+            },
+            'success': function (result) {
+                if (result['code'] === 200) {
+                    xfzalert.alertSuccess("增资成功", function () {
+                        window.location.reload();
+                    })
+                }
+            }
+        })
+    })
 }
 
 

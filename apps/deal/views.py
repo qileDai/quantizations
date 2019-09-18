@@ -41,7 +41,9 @@ class AccountList(LoginRequireMixin, View):
             'platfotms': TradingPlatform.objects.all(),
             # 用户所有账户币种信息
             'currency_list': currency_list,
+            'properties': Property.objects.all(),
         }
+        context.update(context_data)
         return render(request, 'management/tradingaccount.html', context=context)
 
 
@@ -169,8 +171,12 @@ class ChargeAccount(View):
             info = 0
         if currency:
             property_obj = Property.objects.filter(Q(account_id=id) & Q(currency=currency))
+
+            print(property_obj.original_assets)
             original_assets = property_obj.original_assets + float(num)*info['ticker']['last']
             Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
+            return restful.ok()
+
 
 
 class WithDraw(View):
