@@ -202,7 +202,9 @@ class WithDraw(View):
             elif str(platform) == 'HUOBI':
                 pass
         except:
-            info = 0
+            info = dict()
+            info['ticker'] = {}
+            info['last'] = 0
         if currency:
             property_obj = Property.objects.filter(Q(account_id=id) & Q(currency=currency))
             # 提币折合成usdt
