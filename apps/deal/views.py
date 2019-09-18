@@ -169,7 +169,9 @@ class ChargeAccount(View):
             elif str(platform) == 'HUOBI':
                 pass
         except:
-            info = 0
+            info = dict()
+            info['ticker'] = {}
+            info['last'] = 0
         if currency:
             property_obj = Property.objects.filter(Q(account_id=id) & Q(currency=currency))
             for obj in property_obj:
