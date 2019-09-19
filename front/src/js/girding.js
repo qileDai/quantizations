@@ -133,6 +133,7 @@ Robot.prototype.run = function () {
     self.listenTradingRobotEvent();
     self.listenCreatTradingEvent();
     self.listenparameterEven();
+    self.listenClickStragerty();
 
 };
 
@@ -330,6 +331,19 @@ Robot.prototype.getAccountInfoEvent = function(){
     var parantersGroup = $('.strategy-parameters')
     id = parantersGroup.find("select['name='account']").val()
 
+
+}
+
+
+Robot.prototype.listenClickStragerty = function(){
+    var btnList = $('.deal-strategy')
+    console.log(btnList)
+    btnList.each(function (index,element) {
+        var btn = $(element)
+        btn.click(function () {
+            btn.addClass('active').siblings().removeClass('active')
+        })
+    })
 
 }
 
