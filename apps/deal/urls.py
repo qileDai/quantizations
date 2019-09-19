@@ -15,5 +15,6 @@ urlpatterns = [
     path('configcurrency/', views.ConfigCurrency.as_view(), name='configcurrency'),
     path('showcollectasset/', views.ShowCollectAsset.as_view(), name='showcollectasset'),
     path('robotList/', views.RobotList.as_view(), name='robotList'),
+    path('accountinfo/', views.accountinfo, name='accountinfo'),
 
 ]

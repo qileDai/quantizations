@@ -18,6 +18,7 @@ Account.prototype.run = function () {
     self.listtenPropertyDetailsCloseEvent();
     self.deleteAccount();
     self.listenSubmitAccount();
+    // self.listenEditAccount();
 
 }
 
@@ -27,6 +28,18 @@ Account.prototype.listenShowHideAddAccount = function () {
     $('#add-account-btn').click(function () {
         self.accountWrapper.show()
     });
+    $('.update-property').on('click', function () {
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var pk = tr.attr('data-id');
+        self.accountWrapper.show()
+        xfzajax.post({
+            'url': '/deal/accountinfo/',
+            'data': {
+                'pk': pk,
+            }
+        })
+    })
     closeBtn.click(function () {
         self.accountWrapper.hide()
     });
@@ -132,24 +145,70 @@ Account.prototype.deleteAccount = function () {
     })
 }
 
-Account.prototype.listenSubmitAccount = function () {
-    console.log("sdaf")
-    var confirmBtn = $('.confirm');
-    var account = $('.account-body');
-    confirmBtn.click(function () {
+Account.prototype.listenEditAccount = function () {
+    var self = this;
+    $('.update-property').on('click', function () {
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var pk = tr.attr('data-id');
+        var account = $('.account-body');
         platform = $('#platform').find("option:selected").val()
         title = account.find("input[name='account-name']").val()
         accesskey = account.find("input[name='access']").val()
         secretkey = account.find("input[name='scrent']").val()
-        console.log("screnn")
-        console.log(platform, title, secretkey, secretkey)
+        var url = ''
+        if (pk) {
+            url = '/deal/editaccount/'
+        } else {
+            url = '/deal/addaccount/'
+        }
         xfzajax.post({
-            'url': '/deal/addaccount/',
+            'url': url,
             'data': {
                 'platform': platform,
                 'title': title,
                 'accesskey': accesskey,
                 'secretkey': secretkey,
+                'pk': pk,
+            },
+            'success': function (result) {
+                if (result['code'] === 200) {
+                    xfzalert.alertSuccess("添加账户成功！", function () {
+                        window.location.reload()
+                    });
+                }
+            }
+        });
+
+    })
+
+}
+Account.prototype.listenSubmitAccount = function () {
+    var confirmBtn = $('.confirm');
+
+    confirmBtn.click(function () {
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var pk = tr.attr('data-id');
+        var account = $('.account-body');
+        platform = $('#platform').find("option:selected").val()
+        title = account.find("input[name='account-name']").val()
+        accesskey = account.find("input[name='access']").val()
+        secretkey = account.find("input[name='scrent']").val()
+        var url = ''
+        if (pk) {
+            url = '/deal/editaccount/'
+        } else {
+            url = '/deal/addaccount/'
+        }
+        xfzajax.post({
+            'url': url,
+            'data': {
+                'platform': platform,
+                'title': title,
+                'accesskey': accesskey,
+                'secretkey': secretkey,
+                'pk': pk,
             },
             'success': function (result) {
                 if (result['code'] === 200) {
@@ -167,8 +226,8 @@ Account.prototype.chargeAccountEvent = function (pk) {
     confirmBtn.click(function () {
         num = $('#currency-number').val()
         currency = $('#currency').val()
-        console.log("*" )
-        console.log(num,currency,pk)
+        console.log("*")
+        console.log(num, currency, pk)
         xfzajax.post({
             'url': '/deal/chargeaccount/',
             'data': {

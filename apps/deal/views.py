@@ -7,7 +7,7 @@ from urllib import parse
 from apps.deal.asset.get_assets import GetAssets
 from dealapi.exx.exxMarket import MarketCondition
 from dealapi.exx.exxService import ExxService
-from .forms import AccountModelForm, RobotFrom
+from .forms import AccountModelForm, RobotFrom,EditAccountFrom
 from django.db.models import Q
 from utils.mixin import LoginRequireMixin
 from utils import restful
@@ -65,22 +65,44 @@ class AddAccount(View):
         else:
             return restful.params_error(model_form.get_errors())
 
+def accountinfo(request):
+        accout_id = request.POST.get('pk')
+        print("ss")
+        print(accout_id)
+        account = Account.objects.get(pk=accout_id)
+        context = {
+           'account': account,
+        }
+        print(account)
+        return render(request,'management/tradingaccount.html',context=context)
 
 class EditAccount(View):
     """
     编辑账户
     """
+    def get(self,request):
+        accout_id = request.GET.get('account_id')
+        print(accout_id)
+        account = Account.objects.get(pk=accout_id)
+        # context = {
+        #    'account': account,
+        # }
+        # print(account)
+        return render(request,'management/tradingaccount.html')
 
     def post(self, request):
-        id = request.POST.get('pk')
-        account_obj = Account.objects.filter(id=id).first()
-        # instance表示一个模型类对象，确定编辑哪一条数据
-        model_form = AccountModelForm(request.POST, instance=account_obj)
-        if model_form.is_valid():
-            model_form.save()
+        form = EditAccountFrom(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data.get('title')
+            accesskey = form.cleaned_data.get('accesskey')
+            secretkey = form.cleaned_data.get('secretkey')
+            platform = form.cleaned_data.get('platform')
+            pk = form.cleaned_data.get('pk')
+            user_id = request.session.get("user_id")
+            Account.objects.filter(pk=pk).update(title=title,accesskey=accesskey,secretkey=secretkey,platform=platform,user_id=user_id)
             return restful.ok()
         else:
-            return restful.params_error(model_form.get_errors())
+            return restful.params_error(form.get_errors())
 
 
 class DeleteAccount(View):
@@ -303,7 +325,7 @@ class GetAccountInfo(View):
         }
         print(info, info1, info2)
         print(context)
-        return render(request, 'management/tradingaccount.html', context)
+        return render(request, 'management/gridding.html', context)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

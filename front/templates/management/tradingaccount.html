@@ -43,7 +43,7 @@
                                 <td>{{ account.createtime }}</td>
                                 <td>
                                     <a class="check-property" id="check-property-total" href="#">查看资产</a>
-                                    <a class="update-property" href="">修改</a>
+                                    <a class="update-property" href="#" account_id= {{ account.pk }}>修改</a>
                                     <a class="delete-property" href="#">删除</a>
                                     <a class="add-property" href="#">增资</a>
                                     <a class="mention-money" href="#">提币</a>
@@ -77,6 +77,10 @@
                     </div>
                     <div class="account-content ">
                         <label class="accountname-label" for="">账户名称</label>
+                        {% if account %}
+                            <input class="account-controlt name " name="account-name" value="{{ account.title }}"
+                                   type="text">
+                        {% endif %}
                         <input class="account-controlt name " name="account-name" type="text">
                     </div>
                     <div class="account-content  ">

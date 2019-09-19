@@ -326,6 +326,12 @@ Robot.prototype.listenparameterEven = function(){
     })
 }
 
+Robot.prototype.getAccountInfoEvent = function(){
+    var parantersGroup = $('.strategy-parameters')
+    id = parantersGroup.find("select['name='account']").val()
+
+
+}
 
 
 
