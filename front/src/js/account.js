@@ -18,6 +18,7 @@ Account.prototype.run = function () {
     self.listtenPropertyDetailsCloseEvent();
     self.deleteAccount();
     self.listenSubmitAccount();
+    self.listendenominationEvent();
     // self.listenEditAccount();
 
 }
@@ -45,6 +46,21 @@ Account.prototype.listenShowHideAddAccount = function () {
     });
 
 };
+
+
+Account.prototype.listendenominationEvent = function () {
+
+    $('#account-curry-configuration').on('click', function () {
+        $('.denomination-mask-account-wrapper').show();
+        $('.denomination-account-wrapper').show();
+    })
+
+    $('.denomination-close-btn').on('click', function () {
+        $('.denomination-mask-account-wrapper').hide();
+        $('.denomination-account-wrapper').hide();
+
+    })
+}
 
 Account.prototype.listPropertyTotalShowHideEvent = function () {
     var self = this;

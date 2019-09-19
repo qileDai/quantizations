@@ -134,6 +134,7 @@ Robot.prototype.run = function () {
     self.listenCreatTradingEvent();
     self.listenparameterEven();
     self.listenClickStragerty();
+    // self.getAccountInfoEvent();
 
 };
 
@@ -160,6 +161,90 @@ Robot.prototype.loadstepEvent =function(){
         },]
     });
 }
+
+Robot.prototype.listenClickRobotEaaavent = function () {
+
+    var self = this;
+
+    var btnPre = $("#btnPre")
+    var btnNext = $("#btnNext")
+    var robotDataArray = new Array(self.tradingOnWrapper, self.tradingStrategyWrapper, self.setStrategyWrapper, self.setRiskWrapper)
+    var arrayLength = robotDataArray.length
+    var num = 0;
+    var creatrobotclick = 0
+    // console.log(arrayLength)
+    // if (arrayLength <= 1)
+    //     return;
+    $('#create-robot').on('click', function () {
+        if (creatrobotclick==0){
+             self.robotWrapper.show();
+              robotDataArray[num].show()
+             creatrobotclick++
+        }else{
+            console.log(creatrobotclick)
+             self.robotWrapper.show()
+        }
+
+        $("#btnPre").unbind();
+        btnPre.click(function () {
+             console.log('num')
+            if (num<=0){
+               num=0;
+               // li[num].show().sibling().hide();
+            }else {
+                num--;
+                 $('#btnNext').text('下一步')
+               // li[num].show().sibling().hide();
+
+            }
+            //跳转到上一个步骤
+            $(".ystep").prevStep();
+
+             console.log('val',robotDataArray)
+            for (var i=0;i<robotDataArray.length;i++){
+
+                if(num=== i){
+                    robotDataArray[i].show()
+                }else {
+                    robotDataArray[i].hide()
+                }
+            }
+        });
+        $("#btnNext").unbind();
+        btnNext.click(function () {
+            console.log('next')
+            if (num>=2){
+                $('#btnNext').text('完成')
+                num=3;
+
+
+            }else{
+                num++;
+                $('#btnNext').text('下一步')
+            }
+            //跳转到下一个步骤
+            $(".ystep").nextStep();
+            // var stepNum = $(".ystep").getStep();
+            // robotDataArray[stepNum+1].show()
+            // console.log(stepNum)
+            $.each(robotDataArray,function (key,value) {
+                if(num=== key){
+                    value.show()
+                }else {
+                    value.hide()
+                }
+            })
+
+        });
+        $('.warninguser label').on('click', function () {
+           $(this).toggleClass('btn-success')
+        })
+
+    })
+
+
+}
+
 
 Robot.prototype.listenClickRobotEvent = function () {
 
@@ -231,6 +316,32 @@ Robot.prototype.listenClickRobotEvent = function () {
         });
         $("#btnNext").unbind();
         btnNext.click(function () {
+
+
+
+            var transactionCurrency = $('#curry').find(" option:selected").text();//交易币种
+            var markettitle =$('#market').find(" option:selected").text();//交易市场
+            console.log(transactionCurrency);
+            $('.trading-strategy .strategy-curry .curry').text(transactionCurrency)
+            $('.trading-strategy .strategy-curry .curry1').text(markettitle)
+
+            var strategytitle = '网格交易v1.0'
+            $('.strategy-name .strategy-button button').unbind();
+            $('.strategy-name .strategy-button button').on('click', function () {
+                $(this).addClass('active').siblings().removeClass('active');
+                var strategytitle = $(this).text();//交易策略
+                 console.log(strategytitle);
+                $('.set-strategy .strategy-title .curry').text(strategytitle)
+
+            })
+
+            $('.set-strategy .strategy-curry .curry').text(transactionCurrency)
+            $('.set-strategy .strategy-curry .curry1').text(markettitle)
+
+
+
+
+
             console.log('next')
             if (num>=2){
                 $('#btnNext').text('完成')
@@ -330,6 +441,7 @@ Robot.prototype.listenparameterEven = function(){
 Robot.prototype.getAccountInfoEvent = function(){
     var parantersGroup = $('.strategy-parameters')
     id = parantersGroup.find("select['name='account']").val()
+    console.log(id)
 
 
 }
@@ -337,14 +449,12 @@ Robot.prototype.getAccountInfoEvent = function(){
 
 Robot.prototype.listenClickStragerty = function(){
     var btnList = $('.deal-strategy')
-    console.log(btnList)
     btnList.each(function (index,element) {
         var btn = $(element)
         btn.click(function () {
             btn.addClass('active').siblings().removeClass('active')
         })
     })
-
 }
 
 
