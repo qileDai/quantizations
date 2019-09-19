@@ -305,8 +305,8 @@ Robot.prototype.listenClickRobotEvent = function () {
         });
         $("#btnNext").unbind();
         btnNext.click(function () {
-            var transactionCurrency = $('#curry').find(" option:selected").val();//交易币种
-            var markettitle =$('#market').find(" option:selected").val();//交易市场
+            var transactionCurrency = $('#curry').find(" option:selected").text();//交易币种
+            var markettitle =$('#market').find(" option:selected").text();//交易市场
             var text= transactionCurrency + '/' + markettitle
             $('.trading-strategy .strategy-curry .curry').text(text)
             // $('.trading-strategy .strategy-curry .curry1').text(markettitle)
