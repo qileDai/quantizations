@@ -133,7 +133,7 @@ Robot.prototype.run = function () {
     self.listenTradingRobotEvent();
     self.listenCreatTradingEvent();
     self.listenparameterEven();
-    self.listenClickStragerty();
+    // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
 };
@@ -291,17 +291,6 @@ Robot.prototype.listenClickRobotEvent = function () {
             }
             //跳转到上一个步骤
             $(".ystep").prevStep();
-            // var stepNum = $(".ystep").getStep();
-            // console.log(stepNum)
-            // robotDataArray[stepNum-1]
-           // $.each(robotDataArray,function (key,value) {
-           //     console.log('val',value)
-           //      if(num=== key){
-           //          value.show()
-           //      }else {
-           //          value.hide()
-           //      }
-           //  })
              console.log('val',robotDataArray)
             for (var i=0;i<robotDataArray.length;i++){
 
@@ -316,14 +305,11 @@ Robot.prototype.listenClickRobotEvent = function () {
         });
         $("#btnNext").unbind();
         btnNext.click(function () {
-
-
-
-            var transactionCurrency = $('#curry').find(" option:selected").text();//交易币种
-            var markettitle =$('#market').find(" option:selected").text();//交易市场
-            console.log(transactionCurrency);
-            $('.trading-strategy .strategy-curry .curry').text(transactionCurrency)
-            $('.trading-strategy .strategy-curry .curry1').text(markettitle)
+            var transactionCurrency = $('#curry').find(" option:selected").val();//交易币种
+            var markettitle =$('#market').find(" option:selected").val();//交易市场
+            var text= transactionCurrency + '/' + markettitle
+            $('.trading-strategy .strategy-curry .curry').text(text)
+            // $('.trading-strategy .strategy-curry .curry1').text(markettitle)
 
             var strategytitle = '网格交易v1.0'
             $('.strategy-name .strategy-button button').unbind();
@@ -337,11 +323,6 @@ Robot.prototype.listenClickRobotEvent = function () {
 
             $('.set-strategy .strategy-curry .curry').text(transactionCurrency)
             $('.set-strategy .strategy-curry .curry1').text(markettitle)
-
-
-
-
-
             console.log('next')
             if (num>=2){
                 $('#btnNext').text('完成')
