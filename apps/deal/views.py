@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.views.generic import View
-from .models import Account, Property, LastdayAssets, Market, Robot, TradingPlatform
+from .models import Account, Property, LastdayAssets, Market, Robot, TradingPlatform, OrderInfo
 from apps.rbac.models import UserInfo
 from django.core.paginator import Paginator
 from urllib import parse
@@ -11,8 +11,8 @@ from .forms import AccountModelForm, RobotFrom,EditAccountFrom
 from django.db.models import Q
 from utils.mixin import LoginRequireMixin
 from utils import restful
-
-# Create your views here.
+from apps.deal.Strategy.Grid import GridStrategy
+# Create your views here.r
 
 
 class AccountList(LoginRequireMixin, View):
@@ -132,11 +132,8 @@ class ShowAssert(View):
         con = GetAssets(id, account_obj, platform)
         data = con.showassets()
         print(type(data))
-        return render(request,'management/tradingaccount.html')
+        return render(request, 'management/tradingaccount.html')
         # return restful.result(data=data)
-        # return render(request,'management/tradingaccount.html',context=data)
-
-
 
 
 class ShowCollectAsset(View):
@@ -213,7 +210,7 @@ class WithDraw(View):
         account_obj = Account.objects.get(id=id)  # 获取账户信息
         platform = account_obj.platform  # 账户对应的平台
         currency = request.POST.get('currency')
-        num = request.POST.get('currency-number')
+        num = request.POST.get('num')
         # 根据平台调用对应接口
         try:
             if str(platform) == 'EXX':
@@ -221,7 +218,7 @@ class WithDraw(View):
                 market_api = MarketCondition(currency_pair)
                 info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
                 # 调用提币接口
-                withdraw_info = market_api.xx
+                withdraw_info = ExxService.xx()
             elif str(platform) == 'HUOBI':
                 pass
         except:
@@ -277,9 +274,9 @@ class GetParams(View):
         # is_valid()方法会根据model字段的类型以及自定义方法来验证提交的数据
         if model_form.is_valid():
             model_form.save()
-            return redirect('../robotList/')
+            return restful.ok()
         else:
-            return render(request, 'management/gridding.html', {'model_form': model_form, 'title': '创建机器人'})
+            return restful.params_error(message="创建机器人失败")
 
 
 class GetAccountInfo(View):
@@ -292,7 +289,8 @@ class GetAccountInfo(View):
         id = request.POST.get('pk')
         # 获取账户所属的用户信息
         account_obj = Account.objects.filter(id=id)
-        platform = account_obj.platform  # 账户对应的平台
+        # 账户对应的平台
+        platform = account_obj.platform
         # 获取用户信息
         user_obj = UserInfo.objects.all()
         if platform == 'EXX':
@@ -320,14 +318,44 @@ class GetAccountInfo(View):
             'currency': info[currency.upper()].get('balance'),
             'market': info[market.upper()].get('balance'),
             'last': info1['ticker'].get('last'),
-            'resistance': float(max/30),
-            'support_level': float(min/30),
+            'resistance': float(max/int(info2['limit'])),
+            'support_level': float(min/int(info2['limit'])),
             'users': user_obj,
         }
         print(info, info1, info2)
         print(context)
         return render(request, 'management/gridding.html', context)
 
+
+class StartRobot(View):
+    """
+    运行机器人
+    """
+    def post(self, request):
+        ids = request.POST.get('robot_id')
+        # 调用对应策略
+        for id in ids:
+            robot_obj = Robot.objects.get(id=id)
+            if robot_obj.trading_strategy == '网格策略V1.0':
+                thread1 = GridStrategy(
+                    robot_obj=robot_obj,
+                    order_type="buy",
+                )
+                thread2 = GridStrategy(
+                    account_id=robot_obj.trading_account_id,
+                    current_price=robot_obj.current_price,
+                    grid_num=robot_obj.girding_num,
+                    trade_amount=(robot_obj.min_num, robot_obj.max_num),
+                    currency_type=robot_obj.currency + '_' + robot_obj.market,
+
+                    order_type="buy"
+                )
+                thread1.start()
+                thread2.start()
+            elif robot_obj.trading_strategy == '三角套利V1.0':
+                pass
+            elif robot_obj.trading_strategy == '搬砖套利V1.0':
+                pass
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 机器人管理

@@ -14,7 +14,6 @@ class ExxService(object):
         self.secretkey = secretkey
         self.accesskey = "accesskey=" + accesskey
 
-
     def sha512_signature(self, params):
         current_time = str(int(time.time() * 1000))
         # 拼接加密参数assckey、时间、参数
@@ -146,6 +145,11 @@ class ExxService(object):
     https://trade.exx.com/api/getChargeAddress?accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&signature=请求加密签名串
     """
     def get_chargeaddress(self, currency):
+        """
+        获取充币地址
+        :param currency: 币种
+        :return:
+        """
         params = ""
         current_time = str(int(time.time() * 1000))
         url = self.baseUrl + "getChargeAddress?" + self.accesskey + "&currency=" + currency + \
@@ -159,6 +163,11 @@ class ExxService(object):
     
     """
     def get_chargerecord(self, currency):
+        """
+        获取充值记录
+        :param currency: 币种
+        :return: 返回充值记录
+        """
         params = ""
         current_time = str(int(time.time() * 1000))
         url = self.baseUrl + "getChargeRecord?" + self.accesskey + "&currency=" + currency + \
@@ -171,6 +180,11 @@ class ExxService(object):
     https://trade.exx.com/api/getWithdrawAddress?accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&signature=请求加密签名串
     """
     def get_withdrawaddress(self, currency):
+        """
+        获取提币地址
+        :param currency: 币种
+        :return:
+        """
         params = ""
         current_time = str(int(time.time() * 1000))
         url = self.baseUrl + "getWithdrawAddress?" + self.accesskey + "&currency=" + currency + \
@@ -183,6 +197,11 @@ class ExxService(object):
     https://trade.exx.com/api/getWithdrawRecord?accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&pageIndex=页数&signature=请求加密签名串
     """
     def get_withdrawrecord(self, currency):
+        """
+        提币地址
+        :param currency: 币种
+        :return:
+        """
         params = ""
         current_time = str(int(time.time() * 1000))
         url = self.baseUrl + "getWithdrawRecord?" + self.accesskey + "&currency=" + currency + \
@@ -195,6 +214,13 @@ class ExxService(object):
     https://trade.exx.com/api/withdraw?accesskey=your_access_key&amount=10&currency=qtum&nonce=当前时间毫秒数&receiveAddr=提币地址&safePwd=提币密码&signature=请求加密签名串
     """
     def withdraw(self, currency, amount, pwd):
+        """
+        提币
+        :param currency: 币种
+        :param amount: 提币数量
+        :param pwd: 提币密码
+        :return:
+        """
         params = ""
         current_time = str(int(time.time() * 1000))
         url = self.baseUrl + "withdraw?" + self.accesskey + "&amount=" + amount + "&currency=" + currency + \

@@ -29,6 +29,8 @@ class GetAssets(object):
         elif self.platform.Platform_name == 'HUOBI':
             # 返回数据格式需要统一, 待完成-----------------------------------------------
             pass
+        elif self.platform.Platform_name == 'BINANCE':
+            pass
 
         if self.flag:
             # self.flag为True，表示账户数据汇总，不同平台需获取EXX参考价进行折算
