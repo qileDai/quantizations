@@ -272,6 +272,107 @@
 
 
 }
+.account-carry-curry-wrapper {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  display: none;
+
+  .curry-wrapper {
+    width: 450px;
+    height: 330px;
+    position: absolute;
+    top: 30%;
+    left: 40%;
+    background: white;
+    border-radius: 5px;
+
+    .close-group {
+      width: 100%;
+      height: 40px;
+      background: #ffffff;
+      border-bottom: 1px solid #F2F2F2;
+      border-radius: 5px;
+
+      .close-btn {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        float: right;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+    }
+
+    .curry-modal-header {
+
+      .role-modal-header-inner {
+        margin-top: -30px;
+        font-weight: 800;
+        margin-left: 20px;
+      }
+    }
+
+    .curry-body {
+      margin-top: 10px;
+      padding: 20px;
+      text-align: right;
+
+      .form-group {
+        label {
+          font-weight: 400;
+          margin-top: 10px;
+          margin-bottom: 30px;
+        }
+
+        .curry-controlt {
+          width: 280px;
+          height: 40px;
+          //border-radius: 4px;
+          margin-left: 10px;
+          float: right;
+          //border-bottom: 1px solid #F2F2F2;
+
+
+        }
+
+      }
+    }
+
+    .curry-modal-footer {
+      .account-button {
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      .confirm {
+        width: 140px;
+        height: 40px;
+        background: #169BD5;
+        color: #F2F2F2;
+        border-radius: 5px;
+        margin-left: 20px;
+      }
+
+      .cancel {
+        width: 140px;
+        height: 40px;
+        background: #169BD5;
+        color: #F2F2F2;
+        border-radius: 5px;
+        margin-right: 20px;
+      }
+    }
+
+
+  }
+
+
+}
 
 .property {
   * span {

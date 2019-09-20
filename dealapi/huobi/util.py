@@ -9,7 +9,7 @@ import urllib.request
 
 import requests
 
-import accountConfig
+from dealapi import accountConfig
 
 # 在此输入您的Key
 ACCESS_KEY = accountConfig.HUOBI["CNY_1"]["ACCESS_KEY"]

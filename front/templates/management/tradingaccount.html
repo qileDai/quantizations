@@ -115,11 +115,7 @@
             </div>
         </form>
     </div>
-
-
-
-
-
+    <!--添加账户弹框-->
     <div class="add-account-wrapper">
         <form action="">
             <div class="account-wrapper">
@@ -160,7 +156,7 @@
             </div>
         </form>
     </div>
-
+    <!--添加币种弹框-->
     <div class="account-curry-wrapper">
         <form action="">
             <div class="curry-wrapper">
@@ -182,6 +178,39 @@
                     </div>
                     <div class="form-group ">
                         <label class="accountname-label" for="">增加数量</label>
+                        <input class="curry-controlt name " name="currency-number" id="currency-number" type="text">
+                    </div>
+                </div>
+                <div class="curry-modal-footer">
+                    <div class="account-button">
+                        <button class="cancel">取消</button>
+                        <a class="curry-confirm">确定</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="account-carry-curry-wrapper">
+        <form action="">
+            <div class="curry-wrapper">
+                <div class="close-group">
+                    <span class="close-btn icon-close iconfont"></span>
+                </div>
+                <div class="curry-modal-header">
+                    <div class="role-modal-header-inner">提币</div>
+                </div>
+                <div class="curry-body">
+                    <div class="form-group ">
+                        <label class="platform-label" for="">提取币种</label>
+                        <select class="curry-controlt platform" name="currency" id="currency">
+                            <option value="" selected>请选择币种</option>
+                            {% for property in properties %}
+                                <option value="{{ property.currency }}">{{ property.currency }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group ">
+                        <label class="accountname-label" for="">提币数量</label>
                         <input class="curry-controlt name " name="currency-number" id="currency-number" type="text">
                     </div>
                 </div>

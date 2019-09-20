@@ -438,6 +438,9 @@ Robot.prototype.listenClickStragerty = function(){
     })
 }
 
+Robot.prototype.listenSubmitRobot = function(){
+
+}
 
 
 $(function () {
