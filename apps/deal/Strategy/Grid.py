@@ -198,14 +198,14 @@ class GridStrategy(Thread):
         :param order_info: 委托单信息
         :return:
         """
-        ordertype = order_info.get("type")          # --------------------------------------API
+        order_type = order_info.get("type")          # --------------------------------------API
         price = order_info.get("price")
         total_price = order_info.get("trade_amount") * float(price)
         closing_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(order_info.get("trade_date")/1000))
-        account_id = self.robot_obj.trading_account_id
+        robot_id = self.robot_obj.id
         # 保存已完成交易详情到数据库
         sql = "insert into deal_orderinfo(order_type, closing_price, total_price, closing_time, account_id)" \
-              " values({},'{}','{}','{}','{}')".format(ordertype, price, total_price, closing_time, account_id)
+              " values({},'{}','{}','{}','{}')".format(order_type, price, total_price, closing_time, robot_id)
         self.connect_db(sql)
 
     def update_order_info(self):
@@ -248,7 +248,6 @@ class GridStrategy(Thread):
                                 t = Thread(target=self.completed_order_info, args=(b_id, price, item, order_info, "sell"))
                                 t.start()
                             elif order_info.get("type") == "sell":
-                                # 反向挂单价，固定价格不做更新
                                 price = order_info.get("price")-self.grid_range
                                 price = round(price, markets_data.get("amountScale"))
                                 t = Thread(target=self.completed_order_info, args=(b_id, price, item, order_info, "buy"))

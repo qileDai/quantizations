@@ -279,6 +279,31 @@ class GetParams(View):
             return restful.params_error(message="创建机器人失败")
 
 
+def get_account_info(currency, market, id):
+    robot_obj = Robot.objects.filter(id=id)
+    # 获取账户所属的用户信息
+    account_obj = robot_obj.trading_account_id
+    # account_obj = Account.objects.filter(id=robot_obj.trading_account_id)
+    # 账户对应的平台
+    platform = account_obj.platform
+    # 获取用户信息
+    user_obj = UserInfo.objects.all()
+    if platform == 'EXX':
+        # 创建交易接口对象---------------------------------------------------------------------API
+        con = ExxService(account_obj.accesskey, account_obj.secretkey)
+        info = con.get_balance()
+        info = info['funds']
+        # 创建行情接口对象
+        currency_pair = currency.lower() + '_' + market.lower()
+        con1 = MarketCondition(currency_pair)
+        info1 = con1.get_ticker()
+        info2 = con1.get_klines('1day', '30')
+    elif platform == 'HUOBI':
+        pass
+
+    return user_obj, info, info1, info2
+
+
 class GetAccountInfo(View):
     """
     获取交易对可用额度/当前价,计算默认值
@@ -286,26 +311,10 @@ class GetAccountInfo(View):
     def post(self, request):
         currency = request.POST.get('curry-title')
         market = request.POST.get('market-title')
+        # 获取机器人id
         id = request.POST.get('pk')
-        # 获取账户所属的用户信息
-        account_obj = Account.objects.filter(id=id)
-        # 账户对应的平台
-        platform = account_obj.platform
-        # 获取用户信息
-        user_obj = UserInfo.objects.all()
-        if platform == 'EXX':
-            # 创建交易接口对象
-            con = ExxService(account_obj.accesskey, account_obj.secretkey)
-            info = con.get_balance()
-            info = info['funds']
-            # 创建行情接口对象
-            currency_pair = currency.lower() + '_' + market.lower()
-            con1 = MarketCondition(currency_pair)
-            info1 = con1.get_ticker()
-            info2 = con1.get_klines('1day', '30')
-        elif platform == 'HUOBI':
-            pass
-
+        # 调用函数
+        user_obj, info, info1, info2 = get_account_info(currency, market, id)
         # 计算阻力位/支撑位的默认值
         if int(info2['limit']) <= 30:
             max = 0
@@ -325,6 +334,29 @@ class GetAccountInfo(View):
         print(info, info1, info2)
         print(context)
         return render(request, 'management/gridding.html', context)
+
+
+class ShowTradeDetail(View):
+    """
+    展示机器人交易详情
+    """
+    def post(self, request):
+        currency = request.POST.get('curry-title')
+        market = request.POST.get('market-title')
+        id = request.POST.get('pk')
+        # 调用函数
+        user_obj, info, info1, info2 = get_account_info(currency, market, id)
+        finish_num = OrderInfo.objects.filter(robot=id)
+        total_input = ""
+        running_time = ""
+
+        context = {
+            'currency_balance': info[currency.upper()].get('balance'),
+            'market_balance': info[market.upper()].get('balance'),
+            'currency_freeze': info[currency.upper()].get('freeze'),
+            'market_freeze': info[market.upper()].get('freeze'),
+            'last': info1['ticker'].get('last'),
+        }
 
 
 class StartRobot(View):
