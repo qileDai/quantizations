@@ -87,7 +87,7 @@ Account.prototype.listenShowHideCurryWrapper = function () {
     closeBtn.click(function () {
         self.curryWrapper.hide();
     })
-
+    
 };
 
 Account.prototype.listtenToalAccountCloseEvent = function () {
