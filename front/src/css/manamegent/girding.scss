@@ -292,43 +292,52 @@
       .set-risk-strategy {
         margin-top: 30px;
         display: none;
-        .strategy-curry{
+
+        .strategy-curry {
           margin-bottom: 8px;
           color: #999999;
         }
-        .set-strategy-title{
-          .strategy-parameters-top{
+
+        .set-strategy-title {
+          .strategy-parameters-top {
             margin-bottom: 8px;
             color: #999999;
           }
-          .strategy-parameters-below{
+
+          .strategy-parameters-below {
             margin-bottom: 8px;
             margin-left: 90px;
             color: #999999;
           }
         }
-        .strategy-title{
+
+        .strategy-title {
           margin-bottom: 8px;
           color: #999999;
         }
-        .riskstrategy{
-          .stopLoss{
-            margin:30px 100px ;
+
+        .riskstrategy {
+          .stopLoss {
+            margin: 30px 100px;
+
             input {
               width: 300px;
               height: 30px;
             }
           }
-          .warning{
-            margin:20px 100px ;
+
+          .warning {
+            margin: 20px 100px;
+
             input {
               width: 300px;
               height: 30px;
             }
           }
         }
-        .warninguser{
-          label{
+
+        .warninguser {
+          label {
             width: 120px;
             margin: 10px 10px
           }
@@ -378,8 +387,9 @@
   }
 
 }
-.tradingShade{
-  display:none;
+
+.tradingShade {
+  display: none;
   position: fixed;
   z-index: 2;
   top: 0;
@@ -389,23 +399,25 @@
   background: rgba(0, 0, 0, .4);
 
 }
+
 .tradingParticulars {
-  display:none;
+  display: none;
   width: 938px;
   height: 716px;
   z-index: 3;
   background-color: #fff;
   position: absolute;
   left: 50%;
-  top: 50% ;
-  transform: translate(-50%,-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
   border-radius: 5px;
 
   .trading-content {
     height: 40px;
-    border-bottom:1px solid #ccc;
+    border-bottom: 1px solid #ccc;
   }
-  .trading-close-btn{
+
+  .trading-close-btn {
 
     width: 30px;
     height: 30px;
@@ -414,42 +426,81 @@
     margin-top: 10px;
     margin-right: 10px;
   }
-  .trading-modal-header{
+
+  .trading-modal-header {
     font-size: 16px;
-    float:left ;
+    float: left;
     margin-top: 10px;
     margin-left: 10px;
   }
-  .trading-particulars{
+
+  .trading-particulars {
     margin-top: 10px;
-    .trading-ending{
+
+    .trading-ending {
 
       display: inline-block;
       font-size: 16px;
-      margin-right: 20px;
-      cursor:pointer;
+      margin-right: 10px;
+      cursor: pointer;
     }
-    .trading-loading{
-      cursor:pointer;
+
+    .trading-loading {
+      cursor: pointer;
       display: inline-block;
       font-size: 16px;
       margin-right: 20px;
+      margin-left: 10px;
     }
-    .trading-container{
+
+    .trading-container {
       margin-left: 20px;
+
     }
+
+    .trding-information {
+      margin-bottom: 10px;
+
+      .strategy-time {
+        margin-left: 50px;
+      }
+    }
+
+    .account-informaiton {
+      overflow: hidden;
+
+      .account {
+        float: left;
+
+        .account-btc {
+          margin-left: 20px;
+        }
+      }
+
+      .freeze {
+        float: left;
+        margin-left: 60px;
+
+        .freeze-btc {
+          margin-left: 20px;
+        }
+      }
+    }
+
     .trading-list {
       color: green;
       display: inline-block;
-      ul{
+
+      ul {
         border: 1px solid #ccc;
         width: 300px;
-        height:400px;
-        overflow:auto;
-        margin-right:170px;
+        height: 400px;
+        overflow: auto;
+        margin-right: 170px;
         padding: 10px;
-        li{
-          span{
+
+        li {
+          span {
             display: inline-block;
             margin-top: 5px;
             margin-right: 35px;
@@ -457,94 +508,143 @@
         }
       }
     }
+
     .trading-list-ending {
       color: red;
       display: inline-block;
-       ul{
+
+      ul {
         border: 1px solid #ccc;
         width: 300px;
-        height:400px;
-        overflow:auto;
-         li{
-           span{
+        height: 400px;
+        overflow: auto;
+
+        li {
+          span {
             display: inline-block;
             margin-top: 5px;
             margin-right: 35px;
           }
-         }
+        }
       }
     }
   }
-  .trading-ending-table{
+
+  .trading-ending-table {
     display: none;
-    .trading-ending-list{
+
+    .trding-information-content {
+      margin-left: 20px;
+
+      .trding-information {
+        margin-bottom: 10px;
+
+        .strategy-time {
+          margin-left: 50px;
+        }
+      }
+
+      .account-informaiton {
+        overflow: hidden;
+
+        .account {
+          float: left;
+
+          .account-btc {
+            margin-left: 20px;
+          }
+        }
+
+        .freeze {
+          float: left;
+          margin-left: 60px;
+
+          .freeze-btc {
+            margin-left: 20px;
+          }
+        }
+      }
+    }
+
+
+    .trading-ending-list {
       margin-left: 31px;
       margin-top: 28px;
-      tr{
-        td{
-          padding:7px 11px;
+
+      tr {
+        td {
+          padding: 7px 11px;
         }
-        th{
-           padding:7px 11px;
+
+        th {
+          padding: 7px 11px;
         }
       }
     }
   }
 }
-.parameter-configuration{
+
+.parameter-configuration {
   display: none;
   width: 633px;
   height: 1086px;
   position: absolute;
   left: 50%;
   top: 75%;
-  transform: translate(-50% ,-50%);
+  transform: translate(-50%, -50%);
   background-color: #fff;
   z-index: 3;
 
-   .parameter-content {
-     height: 40px;
-     border-bottom: 1px solid #ccc;
-     .parameter-modal-header{
-     font-size: 16px;
-     float:left ;
-     margin-top: 10px;
-     margin-left: 10px;
-     }
-    .parameter-close-btn{
-    width: 30px;
-    height: 30px;
-    display: inline-block;
-    float: right;
-    margin-top: 10px;
-    margin-right: 10px;
+  .parameter-content {
+    height: 40px;
+    border-bottom: 1px solid #ccc;
+
+    .parameter-modal-header {
+      font-size: 16px;
+      float: left;
+      margin-top: 10px;
+      margin-left: 10px;
     }
-   }
-  .parameter-strategy-parameters{
-    div{
+
+    .parameter-close-btn {
+      width: 30px;
+      height: 30px;
+      display: inline-block;
+      float: right;
+      margin-top: 10px;
+      margin-right: 10px;
+    }
+  }
+
+  .parameter-strategy-parameters {
+    div {
       margin-left: 25px;
       margin-top: 20px;
       margin-bottom: 20px;
       font-size: 14px;
       color: #ccc;
     }
-    li{
+
+    li {
       margin-top: 15px;
       text-align: right;
-      input{
+
+      input {
         width: 300px;
         height: 25px;
         margin-left: 15px;
-        float:right;
+        float: right;
         margin-right: 150px;
       }
-      span{
+
+      span {
 
       }
     }
 
   }
-  .risk-strategy{
+
+  .risk-strategy {
     div {
       margin-left: 25px;
       margin-top: 20px;
@@ -553,8 +653,9 @@
       color: #ccc;
     }
   }
-  .risk-strategy-warninguser{
-    div{
+
+  .risk-strategy-warninguser {
+    div {
       margin-left: 25px;
       margin-top: 20px;
       margin-bottom: 20px;
@@ -562,24 +663,24 @@
       color: #ccc;
     }
   }
-  .risk-footer{
-    .risk-button{
-      button{
+
+  .risk-footer {
+    .risk-button {
+      button {
         width: 140px;
         height: 40px;
         border-radius: 5px;
         background: #169bd5;
         border-bottom: none;
-        margin-left:75px;
+        margin-left: 75px;
         margin-right: 75px;
       }
     }
   }
 
 
-
-
 }
+
 li {
   list-style: none;
 }
