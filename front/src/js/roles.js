@@ -26,6 +26,7 @@ Role.prototype.listenDeleteRolesEvent = function () {
                         'pk': pk
                     },
                     'success': function (result) {
+                        console.log(result)
                         if (result['code'] === 200) {
                             window.location.reload()
                         }

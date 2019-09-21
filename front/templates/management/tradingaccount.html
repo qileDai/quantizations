@@ -5,7 +5,19 @@
 {% endblock %}
 {% block head %}
     <link rel="stylesheet" href="{% static 'css/manamegent/account.min.css' %}">
+    <script src="{% static 'arttemplate/template-web.js' %}"></script>
     <script src="{% static 'js/account.min.js' %}"></script>
+    <script id="details-item" type="text/html">
+        {% verbatim %}
+        <div class="property-right">
+            <span class="property-account">账户</span>
+            <span class="property-account-value">sfsdfs
+
+            </span>
+            <button class="refersh">刷新账户</button>
+        </div>
+        {% endverbatim %}
+    </script>
 {% endblock %}
 {% block header %}
     <p>交易账户管理</p>
@@ -217,7 +229,7 @@
                 <div class="curry-modal-footer">
                     <div class="account-button">
                         <button class="cancel">取消</button>
-                        <a class="curry-confirm">确定</a>
+                        <a class="carry-confirm">确定</a>
                     </div>
                 </div>
             </div>
@@ -241,7 +253,7 @@
                     <div class="property-profit">
                         <div class="assets-change">
                             <span class="change">24小时资产变化</span>
-                            <span class="number">+657.29 USDT</span>
+                            <span class="number" id="today-change">+657.29 USDT</span>
                             <span class="percentage">+1.88%</span>
                         </div>
                         <div class="initial-asset">
@@ -451,17 +463,14 @@
                 <div class="property-body">
                     <div class="property-right">
                         <span class="property-account">账户</span>
-                        <spann class="property-total">{{ aasdfasdfa }} </spann>
+                        <span class="property-account-value"> </span>
                         <button class="refersh">刷新账户</button>
                     </div>
                     <div class="property-profit">
                         <div class="assets-change">
                             <span class="change">24小时资产变化</span>
-                            {% for asss in asset_change %}
-                                <span class="number"></span>
-                                <span class="percentage">+1.88%</span>
-                            {% endfor %}
-
+                            <span class="number"></span>
+                            <span class="percentage">+1.88%</span>
                         </div>
                         <div class="initial-asset">
                             <span class="init-total">初始总资产（折合)</span>
@@ -476,7 +485,7 @@
                     <div class="curry-total">
                         <div class="curry-account-total">
                             <span class="total-curry-number">总计提币</span>
-                            <span>-60000usdt</span>
+                            <span class="total-number">-60000usdt</span>
                         </div>
                     </div>
                     <div class="account-property-table">
@@ -485,52 +494,51 @@
                             <div class="col-md-12">
                                 <div class="table-box">
                                     <div class="box-body">
-                                        <table class="table table-bordered">
+                                        <table class="table table-bordered" id="property-details">
                                             <thead>
                                             <tr>
-                                                <th>账户币种</th>
+                                                <th class="currency">币种名称</th>
+                                                <th>参考价（USDT）</th>
                                                 <th>可用</th>
-                                                <th>冻结</th>
-                                                <th>当前资产</th>
-                                                <th>初始资产</th>
+                                                <th class="freeze">冻结</th>
+                                                <th class="">当前资产</th>
+                                                <th class="original_assets">初始资产</th>
                                             </tr>
                                             </thead>
                                             <tbody>
+                                            <tr>
+                                                <td class="currency">1546</td>
+                                                <td class="last">1546.12</td>
+                                                <td class="balance">1546.12</td>
+                                                <td class="freeze">1546.12</td>
+                                                <td class="current_assets">1546.12</td>
+                                                <td class="original_assets">1546.12</td>
+                                            </tr>
                                             <tr>
                                                 <td>1546</td>
                                                 <td>1546.12</td>
                                                 <td>1546.12</td>
                                                 <td>1546.12</td>
                                                 <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
                                                 <td>1546.12</td>
                                             </tr>
                                             <tr>
-                                                <td>USDT</td>
+                                                <td>1546</td>
+                                                <td>1546.12</td>
                                                 <td>1546.12</td>
                                                 <td>1546.12</td>
                                                 <td>1546.12</td>
                                                 <td>1546.12</td>
                                             </tr>
                                             <tr>
-                                                <td>USDT</td>
+                                                <td>1546</td>
                                                 <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
                                                 <td>1546.12</td>
                                                 <td>1546.12</td>
                                                 <td>1546.12</td>
                                                 <td>1546.12</td>
                                             </tr>
+
                                             </tbody>
                                         </table>
                                     </div>

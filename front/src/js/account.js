@@ -4,6 +4,7 @@ function Account() {
     self.curryWrapper = $('.account-curry-wrapper');
     self.totalProperty = $('.property-total-wrapper');
     self.detailsProperty = $('.property-details-wrapper');
+    self.carryWrapper = $('.account-carry-curry-wrapper');
 
 };
 
@@ -19,6 +20,7 @@ Account.prototype.run = function () {
     self.deleteAccount();
     self.listenSubmitAccount();
     self.listendenominationEvent();
+    self.listtencuyyencyShow();
     // self.listenEditAccount();
 
 }
@@ -87,7 +89,7 @@ Account.prototype.listenShowHideCurryWrapper = function () {
     closeBtn.click(function () {
         self.curryWrapper.hide();
     })
-    
+
 };
 
 Account.prototype.listtenToalAccountCloseEvent = function () {
@@ -110,23 +112,53 @@ Account.prototype.listenPropertyDetailsShowEvent = function () {
         var currentbtn = $(this);
         var tr = currentbtn.parent().parent();
         var pk = tr.attr('data-id');
+        $('.refersh').attr('property-id', pk)
         // console.log(pk)
         xfzajax.post({
             'url': '/deal/showassert/',
             'data': {
                 'pk': pk
             },
-            // 'success': function (result) {
-            //     console.log("suceesee")
-            //     console.log(result)
-            //     if (result['code'] === 200) {
-            //         datas = result['data']
-            //         console.log(datas['Platform_name'])
-            //         console.log(datas['asset_change'])
-            //         console.log(datas['assets_dict'])
-            //         console.log(datas['history_profit'])
-            //     }
-            // }
+            'success': function (result) {
+                console.log(result)
+                if (result['code'] === 200) {
+                    datas = result['data']
+                    var platform = datas['Platform_name']  //平台名称
+                    var asset_change = datas['asset_change']  //今日资产变化
+                    var original_assets = datas['original_assets'] //初始资产
+                    var history_profit = datas['history_profit'] //历史盈亏
+                    var withdraw_record = datas['withdraw_record'] //总提币
+                    var assets_dict = datas['assets_dict']   //资产表
+                    var profit_loss_dict = datas['profit_loss_dict'] //损益表
+
+                    $('.property-account-value').text(platform)  //插入平台到html中
+                    var detailsGroup = $('.property-details-wrapper')
+                    detailsGroup.find('.assets-change .number').text(asset_change['number']) //资产变化
+                    detailsGroup.find('.assets-change .percentage').text(asset_change['percent']) //资产变化
+                    detailsGroup.find('.initial-asset .number').text(original_assets) //初始变化
+
+                    detailsGroup.find('.curry-account-total .total-number').text(withdraw_record) //总计提币
+
+                    detailsGroup.find('.history-profit  .number').text(history_profit['number']) //总计提币
+                    detailsGroup.find('.history-profit .percentage').text(history_profit['percent']) //总计提币
+
+                    // var tpl1 = template("",{"assets_dict":assets_dict})
+                    // var tpl2 = template("",{"profit_loss_dict":profit_loss_dict})
+                    // var tpl = template("details-item",{"datas":datas})
+                    // var detailsGroup = $(".property-details-wrapper");
+                    // detailsGroup.append(tpl)
+                    var detailsTab = $('#property-details')
+                    // var td = detailsTab.find("tbody tr td")
+                    $.each(assets_dict, function (key, value) {
+                        console.log(key)
+                        detailsTab
+                        $.each(value, function (j, k) {
+                            console.log(k)
+                        })
+                    })
+
+                }
+            }
         });
     });
     closeBtn.click(function () {
@@ -262,6 +294,49 @@ Account.prototype.chargeAccountEvent = function (pk) {
     })
 }
 
+Account.prototype.listtencuyyencyShow = function () {
+    var self = this;
+    var closeBtn = $('.close-btn');
+    $('.mention-money').click(function () {
+        self.carryWrapper.show();
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var pk = tr.attr('data-id');
+        self.listenWithDraw(pk)
+
+    });
+    closeBtn.click(function () {
+        self.carryWrapper.hide()
+    })
+
+
+};
+
+Account.prototype.listenWithDraw = function (pk) {
+    var self = this;
+    var btn = $('.carry-confirm')
+    btn.click(function () {
+        num = $('#currency-number').val()
+        currency = $('#currency').val()
+        console.log("*")
+        console.log(num, currency, pk)
+        xfzajax.post({
+            'url': '/deal/withdraw/',
+            'data': {
+                'num': num,
+                'currency': currency,
+                'pk': pk,
+            },
+            'success': function (result) {
+                if (result['code'] === 200) {
+                    xfzalert.alertSuccess("提币成功", function () {
+                        window.location.reload()
+                    })
+                }
+            }
+        })
+    })
+}
 
 $(function () {
     var account = new Account();

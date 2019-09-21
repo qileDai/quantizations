@@ -132,8 +132,8 @@ class ShowAssert(View):
         con = GetAssets(id, account_obj, platform)
         data = con.showassets()
         print(type(data))
-        return render(request, 'management/tradingaccount.html')
-        # return restful.result(data=data)
+        # return render(request, 'management/tradingaccount.html')
+        return restful.result(data=data)
 
 
 class ShowCollectAsset(View):
