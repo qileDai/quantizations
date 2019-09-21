@@ -145,8 +145,8 @@ Robot.prototype.initYstepEvent = function () {
     $(".ystep").setStep(1);
 
 };
-Robot.prototype.loadstepEvent =function(){
-     $(".ystep").loadStep({
+Robot.prototype.loadstepEvent = function () {
+    $(".ystep").loadStep({
         size: "large",
         color: "green",
         steps: [{
@@ -170,42 +170,42 @@ Robot.prototype.listenClickRobotEaaavent = function () {
     var btnNext = $("#btnNext")
     var robotDataArray = new Array(self.tradingOnWrapper, self.tradingStrategyWrapper, self.setStrategyWrapper, self.setRiskWrapper)
     var arrayLength = robotDataArray.length
-    var num = 0;
-    var creatrobotclick = 0
+    var num = 0;           //根据num的值 来确定他应该跳向第几页
+    var creatrobotclick = 0//判断是不是页面第一次点击创建机器人
     // console.log(arrayLength)
     // if (arrayLength <= 1)
     //     return;
     $('#create-robot').on('click', function () {
-        if (creatrobotclick==0){
-             self.robotWrapper.show();
-              robotDataArray[num].show()
-             creatrobotclick++
-        }else{
+        if (creatrobotclick == 0) {
+            self.robotWrapper.show();
+            robotDataArray[num].show()
+            creatrobotclick++
+        } else {
             console.log(creatrobotclick)
-             self.robotWrapper.show()
+            self.robotWrapper.show()
         }
 
         $("#btnPre").unbind();
         btnPre.click(function () {
-             console.log('num')
-            if (num<=0){
-               num=0;
-               // li[num].show().sibling().hide();
-            }else {
+            console.log('num')
+            if (num <= 0) {
+                num = 0;
+                // li[num].show().sibling().hide();
+            } else {
                 num--;
-                 $('#btnNext').text('下一步')
-               // li[num].show().sibling().hide();
+                $('#btnNext').text('下一步')
+                // li[num].show().sibling().hide();
 
             }
             //跳转到上一个步骤
             $(".ystep").prevStep();
 
-             console.log('val',robotDataArray)
-            for (var i=0;i<robotDataArray.length;i++){
+            console.log('val', robotDataArray)
+            for (var i = 0; i < robotDataArray.length; i++) {
 
-                if(num=== i){
+                if (num === i) {
                     robotDataArray[i].show()
-                }else {
+                } else {
                     robotDataArray[i].hide()
                 }
             }
@@ -213,12 +213,12 @@ Robot.prototype.listenClickRobotEaaavent = function () {
         $("#btnNext").unbind();
         btnNext.click(function () {
             console.log('next')
-            if (num>=2){
-                $('#btnNext').text('完成')
-                num=3;
+            if (num >= 2) {
+                $('#btnNext').hide()
+                num = 3;
 
 
-            }else{
+            } else {
                 num++;
                 $('#btnNext').text('下一步')
             }
@@ -227,17 +227,17 @@ Robot.prototype.listenClickRobotEaaavent = function () {
             // var stepNum = $(".ystep").getStep();
             // robotDataArray[stepNum+1].show()
             // console.log(stepNum)
-            $.each(robotDataArray,function (key,value) {
-                if(num=== key){
+            $.each(robotDataArray, function (key, value) {
+                if (num === key) {
                     value.show()
-                }else {
+                } else {
                     value.hide()
                 }
             })
 
         });
         $('.warninguser label').on('click', function () {
-           $(this).toggleClass('btn-success')
+            $(this).toggleClass('btn-success')
         })
 
     })
@@ -260,13 +260,13 @@ Robot.prototype.listenClickRobotEvent = function () {
     // if (arrayLength <= 1)
     //     return;
     $('#create-robot').on('click', function () {
-        if (creatrobotclick==0){
-             self.robotWrapper.show();
-              robotDataArray[num].show()
-             creatrobotclick++
-        }else{
+        if (creatrobotclick == 0) {
+            self.robotWrapper.show();
+            robotDataArray[num].show()
+            creatrobotclick++
+        } else {
             console.log(creatrobotclick)
-             self.robotWrapper.show()
+            self.robotWrapper.show()
         }
 
         console.log('open1')
@@ -279,36 +279,62 @@ Robot.prototype.listenClickRobotEvent = function () {
         // console.log(lilength)
         $("#btnPre").unbind();
         btnPre.click(function () {
-             console.log('num')
-            if (num<=0){
-               num=0;
-               // li[num].show().sibling().hide();
-            }else {
+            console.log('num')
+            if (num <= 0) {
+                num = 0;
+
+
+                // li[num].show().sibling().hide();
+            } else {
                 num--;
-                 $('#btnNext').text('下一步')
-               // li[num].show().sibling().hide();
+                $('#btnNext').show().text('下一步')
+                $('#btnComplete').hide();
+                // li[num].show().sibling().hide();
 
             }
             //跳转到上一个步骤
             $(".ystep").prevStep();
-             console.log('val',robotDataArray)
-            for (var i=0;i<robotDataArray.length;i++){
+            console.log('val', robotDataArray)
+            for (var i = 0; i < robotDataArray.length; i++) {
 
-                if(num=== i){
+                if (num === i) {
                     robotDataArray[i].show()
-                }else {
+                } else {
                     robotDataArray[i].hide()
                 }
             }
 
 
         });
+
+
         $("#btnNext").unbind();
         btnNext.click(function () {
+
+
             var transactionCurrency = $('#curry').find(" option:selected").text();//交易币种
-            var markettitle =$('#market').find(" option:selected").text();//交易市场
-            var text= transactionCurrency + '/' + markettitle
-            $('.trading-strategy .strategy-curry .curry').text(text)
+            var markettitle = $('#market').find(" option:selected").text();//交易市场
+            var parameterscontrol = $('.parameters-control').find(" option:selected").text()//交易账户
+            var resistancevalue = $('.strategy-parameters .trading-parameters .resistance-value').val()//阻力值
+            var support = $('.strategy-parameters .trading-parameters .support').val()//支撑位
+            var gridnumber= $('.strategy-parameters .trading-parameters .grid-number').val()//网格数量
+
+
+            // alert('请选择交易币种/交易市场')
+
+
+            var text = transactionCurrency + '/' + markettitle
+            $('.trading-strategy .strategy-curry .curry').text(text);
+            $('.set-strategy .strategy-curry .curry').text(text);
+            $('.set-risk-strategy .strategy-curry .curry').text(text);
+
+
+            $('.set-strategy-title .strategy-parameters-top .user').text(parameterscontrol)
+
+            $('.set-risk-strategy .set-strategy-title .resistance').text(resistancevalue)
+            $('.set-risk-strategy .set-strategy-title .support-level').text(support)
+            $('.set-risk-strategy .set-strategy-title .girding-num').text(gridnumber)
+
             // $('.trading-strategy .strategy-curry .curry1').text(markettitle)
 
             var strategytitle = '网格交易v1.0'
@@ -316,39 +342,48 @@ Robot.prototype.listenClickRobotEvent = function () {
             $('.strategy-name .strategy-button button').on('click', function () {
                 $(this).addClass('active').siblings().removeClass('active');
                 var strategytitle = $(this).text();//交易策略
-                 console.log(strategytitle);
-                $('.set-strategy .strategy-title .curry').text(strategytitle)
-
+                console.log(strategytitle);
+                $('.set-strategy .strategy-title .strategy').text(strategytitle)
+                $('.set-risk-strategy .strategy-title .curry').text(strategytitle)
             })
 
-            $('.set-strategy .strategy-curry .curry').text(transactionCurrency)
-            $('.set-strategy .strategy-curry .curry1').text(markettitle)
+            // $('.set-strategy .strategy-curry .curry').text(transactionCurrency)
+            // $('.set-strategy .strategy-curry .curry1').text(markettitle)
             console.log('next')
-            if (num>=2){
-                $('#btnNext').text('完成')
-                num=3;
-
-
-            }else{
+            if (num >= 2) {
+                $('#btnNext').hide();
+                $('#btnComplete').show();
+                num = 3;
+            } else {
                 num++;
                 $('#btnNext').text('下一步')
             }
             //跳转到下一个步骤
-            $(".ystep").nextStep();
+
             // var stepNum = $(".ystep").getStep();
             // robotDataArray[stepNum+1].show()
             // console.log(stepNum)
-            $.each(robotDataArray,function (key,value) {
-                if(num=== key){
+
+            //  if (transactionCurrency=='---请选择---' ) {
+            //     console.log(transactionCurrency)
+            //         alert('请选择交易币种/交易市场')
+            //          num=0;
+            // }else{
+            $(".ystep").nextStep();
+            //  }
+
+
+            $.each(robotDataArray, function (key, value) {
+                if (num === key) {
                     value.show()
-                }else {
+                } else {
                     value.hide()
                 }
             })
 
         });
         $('.warninguser label').on('click', function () {
-           $(this).toggleClass('btn-success')
+            $(this).toggleClass('btn-success')
         })
 
     })
@@ -357,17 +392,16 @@ Robot.prototype.listenClickRobotEvent = function () {
 }
 
 
-Robot.prototype.listenCloseRobotEvent = function(){
+Robot.prototype.listenCloseRobotEvent = function () {
     var closeBtn = $('.close-btn');
     var robotWrapper = $('.robot-wrapper');
     closeBtn.click(function () {
         robotWrapper.hide();
 
 
-
     })
 };
-Robot.prototype.listenCreatTradingEvent = function(){
+Robot.prototype.listenCreatTradingEvent = function () {
     $('.update-property').on('click', function () {
         $('.tradingParticulars').show();
         $('.tradingShade').show();
@@ -403,7 +437,7 @@ Robot.prototype.listenTradingRobotEvent = function () {
     })
 
 }
-Robot.prototype.listenparameterEven = function(){
+Robot.prototype.listenparameterEven = function () {
     var parameterconfiguration = $('.parameter-configuration');
     var parameterclosebtn = $('.parameter-close-btn');
     var deleteproperty = $('.delete-property');
@@ -411,7 +445,6 @@ Robot.prototype.listenparameterEven = function(){
     deleteproperty.click(function () {
         parameterconfiguration.show();
         tradingShade.show();
-
     })
     parameterclosebtn.click(function () {
         parameterconfiguration.hide();
@@ -419,7 +452,7 @@ Robot.prototype.listenparameterEven = function(){
     })
 }
 
-Robot.prototype.getAccountInfoEvent = function(){
+Robot.prototype.getAccountInfoEvent = function () {
     var parantersGroup = $('.strategy-parameters')
     id = parantersGroup.find("select['name='account']").val()
     console.log(id)
@@ -428,9 +461,9 @@ Robot.prototype.getAccountInfoEvent = function(){
 }
 
 
-Robot.prototype.listenClickStragerty = function(){
+Robot.prototype.listenClickStragerty = function () {
     var btnList = $('.deal-strategy')
-    btnList.each(function (index,element) {
+    btnList.each(function (index, element) {
         var btn = $(element)
         btn.click(function () {
             btn.addClass('active').siblings().removeClass('active')
@@ -438,7 +471,7 @@ Robot.prototype.listenClickStragerty = function(){
     })
 }
 
-Robot.prototype.listenSubmitRobot = function(){
+Robot.prototype.listenSubmitRobot = function () {
 
 }
 

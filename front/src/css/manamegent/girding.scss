@@ -337,6 +337,14 @@
     }
 
     .trading-footer {
+      #btnComplete{
+        width: 140px;
+        height: 40px;
+        border-radius: 5px;
+        background: #169bd5;
+        border-bottom: none;
+        display: none;
+      }
       height: 80px;
       //border-bottom: 20px;
 

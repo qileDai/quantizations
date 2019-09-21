@@ -242,7 +242,7 @@
                 <li class="trading-strategy">
                     <div class="strategy-curry">
                         <span class="title">选中交易对:</span>
-                        <span class="curry">LTC/USDT</span>
+                        <span class="curry">LTC</span>
                         <img src="{% static 'images/1-1.png' %}" alt="">
                     </div>
                     <div class="strategy-title">
@@ -300,15 +300,15 @@
                         </div>
                         <div class="trading-parameters resistance">
                             <span class="title">阻力位</span>
-                            <input class="parameters-control" type="text">
+                            <input class="parameters-control  resistance-value" type="text">
                         </div>
                         <div class="trading-parameters support-level ">
                             <span class="title">支撑位</span>
-                            <input class="parameters-control" type="text">
+                            <input class="parameters-control support" type="text">
                         </div>
                         <div class="trading-parameters girding-num ">
                             <span class="title">网格数量</span>
-                            <input class="parameters-control" value="100" type="text">
+                            <input class="parameters-control grid-number" value="100" type="text">
                         </div>
                         <div class="trading-parameters procudere-fee ">
                             <span class="title">单次交易手续费</span>
@@ -337,19 +337,19 @@
                     </div>
                     <div class="strategy-title">
                         <span class="title">选择交易策略:</span>
-                        <span>网格交易V1.0</span>
+                        <span class="curry">网格交易V1.0</span>
                     </div>
                     <div class="set-strategy-title">
                         <div class="strategy-parameters-top">
                             <span class="title">设置策略参数:</span>
                             <span class="deal-account">交易账户</span>
-                            <span>EXX账户</span>
-                            <span class="resistance">阻力位:</span>
-                            <span class="">93.45 usdt</span>
-                            <span class="support-level">支撑位:</span>
-                            <span class="">93.45 usdt</span>
-                            <span class="girding-num">网格数量:</span>
-                            <span class="">68</span>
+                            <span class="user">EXX账户</span>
+                            <span >阻力位:</span>
+                            <span class="resistance">93.45 usdt</span>
+                            <span class="">支撑位:</span>
+                            <span class="support-level">93.45 usdt</span>
+                            <span class="">网格数量:</span>
+                            <span class="girding-num">68</span>
                         </div>
                         <div class="strategy-parameters-below">
                             <span class="procudere-fee">单次交易手续费:</span>
@@ -428,7 +428,7 @@
                 <div class="trading-button">
                     <button class="prevent-btn  " id="btnPre">上一步</button>
                     <button class="next-btn" id="btnNext">下一步</button>
-                    <button class="complete -btn hidden" id="btnComplete ">完成</button>
+                    <button class="complete -btn " id="btnComplete">完成</button>
                 </div>
             </div>
         </div>
@@ -823,8 +823,8 @@
             </div>
             <div class="risk-footer">
                 <div class="risk-button">
-                    <button class="prevent-btn  " id="btnPre">取消</button>
-                    <button class="next-btn" id="btnNext">完成</button>
+                    <button class="prevent-btn  " id="btnPre1">取消</button>
+                    <button class="next-btn" id="btnNext1">完成</button>
                 </div>
             </div>
 
