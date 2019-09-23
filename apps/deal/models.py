@@ -114,7 +114,9 @@ class OrderInfo(models.Model):
     """
     已完成挂单信息
     """
+    currency_pair = models.CharField(max_length=32)
     order_type = models.CharField(max_length=10)
+    order_id = models.CharField(max_length=32)
     closing_price = models.DecimalField(max_digits=18, decimal_places=8)
     total_price = models.DecimalField(max_digits=18, decimal_places=8)
     closing_time = models.DateTimeField()
