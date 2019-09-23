@@ -25,6 +25,7 @@ Account.prototype.run = function () {
 
 }
 
+
 Account.prototype.listenShowHideAddAccount = function () {
     var self = this;
     var closeBtn = $('.close-btn');
@@ -40,12 +41,25 @@ Account.prototype.listenShowHideAddAccount = function () {
             'url': '/deal/accountinfo/',
             'data': {
                 'pk': pk,
+            },
+            'success':function (result) {
+                if(result['code'] === 200){
+                    account = result['data']
+                    console.log(account)
+                    tpl = template('add-accountInfo',{"account":account})
+                    console.log(tpl)
+                    var accountGroup = $('.account-body')
+                    accountGroup.append(tpl)
+                }
             }
         })
     })
     closeBtn.click(function () {
         self.accountWrapper.hide()
     });
+    $('.cancel').click(function () {
+        self.accountWrapper.hide();
+    })
 
 };
 
@@ -61,7 +75,12 @@ Account.prototype.listendenominationEvent = function () {
         $('.denomination-mask-account-wrapper').hide();
         $('.denomination-account-wrapper').hide();
 
+    });
+    $('.cancel').click(function () {
+        $('.denomination-mask-account-wrapper').hide();
+        $('.denomination-account-wrapper').hide();
     })
+
 }
 
 Account.prototype.listPropertyTotalShowHideEvent = function () {
@@ -72,6 +91,9 @@ Account.prototype.listPropertyTotalShowHideEvent = function () {
     });
     closeBtn.click(function () {
         self.totalProperty.hide()
+    });
+    $('.cancel').click(function () {
+        self.totalProperty.hide();
     })
 
 };
@@ -87,6 +109,9 @@ Account.prototype.listenShowHideCurryWrapper = function () {
         self.chargeAccountEvent(pk)
     });
     closeBtn.click(function () {
+        self.curryWrapper.hide();
+    });
+    $('.cancel').click(function () {
         self.curryWrapper.hide();
     })
 
@@ -151,7 +176,6 @@ Account.prototype.listenPropertyDetailsShowEvent = function () {
                     // var td = detailsTab.find("tbody tr td")
                     $.each(assets_dict, function (key, value) {
                         console.log(key)
-                        detailsTab
                         $.each(value, function (j, k) {
                             console.log(k)
                         })
@@ -162,6 +186,9 @@ Account.prototype.listenPropertyDetailsShowEvent = function () {
         });
     });
     closeBtn.click(function () {
+        self.detailsProperty.hide();
+    });
+    $('.cancel').click(function () {
         self.detailsProperty.hide();
     })
 
@@ -307,6 +334,9 @@ Account.prototype.listtencuyyencyShow = function () {
     });
     closeBtn.click(function () {
         self.carryWrapper.hide()
+    });
+    $('.cancel').click(function () {
+        self.carryWrapper.hide();
     })
 
 
