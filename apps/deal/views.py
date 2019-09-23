@@ -12,6 +12,7 @@ from django.db.models import Q
 from utils.mixin import LoginRequireMixin
 from utils import restful
 from apps.deal.Strategy.Grid import GridStrategy
+from .serializers import AccountSerializer
 # Create your views here.r
 
 
@@ -67,29 +68,23 @@ class AddAccount(View):
 
 def accountinfo(request):
         accout_id = request.POST.get('pk')
-        print("ss")
-        print(accout_id)
         account = Account.objects.get(pk=accout_id)
-        context = {
-           'account': account,
-        }
-        print(account)
-        return render(request,'management/tradingaccount.html',context=context)
+        serialize = AccountSerializer(account)
+        print(serialize.data)
+        return restful.result(data=serialize.data)
 
 class EditAccount(View):
     """
     编辑账户
     """
     def get(self,request):
-        accout_id = request.GET.get('account_id')
-        print(accout_id)
-        account = Account.objects.get(pk=accout_id)
-        # context = {
-
-        #    'account': account,
-        # }
-        # print(account)
-        return render(request,'management/tradingaccount.html')
+        try:
+            accout_id = request.POST.get('pk')
+            account = Account.objects.get(pk=accout_id)
+            serialize = AccountSerializer(account)
+            return restful.result(data=serialize.data)
+        except:
+            restful.params_error(message="账户序列化错误")
 
     def post(self, request):
         form = EditAccountFrom(request.POST)

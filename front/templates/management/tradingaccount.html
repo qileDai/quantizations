@@ -7,17 +7,7 @@
     <link rel="stylesheet" href="{% static 'css/manamegent/account.min.css' %}">
     <script src="{% static 'arttemplate/template-web.js' %}"></script>
     <script src="{% static 'js/account.min.js' %}"></script>
-    <script id="details-item" type="text/html">
-        {% verbatim %}
-        <div class="property-right">
-            <span class="property-account">账户</span>
-            <span class="property-account-value">sfsdfs
 
-            </span>
-            <button class="refersh">刷新账户</button>
-        </div>
-        {% endverbatim %}
-    </script>
 {% endblock %}
 {% block header %}
     <p>交易账户管理</p>
@@ -120,8 +110,8 @@
 
                 <div class="denomination-account-modal-footer">
                     <div class="account-button">
-                        <button class="cancel">取消</button>
-                        <button class="confirm">确定</button>
+                        <a class="btn cancel">取消</a>
+                        <a class="btn confirm">确定</a>
                     </div>
                 </div>
             </div>
@@ -138,31 +128,48 @@
                     <div class="role-modal-header-inner">添加API账户</div>
                 </div>
                 <div class="account-body">
-                    <div class="account-content ">
-                        <label class="platform-label" for="">账户所属平台</label>
-                        <select class="account-controlt platform" name="platform" id="platform">
-                            {% for platform in platfotms %}
-                                <option value="{{ platform.pk }}">{{ platform.Platform_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="account-content ">
-                        <label class="accountname-label" for="">账户名称</label>
-                        <input class="account-controlt name " name="account-name" type="text">
-                    </div>
-                    <div class="account-content  ">
-                        <label class="access-label" for="">Access Key</label>
-                        <input class="account-controlt access-key" name="access" type="text">
-                    </div>
-                    <div class="account-content ">
-                        <label class="platform-label" for="">Scrent Key</label>
-                        <input class="account-controlt scrent-key" name="scrent" type="text">
-                    </div>
+                    <script id="add-accountInfo" type="text/html">
+                        {% verbatim %}
+                        <div class="account-content ">
+                            <label class="platform-label" for="">账户所属平台</label>
+                            <select class="account-controlt platform" name="platform" id="platform">
+                                {{ if account }}
+                                    <option value="{{ account.platform.pk }}">{{ account.platform.Platform_name }}</option>
+                                {{ else }}
+                                    <option value=""></option>
+                                {{ /if }}
+                            </select>
+                        </div>
+                        <div class="account-content ">
+                            <label class="accountname-label" for="">账户名称</label>
+                            {{ if account }}
+                                <input class="account-controlt name " name="account-name" type="text"
+                                   value="{{ account.title }}">
+                            {{ else }}
+                                <input class="account-controlt name " name="account-name" type="text">
+                            {{ /if }}
+                        </div>
+                        <div class="account-content  ">
+                            <label class="access-label" for="">Access Key</label>
+                            {{ if account }}
+                            <input class="account-controlt access-key" name="access" type="text"
+                                   value="{{ account.accesskey }}">
+                            {{ else }}
+                            <input class="account-controlt access-key" name="access" type="text">
+                            {{ /if }}
+                        </div>
+                        <div class="account-content ">
+                            <label class="platform-label" for="">Scrent Key</label>
+                            {{ if account }}
+                            <input class="account-controlt scrent-key" name="scrent" type="text">
+                        </div>
+                        {% endverbatim %}
+                    </script>
                 </div>
                 <div class="account-modal-footer">
                     <div class=" account-button">
-                        <button class="cancel">取消</button>
-                        <a href="#" class="confirm">确定</a>
+                        <a class=" btn cancel">取消</a>
+                        <a href="#" class=" btn confirm">确定</a>
                     </div>
                 </div>
             </div>
@@ -195,8 +202,8 @@
                 </div>
                 <div class="curry-modal-footer">
                     <div class="account-button">
-                        <button class="cancel">取消</button>
-                        <a class="curry-confirm">确定</a>
+                        <a class="btn cancel">取消</a>
+                        <a class="btn curry-confirm">确定</a>
                     </div>
                 </div>
             </div>
@@ -228,8 +235,8 @@
                 </div>
                 <div class="curry-modal-footer">
                     <div class="account-button">
-                        <button class="cancel">取消</button>
-                        <a class="carry-confirm">确定</a>
+                        <a class="btn cancel">取消</a>
+                        <a class="btn carry-confirm">确定</a>
                     </div>
                 </div>
             </div>
@@ -538,7 +545,6 @@
                                                 <td>1546.12</td>
                                                 <td>1546.12</td>
                                             </tr>
-
                                             </tbody>
                                         </table>
                                     </div>

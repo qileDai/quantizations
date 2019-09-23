@@ -248,7 +248,7 @@
         margin-top: 20px;
       }
 
-      .confirm {
+      .curry-confirm {
         width: 140px;
         height: 40px;
         background: #169BD5;
@@ -349,7 +349,7 @@
         margin-top: 20px;
       }
 
-      .confirm {
+      .carry-confirm {
         width: 140px;
         height: 40px;
         background: #169BD5;
@@ -607,6 +607,7 @@
           color: #F2F2F2;
           margin-left: 50px;
           margin-bottom: 20px;
+          margin-top: 15px;
         }
         .confirm{
           width: 140px;
@@ -616,6 +617,7 @@
           color: #F2F2F2;
           margin-left: 40px;
           margin-bottom: 20px;
+          margin-top: 15px;
         }
       }
     }
@@ -636,6 +638,7 @@
       .denomination-close-btn{
         display: inline-block;
         float: right;
+        cursor: pointer;
       }
     }
   }
