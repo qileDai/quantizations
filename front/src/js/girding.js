@@ -133,6 +133,7 @@ Robot.prototype.run = function () {
     self.listenTradingRobotEvent();
     self.listenCreatTradingEvent();
     self.listenparameterEven();
+    self.listenSubmitRobot();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
@@ -170,8 +171,8 @@ Robot.prototype.listenClickRobotEaaavent = function () {
     var btnNext = $("#btnNext")
     var robotDataArray = new Array(self.tradingOnWrapper, self.tradingStrategyWrapper, self.setStrategyWrapper, self.setRiskWrapper)
     var arrayLength = robotDataArray.length
-    var num = 0;           //根据num的值 来确定他应该跳向第几页
-    var creatrobotclick = 0//判断是不是页面第一次点击创建机器人
+    var num = 0;
+    var creatrobotclick = 0
     // console.log(arrayLength)
     // if (arrayLength <= 1)
     //     return;
@@ -214,7 +215,7 @@ Robot.prototype.listenClickRobotEaaavent = function () {
         btnNext.click(function () {
             console.log('next')
             if (num >= 2) {
-                $('#btnNext').hide()
+                $('#btnNext').text('完成')
                 num = 3;
 
 
@@ -282,13 +283,10 @@ Robot.prototype.listenClickRobotEvent = function () {
             console.log('num')
             if (num <= 0) {
                 num = 0;
-
-
                 // li[num].show().sibling().hide();
             } else {
                 num--;
-                $('#btnNext').show().text('下一步')
-                $('#btnComplete').hide();
+                $('#btnNext').text('下一步')
                 // li[num].show().sibling().hide();
 
             }
@@ -306,10 +304,8 @@ Robot.prototype.listenClickRobotEvent = function () {
 
 
         });
-
-
         $("#btnNext").unbind();
-        btnNext.click(function () {
+         btnNext.click(function () {
 
 
             var transactionCurrency = $('#curry').find(" option:selected").text();//交易币种
@@ -445,6 +441,7 @@ Robot.prototype.listenparameterEven = function () {
     deleteproperty.click(function () {
         parameterconfiguration.show();
         tradingShade.show();
+
     })
     parameterclosebtn.click(function () {
         parameterconfiguration.hide();
@@ -472,6 +469,32 @@ Robot.prototype.listenClickStragerty = function () {
 }
 
 Robot.prototype.listenSubmitRobot = function () {
+    var btnComplete = $('.btnComplete ')
+    //获取交易对数据
+    btnComplete.click(function () {
+        var robotGroup = $('.set-risk-strategy')
+        var curry = robotGroup.find('.curry').text()        //交易对
+        var strr = curry.split('/')
+        var curreny = strr[0]
+        var market = strr[1]
+        console.log(curreny, market)
+        var strategy = robotGroup.find('.strategy').text() //交易策略
+        var account = robotGroup.find('.account-value').text()  //账户
+        var resistance = robotGroup.find('.resistance-value').text() //阻力位
+        var support = robotGroup.find('.support-value').text()
+        var girding_num = robotGroup.find('.girding-value').text()
+        var free = robotGroup.find('.deal-account-free').text()
+        var girding_profit = robotGroup.find('.girding-profit-value').text()
+        console.log(strategy, account, resistance, support, girding_num, free, girding_profit)
+
+        xfzajax.post({
+            'url':'',
+            'data':{
+
+            }
+        })
+    })
+
 
 }
 
