@@ -128,43 +128,26 @@
                     <div class="role-modal-header-inner">添加API账户</div>
                 </div>
                 <div class="account-body">
-                    <script id="add-accountInfo" type="text/html">
-                        {% verbatim %}
-                        <div class="account-content ">
-                            <label class="platform-label" for="">账户所属平台</label>
-                            <select class="account-controlt platform" name="platform" id="platform">
-                                {{ if account }}
-                                    <option value="{{ account.platform.pk }}">{{ account.platform.Platform_name }}</option>
-                                {{ else }}
-                                    <option value=""></option>
-                                {{ /if }}
-                            </select>
-                        </div>
-                        <div class="account-content ">
-                            <label class="accountname-label" for="">账户名称</label>
-                            {{ if account }}
-                                <input class="account-controlt name " name="account-name" type="text"
-                                   value="{{ account.title }}">
-                            {{ else }}
-                                <input class="account-controlt name " name="account-name" type="text">
-                            {{ /if }}
-                        </div>
-                        <div class="account-content  ">
-                            <label class="access-label" for="">Access Key</label>
-                            {{ if account }}
-                            <input class="account-controlt access-key" name="access" type="text"
-                                   value="{{ account.accesskey }}">
-                            {{ else }}
-                            <input class="account-controlt access-key" name="access" type="text">
-                            {{ /if }}
-                        </div>
-                        <div class="account-content ">
-                            <label class="platform-label" for="">Scrent Key</label>
-                            {{ if account }}
-                            <input class="account-controlt scrent-key" name="scrent" type="text">
-                        </div>
-                        {% endverbatim %}
-                    </script>
+                    <div class="account-content ">
+                        <label class="platform-label" for="">账户所属平台</label>
+                        <select class="account-controlt platform" name="platform" id="platform">
+                            {% for platform in platfotms %}
+                                 <option value="{{ platform.pk }}">{{ platform.Platform_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="account-content ">
+                        <label class="accountname-label" for="">账户名称</label>
+                        <input class="account-controlt name " name="account-name" type="text">
+                    </div>
+                    <div class="account-content  ">
+                        <label class="access-label" for="">Access Key</label>
+                        <input class="account-controlt access-key" name="access" type="text">
+                    </div>
+                    <div class="account-content ">
+                        <label class="platform-label" for="">Scrent Key</label>
+                        <input class="account-controlt scrent-key" name="scrent" type="text">
+                    </div>
                 </div>
                 <div class="account-modal-footer">
                     <div class=" account-button">

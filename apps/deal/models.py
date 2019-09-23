@@ -26,16 +26,18 @@ class Account(models.Model):
     账户信息
     """
     # 账户名称
-    title = models.CharField(max_length=32, unique=True, verbose_name="账户名称")
-    accesskey = models.CharField(max_length=128, unique=True)
-    secretkey = models.CharField(max_length=128, unique=True)
+    title = models.CharField(max_length=32,verbose_name="账户名称",unique=True)
+    accesskey = models.CharField(max_length=128)
+    secretkey = models.CharField(max_length=128)
     # 创建时间
     createtime = models.DateTimeField(auto_now_add=True)
     # 与用户表是多对一关系
-    users = models.ForeignKey(UserInfo, on_delete=models.CASCADE, null=True, blank=True)
+    users = models.ForeignKey(UserInfo, on_delete=models.CASCADE, blank=True)
     # 与平台表是多对一关系
     platform = models.ForeignKey("TradingPlatform", on_delete=models.CASCADE, null=True, blank=True)
 
+    class Meta:
+        ordering = ['-createtime']
     def __str__(self):
         return self.title
 
@@ -114,9 +116,7 @@ class OrderInfo(models.Model):
     """
     已完成挂单信息
     """
-    currency_pair = models.CharField(max_length=32)
     order_type = models.CharField(max_length=10)
-    order_id = models.CharField(max_length=32)
     closing_price = models.DecimalField(max_digits=18, decimal_places=8)
     total_price = models.DecimalField(max_digits=18, decimal_places=8)
     closing_time = models.DateTimeField()

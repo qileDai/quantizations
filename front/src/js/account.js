@@ -36,29 +36,49 @@ Account.prototype.listenShowHideAddAccount = function () {
         var currentbtn = $(this);
         var tr = currentbtn.parent().parent();
         var pk = tr.attr('data-id');
+        console.log(pk)
         self.accountWrapper.show()
         xfzajax.post({
             'url': '/deal/accountinfo/',
             'data': {
                 'pk': pk,
             },
-            'success':function (result) {
-                if(result['code'] === 200){
+            'success': function (result) {
+                if (result['code'] === 200) {
                     account = result['data']
-                    console.log(account)
-                    tpl = template('add-accountInfo',{"account":account})
-                    console.log(tpl)
-                    var accountGroup = $('.account-body')
-                    accountGroup.append(tpl)
+                    var accountGroup = $('.account-body');
+                    platform = account['platform']['Platform_name']
+                    id = account['platform']['id']
+                    console.log(platform)
+                    title = account['title']
+                    accesskey = account['accesskey']
+                    secretkey = account['secretkey']
+
+                    // $('#platform').text(platform)
+                    var option = $("<option>").val(id).text(platform);
+                     $("#platform").append(option)
+                    accountGroup.find("input[name='account-name']").val(title)
+                    accountGroup.find("input[name='access']").val(accesskey)
+                    accountGroup.find("input[name='scrent']").val(secretkey)
+
+                    self.listenSubmitAccount(pk)
+                    // console.log(account)
+                    // tpl = template('add-accountInfo',{"account":account})
+                    // console.log(tpl)
+                    // var accountGroup = $('.account-body')
+                    // accountGroup.append(tpl)
+
                 }
             }
         })
     })
     closeBtn.click(function () {
         self.accountWrapper.hide()
+        window.location.reload()
     });
     $('.cancel').click(function () {
         self.accountWrapper.hide();
+        window.location.reload()
     })
 
 };
@@ -120,6 +140,7 @@ Account.prototype.listenShowHideCurryWrapper = function () {
 Account.prototype.listtenToalAccountCloseEvent = function () {
     $('.property-close-btn').on('click', function () {
         $('.property-total-wrapper').hide()
+        window.location.reload()
     })
 };
 
@@ -220,25 +241,17 @@ Account.prototype.deleteAccount = function () {
     })
 }
 
-Account.prototype.listenEditAccount = function () {
+Account.prototype.listenEditAccount = function (pk) {
     var self = this;
-    $('.update-property').on('click', function () {
-        var currentbtn = $(this);
-        var tr = currentbtn.parent().parent();
-        var pk = tr.attr('data-id');
+    var confirmBtn = $('.confirm');
+    confirmBtn.on('click', function () {
         var account = $('.account-body');
         platform = $('#platform').find("option:selected").val()
         title = account.find("input[name='account-name']").val()
         accesskey = account.find("input[name='access']").val()
         secretkey = account.find("input[name='scrent']").val()
-        var url = ''
-        if (pk) {
-            url = '/deal/editaccount/'
-        } else {
-            url = '/deal/addaccount/'
-        }
         xfzajax.post({
-            'url': url,
+            'url': '/deal/editaccount/',
             'data': {
                 'platform': platform,
                 'title': title,
@@ -253,18 +266,17 @@ Account.prototype.listenEditAccount = function () {
                     });
                 }
             }
+
         });
 
     })
 
 }
-Account.prototype.listenSubmitAccount = function () {
+Account.prototype.listenSubmitAccount = function (pk) {
     var confirmBtn = $('.confirm');
 
     confirmBtn.click(function () {
-        var currentbtn = $(this);
-        var tr = currentbtn.parent().parent();
-        var pk = tr.attr('data-id');
+        console.log(pk)
         var account = $('.account-body');
         platform = $('#platform').find("option:selected").val()
         title = account.find("input[name='account-name']").val()

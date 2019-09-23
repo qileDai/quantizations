@@ -352,6 +352,7 @@
         border-radius: 5px;
         background: #169bd5;
         border-bottom: none;
+        color: white;
         display: none;
       }
       height: 80px;
@@ -360,7 +361,7 @@
       .trading-button {
         text-align: center;
 
-        button {
+        a {
           margin-left: 40px;
           margin-right: 40px;
         }
@@ -371,6 +372,7 @@
           border-radius: 5px;
           background: #169bd5;
           border-bottom: none;
+          color: white;
         }
 
         .next-btn {
@@ -379,6 +381,7 @@
           border-radius: 5px;
           background: #169bd5;
           border-bottom: none;
+          color: white;
         }
       }
     }
