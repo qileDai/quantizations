@@ -134,6 +134,7 @@ Robot.prototype.run = function () {
     self.listenCreatTradingEvent();
     self.listenparameterEven();
     self.listenSubmitRobot();
+    self.runRobotEvent();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
@@ -212,7 +213,7 @@ Robot.prototype.listenClickRobotEaaavent = function () {
             }
         });
         $("#btnNext").unbind();
-         btnNext.click(function () {
+        btnNext.click(function () {
 
 
             var transactionCurrency = $('#curry').find(" option:selected").text();//交易币种
@@ -220,7 +221,7 @@ Robot.prototype.listenClickRobotEaaavent = function () {
             var parameterscontrol = $('.parameters-control').find(" option:selected").text()//交易账户
             var resistancevalue = $('.strategy-parameters .trading-parameters .resistance-value').val()//阻力值
             var support = $('.strategy-parameters .trading-parameters .support').val()//支撑位
-            var gridnumber= $('.strategy-parameters .trading-parameters .grid-number').val()//网格数量
+            var gridnumber = $('.strategy-parameters .trading-parameters .grid-number').val()//网格数量
 
 
             // alert('请选择交易币种/交易市场')
@@ -345,7 +346,7 @@ Robot.prototype.listenClickRobotEvent = function () {
             var parameterscontrol = $('.parameters-control').find(" option:selected").text()//交易账户
             var resistancevalue = $('.strategy-parameters .trading-parameters .resistance-value').val()//阻力值
             var support = $('.strategy-parameters .trading-parameters .support').val()//支撑位
-            var gridnumber= $('.strategy-parameters .trading-parameters .grid-number').val()//网格数量
+            var gridnumber = $('.strategy-parameters .trading-parameters .grid-number').val()//网格数量
 
             // alert('请选择交易币种/交易市场')
             var text = transactionCurrency + '/' + markettitle
@@ -490,15 +491,40 @@ Robot.prototype.listenSubmitRobot = function () {
         var market = strr[1]
         console.log(curreny, market)
         var user = robotGroup.find('.user').text() //交易账户
-        var strategy = robotGroup.find('.strategy').text() //交易策略
+        var strategy = ('.strategy-parameters-top .strategy').text() //交易策略
         var account = robotGroup.find('.account-value').text()  //账户
         var resistance = robotGroup.find('.resistance-value').text() //阻力位
         var support = robotGroup.find('.support-value').text()
         var girding_num = robotGroup.find('.girding-value').text()
         var free = robotGroup.find('.deal-account-free').text()
         var girding_profit = robotGroup.find('.girding-profit-value').text()
+        console.log("diaqle")
         console.log(strategy, account, resistance, support, girding_num, free, girding_profit)
 
+    })
+
+}
+
+Robot.prototype.runRobotEvent = function () {
+    var robotBnt = $('#run-robot')
+    robotBnt.click(function () {
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var robot = tr.attr('data-id');
+        var robot_id = new  Array()
+        robot_id.push({
+            "id":robot
+        })
+        console.log(robot_id)
+        xfzajax.post({
+            'url': '/deal/startrobot/',
+            'data':{
+                'robot_id':1,
+            },
+            'success':function (result) {
+
+            }
+        })
     })
 
 }
