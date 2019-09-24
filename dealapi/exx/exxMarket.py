@@ -130,10 +130,10 @@ class MarketCondition(object):
         return sell1_price
 
 
-# if __name__ == "__main__":
-#     market = MarketCondition('eth_usdt')
-#     result = market.get_klines('1day', '30')
-#     print(result)
+if __name__ == "__main__":
+    market = MarketCondition('eth_usdt')
+    result = market.get_ticker()
+    print(result)
 
 
 

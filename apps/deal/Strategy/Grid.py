@@ -15,10 +15,10 @@ class GridStrategy(Thread):
         # kwargs = {'robot_obj': robot_obj, 'order_type': order_type}
         super().__init__()
         self.robot_obj = kwargs['robot_obj']                                          # 机器人对象
-        self.currency_type = self.robot_obj.currency + '_' + self.robot_obj.market    # 交易对
+        self.currency_type = self.robot_obj.currency.lower() + '_' + self.robot_obj.market.lower()    # 交易对
         self.order_type = kwargs['order_type']                                        # 挂单类型
         self.id_list = list()                                                         # 挂单id列表
-        self.grid_range = (self.robot_obj.resistance - self.robot_obj.support_level) / self.robot_obj.girding_num
+        self.grid_range = float(self.robot_obj.resistance - self.robot_obj.support_level) / float(self.robot_obj.girding_num)
         self.Flag = True  # 停止标志位
         self.start_time = datetime.datetime.now()
 
@@ -116,28 +116,28 @@ class GridStrategy(Thread):
             print("获取市场信息失败...", e)
         else:
             # 计算买一价，卖一价
-            min_buy1 = self.robot_obj.current_price-self.grid_range*3/2
-            max_buy1 = self.robot_obj.current_price-self.grid_range
-            min_sell1 = self.robot_obj.current_price+self.grid_range
-            max_sell1 = self.robot_obj.current_price+self.grid_range*3/2
+            min_buy1 = float(self.robot_obj.current_price)-self.grid_range*3/2
+            max_buy1 = float(self.robot_obj.current_price)-self.grid_range
+            min_sell1 = float(self.robot_obj.current_price)+self.grid_range
+            max_sell1 = float(self.robot_obj.current_price)+self.grid_range*3/2
 
             for i in range(self.robot_obj.girding_num):
                 # 根据挂单类型计算挂单价格区间
                 if self.order_type == "buy" and flag == 0:
                     a, b = min_buy1-self.grid_range*i, max_buy1-self.grid_range*i
                     # 获取挂卖单价的小数位
-                    price = round(random.uniform(a, b), markets_data.get("priceScale"))
+                    price = round(random.uniform(a, b), markets_data.get("priceScale", 2))
                 elif self.order_type == "sell" and flag == 0:
                     a, b = min_sell1+self.grid_range*i, max_sell1+self.grid_range*i
                     # 获取挂买单价的小数位
-                    price = round(random.uniform(a, b), markets_data.get("amountScale"))
-
+                    price = round(random.uniform(a, b), markets_data.get("amountScale", 2))
                 # 获取挂单数量
-                amount = random.uniform(self.robot_obj.min_num, self.robot_obj.min_num)
+                amount = random.uniform(self.robot_obj.min_num, self.robot_obj.max_num)
                 try:
                     if order_type is None:
                         # 如果order_type为空，挂原始单
-                        res = self.server_api.order(str(amount), self.currency_type, str(price), self.order_type)
+                        res = self.server_api.order(str(amount), self.currency_type, str(price), str(self.order_type))
+                        print(res, self.currency_type)
                         # 下单成功，添加下单id
                         if res.get("id") is not None:
                             self.id_list.append(
@@ -146,6 +146,7 @@ class GridStrategy(Thread):
                                                  "price": price,
                                                  "amount": amount}}
                             )
+                            print(self.order_type, '添加')
                     else:
                         # 如果order_type不为空，更新挂单
                         b_id = list(item.keys())[0]
@@ -167,7 +168,8 @@ class GridStrategy(Thread):
                     self.log_info("api")
                     logging.exception("PLACE ORDER ERROR...", e)
                     print("下单失败", e)
-                # time.sleep(0.1)
+
+        print(self.id_list)
 
     def completed_order_info(self, b_id, price, item, order_info, order_type):
         """
@@ -315,4 +317,4 @@ class GridStrategy(Thread):
 
     def run(self):
         self.place_order()
-        self.update_order_info()
+        # self.update_order_info()
