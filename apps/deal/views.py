@@ -406,7 +406,7 @@ class ShowTradeDetail(View):
             # 总收益
             'profit': (info[currency.upper()].get('total')-property_obj.original_assets)*info1['ticker'].get('last'),
         }
-        return render(request, 'management/gridding.html', context)
+        return restful.result(data=context)
 
 
 class StartRobot(View):
@@ -426,8 +426,8 @@ class StartRobot(View):
 
     def post(self, request):
         # 多个和一个
-        ids = request.POST.get('robot_id')
-
+        ids = request.POST.getlist('robot_id')
+        print(ids)
         # Flag为1启动，为0停止
         Flag = request.POST.get('flag')
         # 调用对应策略
@@ -461,6 +461,7 @@ class StartRobot(View):
             elif robot_obj.trading_strategy == '搬砖套利V1.0':
                 pass
         StartRobot.order_list = threading.enumerate()
+        return restful.ok()
 
 
 class ShowConfig(View):

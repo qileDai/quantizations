@@ -135,6 +135,7 @@ Robot.prototype.run = function () {
     self.listenparameterEven();
     self.listenSubmitRobot();
     self.runRobotEvent();
+    self.protectRelieve();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
@@ -409,9 +410,21 @@ Robot.prototype.listenCloseRobotEvent = function () {
     })
 };
 Robot.prototype.listenCreatTradingEvent = function () {
-    $('.update-property').on('click', function () {
+    $('.robot-details').on('click', function () {
         $('.tradingParticulars').show();
         $('.tradingShade').show();
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var robot_id = tr.attr('data-id');
+        xfzajax.post({
+            'url': '/deal/showtradedetail/',
+            'data':{
+                'robot_id':robot_id
+            },
+            'success':function (result) {
+                console.log(result)
+            }
+        })
     })
 
 }
@@ -447,7 +460,7 @@ Robot.prototype.listenTradingRobotEvent = function () {
 Robot.prototype.listenparameterEven = function () {
     var parameterconfiguration = $('.parameter-configuration');
     var parameterclosebtn = $('.parameter-close-btn');
-    var deleteproperty = $('.delete-property');
+    var deleteproperty = $('.allocation');
     var tradingShade = $('.tradingShade')
     deleteproperty.click(function () {
         parameterconfiguration.show();
@@ -511,22 +524,47 @@ Robot.prototype.runRobotEvent = function () {
         var currentbtn = $(this);
         var tr = currentbtn.parent().parent();
         var robot = tr.attr('data-id');
-        var robot_id = new  Array()
-        robot_id.push({
-            "id":robot
-        })
+        var robot_id = []
+        robot_id.push(robot)
         console.log(robot_id)
         xfzajax.post({
             'url': '/deal/startrobot/',
-            'data':{
-                'robot_id':1,
+            'data': {
+                'robot_id': robot_id,
             },
-            'success':function (result) {
-
+            traditional: true,
+            'success': function (result) {
+                if (result['code'] === 200) {
+                    console.log(result)
+                }
             }
         })
     })
 
+};
+
+Robot.prototype.protectRelieve = function () {
+    $('.protect-relieve').on('click', function () {
+        var flag = $(this).text()
+        console.log(flag)
+        var element = $(this).siblings()
+        var runflg = $(element[0]).text()
+        if (runflg === '运行' || runflg === '运行(保护)') {
+            var flg_text = '运行'
+        }
+        if (runflg === '停止' || runflg === '停止(保护)') {
+            var flg_text = '停止'
+        }
+        if (flag === '保护') {
+            var new_value = runflg + '(' + flag + ')'
+            console.log(new_value)
+            $(element[0]).text(new_value)
+            $(this).text('解除')
+        } else {
+            $(element[0]).text(flg_text)
+            $(this).text('保护')
+        }
+    })
 }
 
 

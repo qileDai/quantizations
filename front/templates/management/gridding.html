@@ -85,110 +85,29 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>EXX账户1</td>
-                            <td>trx</td>
-                            <td>USDT</td>
-                            <td>网格交易V1.0</td>
-                            <td>1,000,000.00 usdt</td>
-                            <td>+56.33 usdt</td>
-                            <td>+0.01 usdt</td>
-                            <td>+56.33 usdt</td>
-                            <td>68%</td>
-                            <td>2018-11-21 13:54:23</td>
-                            <td>运行中</td>
-                            <td>
-                                <a class="check-property" id="check-property-total" href="#">停止</a>
-                                <a class="update-property" href="javascript:;">详情</a>
-                                <a class="delete-property" href="javascript:;">配置</a>
-                                <a class="edit-property" href="">保护</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td>EXX账户1</td>
-                            <td>trx</td>
-                            <td>USDT</td>
-                            <td>网格交易V1.0</td>
-                            <td>1,000,000.00 usdt</td>
-                            <td>+56.33 usdt</td>
-                            <td>+0.01 usdt</td>
-                            <td>+56.33 usdt</td>
-                            <td>68%</td>
-                            <td>2018-11-21 13:54:23</td>
-                            <td>运行中</td>
-                            <td>
-                                <a class="check-property" id="check-property-total" href="#">停止</a>
-                                <a class="update-property" href="javascript:;">详情</a>
-                                <a class="delete-property" href="javascript:;">配置</a>
-                                <a class="edit-property" href="">保护</a>
+                        {% for robot in robots %}
+                            <tr data-id="{{ robot.pk }}">
+                                <td>{{ robot.pk }}</td>
+                                <td>{{ robot.trading_account.title }}</td>
+                                <td>{{ robot.currency }}</td>
+                                <td>{{ robot.market }}</td>
+                                <td>{{ robot.trading_strategy }}</td>
+                                <td>1,000,000.00 usdt</td>
+                                <td>+56.33 usdt</td>
+                                <td>+0.01 usdt</td>
+                                <td>+56.33 usdt</td>
+                                <td>68%</td>
+                                <td>{{ robot.create_time }}</td>
+                                <td>{{ robot.status }}</td>
+                                <td>
+                                    <a class="run-stop" id="run-robot" href="#">运行</a>
+                                    <a class="robot-details" href="javascript:;">详情</a>
+                                    <a class="allocation" href="javascript:;">配置</a>
+                                    <a class="protect-relieve" href="#">保护</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
 
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td>EXX账户1</td>
-                            <td>trx</td>
-                            <td>USDT</td>
-                            <td>网格交易V1.0</td>
-                            <td>1,000,000.00 usdt</td>
-                            <td>+56.33 usdt</td>
-                            <td>+0.01 usdt</td>
-                            <td>+56.33 usdt</td>
-                            <td>68%</td>
-                            <td>2018-11-21 13:54:23</td>
-                            <td>运行中</td>
-                            <td>
-                                <a class="check-property" id="check-property-total" href="#">停止</a>
-                                <a class="update-property" href="javascript:;">详情</a>
-                                <a class="delete-property" href="javascript:;">配置</a>
-                                <a class="edit-property" href="">保护</a>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td>EXX账户1</td>
-                            <td>trx</td>
-                            <td>USDT</td>
-                            <td>网格交易V1.0</td>
-                            <td>1,000,000.00 usdt</td>
-                            <td>+56.33 usdt</td>
-                            <td>+0.01 usdt</td>
-                            <td>+56.33 usdt</td>
-                            <td>68%</td>
-                            <td>2018-11-21 13:54:23</td>
-                            <td>运行中</td>
-                            <td>
-                                <a class="check-property" id="check-property-total" href="#">停止</a>
-                                <a class="update-property" href="javascript:;">详情</a>
-                                <a class="delete-property" href="javascript:;">配置</a>
-                                <a class="edit-property" href="">保护</a>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td>EXX账户1</td>
-                            <td>trx</td>
-                            <td>USDT</td>
-                            <td>网格交易V1.0</td>
-                            <td>1,000,000.00 usdt</td>
-                            <td>+56.33 usdt</td>
-                            <td>+0.01 usdt</td>
-                            <td>+56.33 usdt</td>
-                            <td>68%</td>
-                            <td>2018-11-21 13:54:23</td>
-                            <td>运行中</td>
-                            <td>
-                                <a class="check-property" id="check-property-total" href="#">停止</a>
-                                <a class="update-property" href="javascript:;">详情</a>
-                                <a class="delete-property" href="javascript:;">配置</a>
-                                <a class="edit-property" href="">保护</a>
-
-                            </td>
-                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -827,11 +746,7 @@
                     <button class="next-btn" id="btnNext1">完成</button>
                 </div>
             </div>
-
-
         </div>
-
-
     </div>
 
     <script src="{% static 'ystep-master/js/jquery.min.js' %}"></script>
