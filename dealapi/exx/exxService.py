@@ -23,6 +23,7 @@ class ExxService(object):
         singature_parmas = "&".join(sort_parmas)
         singature_parmas = bytes(singature_parmas, encoding="utf-8")
         signature = hmac.new(bytes(self.secretkey, encoding="utf-8"), singature_parmas, hashlib.sha512).hexdigest()
+        print(signature)
 
         return signature
 
@@ -57,7 +58,7 @@ class ExxService(object):
                     # if result['code'] != 100:
                     #     return result.update({"code":400,"message":"请求失败"})
         except Exception as e:
-            self.log.error("委托下单失败", e)
+            print(e)
         return result
 
 
@@ -234,6 +235,11 @@ class ExxService(object):
 # service_api = ExxService('c6b2ee35465dfddf535e8ddaeaaaf4ee8a90894e', '3b56369d-8072-461e-91f6-243b6277af01')
 # data = service_api.get_balance()
 # print(data)
+ser = ExxService("5fe37f4f9fdd43cf5f58b466697f549f4eb266cc","b338ea93-c922-4565-83b3-452d837a920e")
+data = ser.order(2,"eth_usdt","1024"," buy")
+print(data)
+
+
 
 
 

@@ -55,18 +55,18 @@ Account.prototype.listenShowHideAddAccount = function () {
                     secretkey = account['secretkey']
 
                     // $('#platform').text(platform)
-                    var option = $("<option>").val(id).text(platform);
-                     $("#platform").append(option)
-                    accountGroup.find("input[name='account-name']").val(title)
-                    accountGroup.find("input[name='access']").val(accesskey)
-                    accountGroup.find("input[name='scrent']").val(secretkey)
-
-                    self.listenSubmitAccount(pk)
+                    // var option = $("<option>").val(id).text(platform);
+                    //  $("#platform").append(option)
+                    // accountGroup.find("input[name='account-name']").val(title)
+                    // accountGroup.find("input[name='access']").val(accesskey)
+                    // accountGroup.find("input[name='scrent']").val(secretkey)
+                    //
+                    // self.listenSubmitAccount(pk)
                     // console.log(account)
-                    // tpl = template('add-accountInfo',{"account":account})
-                    // console.log(tpl)
-                    // var accountGroup = $('.account-body')
-                    // accountGroup.append(tpl)
+                    tpl = template('add-accountInfo',{"account":account})
+                    console.log(tpl)
+                    var accountGroup = $('#account-body')
+                    accountGroup.append(tpl)
 
                 }
             }
