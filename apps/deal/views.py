@@ -25,6 +25,8 @@ class AccountList(LoginRequireMixin, View):
     def get(self, request):
         page = int(request.GET.get('p', 1))
         user_id = request.session.get("user_id")
+        if not user_id:
+            return render(request, "cms/login.html", {'error': '账户失效，请重新登陆！'})
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
         # 获取用户所有币种
@@ -297,7 +299,7 @@ def get_account_info(currency, market, id):
     user_obj = UserInfo.objects.all()
     if str(platform) == 'EXX':
         # 创建交易接口对象---------------------------------------------------------------------API
-        service_obj = ExxService(account_obj.accesskey, account_obj.secretkey)
+        service_obj = ExxService(account_obj.secretkey, account_obj.accesskey)
         # 创建行情接口对象
         currency_pair = currency.lower() + '_' + market.lower()
         market_obj = MarketCondition(currency_pair)
@@ -320,16 +322,13 @@ class GetAccountInfo(View):
         # 调用函数
         user_obj, service_obj, market_obj = get_account_info(currency, market, id)
         info = service_obj.get_balance()
-        print(info)
         info = info.get('funds')
         info1 = market_obj.get_ticker()
-        print(info1)
         info2 = market_obj.get_klines('1day', '30')
         info2 = info2.get('datas')
-        print(info2)
 
         # 计算阻力位/支撑位的默认值
-        if int(info2['limit']) <= 30:
+        if int(info2.get('limit', 0)) <= 30:
             max = 0
             min = 0
             for i in info2['data']:
@@ -365,20 +364,24 @@ class StartRobot(View):
 
     def post(self, request):
         # 多个和一个
-        ids = request.POST.getlist('robot_id')
-        print(ids)
+        ids = request.POST.get('robot_id')
+        if ids:
+            robots = Robot.objects.filter(id=ids)
+            print(robots)
+        else:
+            robots = Robot.objects.all()
         # Flag为1启动，为0停止
         Flag = request.POST.get('flag')
         # 调用对应策略
-        for id in ids:
-            robot_obj = Robot.objects.get(id=id)
-            if robot_obj.trading_strategy == '网格策略V1.0' and Flag == 1:
+        for robot_obj in robots:
+            if robot_obj.trading_strategy == '网格策略V1.0' and Flag == '1':
                 # 启动线程
                 thread1 = GridStrategy(robot_obj=robot_obj, order_type="buy")
                 thread2 = GridStrategy(robot_obj=robot_obj, order_type="sell")
                 thread1.start()
                 thread2.start()
-            elif robot_obj.trading_strategy == '网格策略V1.0' and Flag == 0:
+                print('-'*30, '启动线程')
+            elif robot_obj.trading_strategy == '网格策略V1.0' and Flag == '0':
                 # 停止线程
                 for item in threading.enumerate():
                     try:
@@ -400,7 +403,7 @@ class StartRobot(View):
             elif robot_obj.trading_strategy == '搬砖套利V1.0':
                 pass
         StartRobot.order_list = threading.enumerate()
-        return restful.ok()
+        return HttpResponse("OK")
 
 
 class ShowTradeDetail(View):
@@ -461,7 +464,7 @@ class ShowTradeDetail(View):
             # 总收益
             'profit': (info[currency.upper()].get('total')-property_obj.original_assets)*info1['ticker'].get('last'),
         }
-        return restful.result(data=context)
+        return render(request, 'management/gridding.html', context)
 
 
 class ShowConfig(View):
