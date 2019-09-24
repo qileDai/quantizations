@@ -28,9 +28,11 @@ class AccountModelForm(forms.ModelForm, FormMixin):
 class EditAccountFrom(forms.ModelForm,FormMixin):
     pk = forms.IntegerField()
     platform = forms.IntegerField()
+
     class Meta:
         model = Account
         fields = ('users', 'title', 'accesskey', 'secretkey')
+
 
 class RobotFrom(forms.ModelForm):
 

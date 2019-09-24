@@ -57,7 +57,7 @@ class ExxService(object):
                     # if result['code'] != 100:
                     #     return result.update({"code":400,"message":"请求失败"})
         except Exception as e:
-            self.log.error("委托下单失败", e)
+            print("委托下单失败", e)
         return result
 
 
@@ -140,9 +140,9 @@ class ExxService(object):
         # print('+'*20, result)
         return result
 
-
     """
-    https://trade.exx.com/api/getChargeAddress?accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&signature=请求加密签名串
+    https://trade.exx.com/api/getChargeAddress?
+    accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&signature=请求加密签名串
     """
     def get_chargeaddress(self, currency):
         """
@@ -159,7 +159,8 @@ class ExxService(object):
         return result
 
     """
-    https://trade.exx.com/api/getChargeRecord?accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&pageIndex=页数&signature=请求加密签名串
+    https://trade.exx.com/api/getChargeRecord?
+    accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&pageIndex=页数&signature=请求加密签名串
     
     """
     def get_chargerecord(self, currency):
@@ -177,7 +178,8 @@ class ExxService(object):
         return result
 
     """
-    https://trade.exx.com/api/getWithdrawAddress?accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&signature=请求加密签名串
+    https://trade.exx.com/api/getWithdrawAddress?
+    accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&signature=请求加密签名串
     """
     def get_withdrawaddress(self, currency):
         """
@@ -194,7 +196,8 @@ class ExxService(object):
         return result
 
     """
-    https://trade.exx.com/api/getWithdrawRecord?accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&pageIndex=页数&signature=请求加密签名串
+    https://trade.exx.com/api/getWithdrawRecord?
+    accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&pageIndex=页数&signature=请求加密签名串
     """
     def get_withdrawrecord(self, currency):
         """
@@ -211,7 +214,9 @@ class ExxService(object):
         return result
 
     """
-    https://trade.exx.com/api/withdraw?accesskey=your_access_key&amount=10&currency=qtum&nonce=当前时间毫秒数&receiveAddr=提币地址&safePwd=提币密码&signature=请求加密签名串
+    https://trade.exx.com/api/withdraw?
+    accesskey=your_access_key&amount=10&currency=qtum&nonce=当前时间毫秒数
+    &receiveAddr=提币地址&safePwd=提币密码&signature=请求加密签名串
     """
     def withdraw(self, currency, amount, pwd):
         """
