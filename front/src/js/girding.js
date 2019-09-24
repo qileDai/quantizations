@@ -499,11 +499,7 @@ Robot.prototype.listenSubmitRobot = function () {
         var girding_profit = robotGroup.find('.girding-profit-value').text()
         console.log(strategy, account, resistance, support, girding_num, free, girding_profit)
 
-
-
-
     })
-
 
 }
 
