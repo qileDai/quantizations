@@ -7,12 +7,13 @@ from urllib import parse
 from apps.deal.asset.get_assets import GetAssets
 from dealapi.exx.exxMarket import MarketCondition
 from dealapi.exx.exxService import ExxService
-from .forms import AccountModelForm, RobotFrom,EditAccountFrom
+from .forms import AccountModelForm, RobotFrom, EditAccountFrom
 from django.db.models import Q
 from utils.mixin import LoginRequireMixin
 from utils import restful
 from apps.deal.Strategy.Grid import GridStrategy
-from .serializers import AccountSerializer
+import threading
+import datetime
 # Create your views here.r
 
 
@@ -66,25 +67,33 @@ class AddAccount(View):
         else:
             return restful.params_error(model_form.get_errors())
 
+
 def accountinfo(request):
         accout_id = request.POST.get('pk')
+        print("ss")
+        print(accout_id)
         account = Account.objects.get(pk=accout_id)
-        serialize = AccountSerializer(account)
-        print(serialize.data)
-        return restful.result(data=serialize.data)
+        context = {
+           'account': account,
+        }
+        print(account)
+        return render(request, 'management/tradingaccount.html', context=context)
+
 
 class EditAccount(View):
     """
     编辑账户
     """
     def get(self,request):
-        try:
-            accout_id = request.POST.get('pk')
-            account = Account.objects.get(pk=accout_id)
-            serialize = AccountSerializer(account)
-            return restful.result(data=serialize.data)
-        except:
-            restful.params_error(message="账户序列化错误")
+        accout_id = request.GET.get('account_id')
+        print(accout_id)
+        account = Account.objects.get(pk=accout_id)
+        # context = {
+
+        #    'account': account,
+        # }
+        # print(account)
+        return render(request, 'management/tradingaccount.html')
 
     def post(self, request):
         form = EditAccountFrom(request.POST)
@@ -127,8 +136,8 @@ class ShowAssert(View):
         con = GetAssets(id, account_obj, platform)
         data = con.showassets()
         print(type(data))
-        # return render(request, 'management/tradingaccount.html')
-        return restful.result(data=data)
+        return render(request, 'management/tradingaccount.html')
+        # return restful.result(data=data)
 
 
 class ShowCollectAsset(View):
@@ -160,7 +169,7 @@ class ShowCollectAsset(View):
         # 汇总资产变化/初始总资产/历史盈亏/
         print('资产汇总', '-'*20)
         print(context_list[0])
-        return restful.result(data=context_list[0])
+        return render(request, 'management/tradingaccount.html', context_list[0])
 
 
 class ChargeAccount(View):
@@ -187,12 +196,10 @@ class ChargeAccount(View):
             info = dict()
             info['ticker'] = {}
             info['last'] = 0
-        if currency:
-            property_obj = Property.objects.filter(Q(account_id=id) & Q(currency=currency))
-            for obj in property_obj:
-                original_assets = float(obj.original_assets) + float(num)*float(info['ticker']['last'])
-                Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
-            return restful.ok()
+        property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
+        original_assets = float(property_obj.original_assets) + float(num)*float(info['ticker']['last'])
+        Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
+        return restful.ok()
 
 
 class WithDraw(View):
@@ -221,11 +228,10 @@ class WithDraw(View):
             info['ticker'] = {}
             info['last'] = 0
         if currency:
-            property_obj = Property.objects.filter(Q(account_id=id) & Q(currency=currency))
             # 提币折合成usdt
-            for obj in property_obj:
-                original_assets = float(obj.original_assets) + float(num)*float(info['ticker']['last'])
-                Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
+            property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
+            original_assets = float(property_obj.original_assets) + float(num) * float(info['ticker']['last'])
+            Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
             return restful.ok()
 
 
@@ -275,46 +281,58 @@ class GetParams(View):
 
 
 def get_account_info(currency, market, id):
-    robot_obj = Robot.objects.filter(id=id)
+    """
+    获取用户信息
+    :param currency: 交易币种
+    :param market: 交易市场
+    :param id: 机器人id
+    :return:
+    """
+    robot_obj = Robot.objects.get(id=id)
     # 获取账户所属的用户信息
-    account_obj = robot_obj.trading_account_id
-    # account_obj = Account.objects.filter(id=robot_obj.trading_account_id)
+    account_obj = Account.objects.get(id=robot_obj.trading_account_id)
     # 账户对应的平台
     platform = account_obj.platform
     # 获取用户信息
     user_obj = UserInfo.objects.all()
-    if platform == 'EXX':
+    if str(platform) == 'EXX':
         # 创建交易接口对象---------------------------------------------------------------------API
-        con = ExxService(account_obj.accesskey, account_obj.secretkey)
-        info = con.get_balance()
-        info = info['funds']
+        service_obj = ExxService(account_obj.accesskey, account_obj.secretkey)
         # 创建行情接口对象
         currency_pair = currency.lower() + '_' + market.lower()
-        con1 = MarketCondition(currency_pair)
-        info1 = con1.get_ticker()
-        info2 = con1.get_klines('1day', '30')
-    elif platform == 'HUOBI':
+        market_obj = MarketCondition(currency_pair)
+
+    elif str(platform) == 'HUOBI':
         pass
 
-    return user_obj, info, info1, info2
+    return user_obj, service_obj, market_obj
 
 
 class GetAccountInfo(View):
     """
-    获取交易对可用额度/当前价,计算默认值
+    展示交易对可用额度/当前价,计算默认值
     """
     def post(self, request):
         currency = request.POST.get('curry-title')
         market = request.POST.get('market-title')
         # 获取机器人id
-        id = request.POST.get('pk')
+        id = request.POST.get('robot_id')
         # 调用函数
-        user_obj, info, info1, info2 = get_account_info(currency, market, id)
+        user_obj, service_obj, market_obj = get_account_info(currency, market, id)
+        info = service_obj.get_balance()
+        print(info)
+        info = info.get('funds')
+        info1 = market_obj.get_ticker()
+        print(info1)
+        info2 = market_obj.get_klines('1day', '30')
+        info2 = info2.get('datas')
+        print(info2)
+
         # 计算阻力位/支撑位的默认值
         if int(info2['limit']) <= 30:
             max = 0
             min = 0
-            for i in info2['datas']['data']:
+            for i in info2['data']:
                 max += float(i[2])
                 min += float(i[3])
 
@@ -326,7 +344,6 @@ class GetAccountInfo(View):
             'support_level': float(min/int(info2['limit'])),
             'users': user_obj,
         }
-        print(info, info1, info2)
         print(context)
         return render(request, 'management/gridding.html', context)
 
@@ -336,53 +353,122 @@ class ShowTradeDetail(View):
     展示机器人交易详情
     """
     def post(self, request):
-        currency = request.POST.get('curry-title')
-        market = request.POST.get('market-title')
-        id = request.POST.get('pk')
+        # 获取机器人id
+        id = request.POST.get('robot_id')
+        robot_obj = Robot.objects.get(id=id)
+        currency = robot_obj.currency
+        market = robot_obj.market
         # 调用函数
-        user_obj, info, info1, info2 = get_account_info(currency, market, id)
-        finish_num = OrderInfo.objects.filter(robot=id)
-        total_input = ""
-        running_time = ""
+        user_obj, service_obj, market_obj = get_account_info(currency, market, id)
+        info = service_obj.get_balance()
+        info = info.get('funds')
+        info1 = market_obj.get_ticker()
+
+        property_obj = Property.objects.get(Q(account_id=robot_obj.trading_account_id) & Q(currency=currency))
+        closed_order = OrderInfo.objects.filter(robot=id)
+
+        # 获取挂单信息
+        order_list = list()
+        for item in StartRobot.robot_list:
+            try:
+                # 获取机器人对应的线程对象
+                robot = item.robot_obj
+                if id == robot.id:
+                    order_list += item.id_list
+                running_time = item.start_time - datetime.datetime.now()
+            except:
+                print('对象没有属性robot_obj')
+                continue
 
         context = {
+            # 已完成笔数
+            'closed_num': len(closed_order),
+            # 已完成挂单信息
+            'closed_info': closed_order,
+            # 未完成笔数
+            'open_num': len(order_list),
+            # 未完成挂单信息
+            'open_info': order_list,
+            # 总投入
+            'total_input': property_obj.original_assets,
+            # 运行时间
+            'running_time': running_time,
+            # 交易币种可用
             'currency_balance': info[currency.upper()].get('balance'),
+            # 交易市场可用
             'market_balance': info[market.upper()].get('balance'),
+            # 交易币种冻结
             'currency_freeze': info[currency.upper()].get('freeze'),
+            # 交易市场冻结
             'market_freeze': info[market.upper()].get('freeze'),
+            # 当前价
             'last': info1['ticker'].get('last'),
+            # 总收益
+            'profit': (info[currency.upper()].get('total')-property_obj.original_assets)*info1['ticker'].get('last'),
         }
+        return render(request, 'management/gridding.html', context)
 
 
 class StartRobot(View):
     """
-    运行机器人
+    管理机器人
     """
+    order_list = ""
+
+    def cancel_orders(self, robot, order_list):
+        # 撤单，不同平台
+        account_obj = Account.objects.get(id=robot.trading_account_id)
+        user_obj, service_obj, market_obj = get_account_info(robot.currency, robot.market, robot.id)
+        currency_pair = robot.currency + '_' + robot.market
+        for order_id in order_list:
+            order_id = list(order_id.keys())
+            service_obj.cancel_order(currency_pair, order_id[0])
+
     def post(self, request):
+        # 多个和一个
         ids = request.POST.get('robot_id')
+
+        # Flag为1启动，为0停止
+        Flag = request.POST.get('flag')
         # 调用对应策略
         for id in ids:
             robot_obj = Robot.objects.get(id=id)
-            if robot_obj.trading_strategy == '网格策略V1.0':
-                thread1 = GridStrategy(
-                    robot_obj=robot_obj,
-                    order_type="buy",
-                )
-                thread2 = GridStrategy(
-                    account_id=robot_obj.trading_account_id,
-                    current_price=robot_obj.current_price,
-                    grid_num=robot_obj.girding_num,
-                    trade_amount=(robot_obj.min_num, robot_obj.max_num),
-                    currency_type=robot_obj.currency + '_' + robot_obj.market,
-
-                    order_type="buy"
-                )
+            if robot_obj.trading_strategy == '网格策略V1.0' and Flag == 1:
+                # 启动线程
+                thread1 = GridStrategy(robot_obj=robot_obj, order_type="buy")
+                thread2 = GridStrategy(robot_obj=robot_obj, order_type="sell")
                 thread1.start()
                 thread2.start()
+            elif robot_obj.trading_strategy == '网格策略V1.0' and Flag == 0:
+                # 停止线程
+                for item in threading.enumerate():
+                    try:
+                        # 获取线程对应的机器人
+                        robot = item.robot_obj
+                        if id == robot.id:
+                            item.setFlag(False)
+                        if not item.isAlive():
+                            # 撤单
+                            print(item.id_list)
+                            cancel_thread = threading.Thread(target=self.cancel_orders, args=(robot, item.id_list))
+                            cancel_thread.start()
+                    except:
+                        print('对象没有属性robot_obj')
+                        continue
+
             elif robot_obj.trading_strategy == '三角套利V1.0':
                 pass
             elif robot_obj.trading_strategy == '搬砖套利V1.0':
                 pass
+        StartRobot.order_list = threading.enumerate()
+
+
+class ShowConfig(View):
+    """
+    展示机器人配置信息
+    """
+    pass
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 机器人管理
