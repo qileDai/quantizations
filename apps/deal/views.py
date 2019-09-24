@@ -348,6 +348,61 @@ class GetAccountInfo(View):
         return render(request, 'management/gridding.html', context)
 
 
+class StartRobot(View):
+    """
+    管理机器人
+    """
+    order_list = ""
+
+    def cancel_orders(self, robot, order_list):
+        # 撤单，不同平台
+        account_obj = Account.objects.get(id=robot.trading_account_id)
+        user_obj, service_obj, market_obj = get_account_info(robot.currency, robot.market, robot.id)
+        currency_pair = robot.currency + '_' + robot.market
+        for order_id in order_list:
+            order_id = list(order_id.keys())
+            service_obj.cancel_order(currency_pair, order_id[0])
+
+    def post(self, request):
+        # 多个和一个
+        ids = request.POST.getlist('robot_id')
+        print(ids)
+        # Flag为1启动，为0停止
+        Flag = request.POST.get('flag')
+        # 调用对应策略
+        for id in ids:
+            robot_obj = Robot.objects.get(id=id)
+            if robot_obj.trading_strategy == '网格策略V1.0' and Flag == 1:
+                # 启动线程
+                thread1 = GridStrategy(robot_obj=robot_obj, order_type="buy")
+                thread2 = GridStrategy(robot_obj=robot_obj, order_type="sell")
+                thread1.start()
+                thread2.start()
+            elif robot_obj.trading_strategy == '网格策略V1.0' and Flag == 0:
+                # 停止线程
+                for item in threading.enumerate():
+                    try:
+                        # 获取线程对应的机器人
+                        robot = item.robot_obj
+                        if id == robot.id:
+                            item.setFlag(False)
+                        if not item.isAlive():
+                            # 撤单
+                            print(item.id_list)
+                            cancel_thread = threading.Thread(target=self.cancel_orders, args=(robot, item.id_list))
+                            cancel_thread.start()
+                    except:
+                        print('对象没有属性robot_obj')
+                        continue
+
+            elif robot_obj.trading_strategy == '三角套利V1.0':
+                pass
+            elif robot_obj.trading_strategy == '搬砖套利V1.0':
+                pass
+        StartRobot.order_list = threading.enumerate()
+        return restful.ok()
+
+
 class ShowTradeDetail(View):
     """
     展示机器人交易详情
@@ -407,61 +462,6 @@ class ShowTradeDetail(View):
             'profit': (info[currency.upper()].get('total')-property_obj.original_assets)*info1['ticker'].get('last'),
         }
         return restful.result(data=context)
-
-
-class StartRobot(View):
-    """
-    管理机器人
-    """
-    order_list = ""
-
-    def cancel_orders(self, robot, order_list):
-        # 撤单，不同平台
-        account_obj = Account.objects.get(id=robot.trading_account_id)
-        user_obj, service_obj, market_obj = get_account_info(robot.currency, robot.market, robot.id)
-        currency_pair = robot.currency + '_' + robot.market
-        for order_id in order_list:
-            order_id = list(order_id.keys())
-            service_obj.cancel_order(currency_pair, order_id[0])
-
-    def post(self, request):
-        # 多个和一个
-        ids = request.POST.getlist('robot_id')
-        print(ids)
-        # Flag为1启动，为0停止
-        Flag = request.POST.get('flag')
-        # 调用对应策略
-        for id in ids:
-            robot_obj = Robot.objects.get(id=id)
-            if robot_obj.trading_strategy == '网格策略V1.0' and Flag == 1:
-                # 启动线程
-                thread1 = GridStrategy(robot_obj=robot_obj, order_type="buy")
-                thread2 = GridStrategy(robot_obj=robot_obj, order_type="sell")
-                thread1.start()
-                thread2.start()
-            elif robot_obj.trading_strategy == '网格策略V1.0' and Flag == 0:
-                # 停止线程
-                for item in threading.enumerate():
-                    try:
-                        # 获取线程对应的机器人
-                        robot = item.robot_obj
-                        if id == robot.id:
-                            item.setFlag(False)
-                        if not item.isAlive():
-                            # 撤单
-                            print(item.id_list)
-                            cancel_thread = threading.Thread(target=self.cancel_orders, args=(robot, item.id_list))
-                            cancel_thread.start()
-                    except:
-                        print('对象没有属性robot_obj')
-                        continue
-
-            elif robot_obj.trading_strategy == '三角套利V1.0':
-                pass
-            elif robot_obj.trading_strategy == '搬砖套利V1.0':
-                pass
-        StartRobot.order_list = threading.enumerate()
-        return restful.ok()
 
 
 class ShowConfig(View):
