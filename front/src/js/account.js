@@ -21,21 +21,19 @@ Account.prototype.run = function () {
     self.listenSubmitAccount();
     self.listendenominationEvent();
     self.listtencuyyencyShow();
+    self.showCollectAsset();
+    self.showDetailProperty();
     // self.listenEditAccount();
 
 }
 
-
-Account.prototype.listenShowHideAddAccount = function () {
+Account.prototype.showDetailProperty = function(){
     var self = this;
-    var closeBtn = $('.close-btn');
-    $('#add-account-btn').click(function () {
-        self.accountWrapper.show()
-    });
-    $('.update-property').on('click', function () {
+     $('.update-property').on('click', function () {
         var currentbtn = $(this);
         var tr = currentbtn.parent().parent();
         var pk = tr.attr('data-id');
+        $('#add-account-pk').attr('account-pk',pk)
         console.log(pk)
         self.accountWrapper.show()
         xfzajax.post({
@@ -44,8 +42,10 @@ Account.prototype.listenShowHideAddAccount = function () {
                 'pk': pk,
             },
             'success': function (result) {
+                console.log(result)
                 if (result['code'] === 200) {
                     account = result['data']
+                    console.log(account)
                     var accountGroup = $('.account-body');
                     platform = account['platform']['Platform_name']
                     id = account['platform']['id']
@@ -53,26 +53,34 @@ Account.prototype.listenShowHideAddAccount = function () {
                     title = account['title']
                     accesskey = account['accesskey']
                     secretkey = account['secretkey']
-
-                    // $('#platform').text(platform)
+                    $("#platform option[value="+id+"]").prop("selected", true);
                     // var option = $("<option>").val(id).text(platform);
                     //  $("#platform").append(option)
-                    // accountGroup.find("input[name='account-name']").val(title)
-                    // accountGroup.find("input[name='access']").val(accesskey)
-                    // accountGroup.find("input[name='scrent']").val(secretkey)
+                    accountGroup.find("input[name='account-name']").val(title)
+                    accountGroup.find("input[name='access']").val(accesskey)
+                    accountGroup.find("input[name='scrent']").val(secretkey)
                     //
                     // self.listenSubmitAccount(pk)
                     // console.log(account)
-                    tpl = template('add-accountInfo',{"account":account})
-                    console.log(tpl)
-                    var accountGroup = $('#account-body')
-                    accountGroup.append(tpl)
+                    // tpl = template('add-accountInfo',{"account":account})
+                    // console.log(tpl)
+                    // var accountGroup = $('#account-body')
+                    // accountGroup.append(tpl)
 
                 }
             }
         })
     })
+}
+Account.prototype.listenShowHideAddAccount = function () {
+    var self = this;
+    var closeBtn = $('.close-btn');
+    $('#add-account-btn').click(function () {
+        self.accountWrapper.show()
+    });
+
     closeBtn.click(function () {
+        console.log("sssfsdf")
         self.accountWrapper.hide()
         window.location.reload()
     });
@@ -160,7 +168,8 @@ Account.prototype.listenPropertyDetailsShowEvent = function () {
         var pk = tr.attr('data-id');
         $('.refersh').attr('property-id', pk)
         // console.log(pk)
-        xfzajax.post({
+        xfzajax.post(
+            {
             'url': '/deal/showassert/',
             'data': {
                 'pk': pk
@@ -168,39 +177,44 @@ Account.prototype.listenPropertyDetailsShowEvent = function () {
             'success': function (result) {
                 console.log(result)
                 if (result['code'] === 200) {
-                    datas = result['data']
-                    var platform = datas['Platform_name']  //平台名称
-                    var asset_change = datas['asset_change']  //今日资产变化
-                    var original_assets = datas['original_assets'] //初始资产
-                    var history_profit = datas['history_profit'] //历史盈亏
-                    var withdraw_record = datas['withdraw_record'] //总提币
-                    var assets_dict = datas['assets_dict']   //资产表
-                    var profit_loss_dict = datas['profit_loss_dict'] //损益表
-
-                    $('.property-account-value').text(platform)  //插入平台到html中
-                    var detailsGroup = $('.property-details-wrapper')
-                    detailsGroup.find('.assets-change .number').text(asset_change['number']) //资产变化
-                    detailsGroup.find('.assets-change .percentage').text(asset_change['percent']) //资产变化
-                    detailsGroup.find('.initial-asset .number').text(original_assets) //初始变化
-
-                    detailsGroup.find('.curry-account-total .total-number').text(withdraw_record) //总计提币
-
-                    detailsGroup.find('.history-profit  .number').text(history_profit['number']) //总计提币
-                    detailsGroup.find('.history-profit .percentage').text(history_profit['percent']) //总计提币
+                    // datas = result['data']
+                    var properties = result['data']
+                    console.log(properties)
+                    // var platform = datas['Platform_name']  //平台名称
+                    // var asset_change = datas['asset_change']  //今日资产变化
+                    // var original_assets = datas['original_assets'] //初始资产
+                    // var history_profit = datas['history_profit'] //历史盈亏
+                    // var withdraw_record = datas['withdraw_record'] //总提币
+                    // var assets_dict = datas['assets_dict']   //资产表
+                    // var profit_loss_dict = datas['profit_loss_dict'] //损益表
+                    //
+                    // $('.property-account-value').text(platform)  //插入平台到html中
+                    // var detailsGroup = $('.property-details-wrapper')
+                    // detailsGroup.find('.assets-change .number').text(asset_change['number']) //资产变化
+                    // detailsGroup.find('.assets-change .percentage').text(asset_change['percent']) //资产变化
+                    // detailsGroup.find('.initial-asset .number').text(original_assets) //初始变化
+                    //
+                    // detailsGroup.find('.curry-account-total .total-number').text(withdraw_record) //总计提币
+                    //
+                    // detailsGroup.find('.history-profit  .number').text(history_profit['number']) //总计提币
+                    // detailsGroup.find('.history-profit .percentage').text(history_profit['percent']) //总计提币
 
                     // var tpl1 = template("",{"assets_dict":assets_dict})
                     // var tpl2 = template("",{"profit_loss_dict":profit_loss_dict})
                     // var tpl = template("details-item",{"datas":datas})
                     // var detailsGroup = $(".property-details-wrapper");
                     // detailsGroup.append(tpl)
-                    var detailsTab = $('#property-details')
-                    // var td = detailsTab.find("tbody tr td")
-                    $.each(assets_dict, function (key, value) {
-                        console.log(key)
-                        $.each(value, function (j, k) {
-                            console.log(k)
-                        })
-                    })
+                    var tpl = template('property-details',{'properties':properties})
+                    var accountProperty = $('#property-details-ids')
+                    accountProperty.append(tpl)
+                    // var detailsTab = $('#property-details')
+                    // // var td = detailsTab.find("tbody tr td")
+                    // $.each(assets_dict, function (key, value) {
+                    //     console.log(key)
+                    //     $.each(value, function (j, k) {
+                    //         console.log(k)
+                    //     })
+                    // })
 
                 }
             }
@@ -213,6 +227,18 @@ Account.prototype.listenPropertyDetailsShowEvent = function () {
         self.detailsProperty.hide();
     })
 
+}
+
+
+Account.prototype.showCollectAsset = function(){
+  $('#property-total').click(function () {
+     xfzajax.post({
+         'url':'/deal/showcollectasset/',
+         'success':function (result) {
+             console.log(result)
+         }
+     })
+  })
 }
 
 Account.prototype.deleteAccount = function () {
@@ -276,6 +302,7 @@ Account.prototype.listenSubmitAccount = function (pk) {
     var confirmBtn = $('.confirm');
 
     confirmBtn.click(function () {
+       var pk = $(this).attr('account-pk')
         console.log(pk)
         var account = $('.account-body');
         platform = $('#platform').find("option:selected").val()
@@ -299,9 +326,15 @@ Account.prototype.listenSubmitAccount = function (pk) {
             },
             'success': function (result) {
                 if (result['code'] === 200) {
-                    xfzalert.alertSuccess("添加账户成功！", function () {
+                    if (pk) {
+                       xfzalert.alertSuccess("编辑账户成功！", function () {
                         window.location.reload()
                     });
+                    }else {
+                          xfzalert.alertSuccess("添加账户成功！", function () {
+                        window.location.reload()
+                    });
+                    }
                 }
             }
         });

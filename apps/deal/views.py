@@ -14,6 +14,9 @@ from utils import restful
 from apps.deal.Strategy.Grid import GridStrategy
 import threading
 import datetime
+from rest_framework import serializers
+import json
+from apps.deal.serializers import AccountSerializer
 # Create your views here.r
 
 
@@ -29,8 +32,13 @@ class AccountList(LoginRequireMixin, View):
             return render(request, "cms/login.html", {'error': '账户失效，请重新登陆！'})
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
+        # ids = Account.objects.filter(users__id=user_id).values('id')
+        # print(ids)
+        # for id in ids:
+        #     print(id)
         # 获取用户所有币种
         currency_list = Property.objects.filter(account__users__id=user_id).distinct()
+        print(currency_list)
         print(accounts)
         # 分页
         paginator = Paginator(accounts, 10)
@@ -72,14 +80,10 @@ class AddAccount(View):
 
 def accountinfo(request):
         accout_id = request.POST.get('pk')
-        print("ss")
-        print(accout_id)
         account = Account.objects.get(pk=accout_id)
-        context = {
-           'account': account,
-        }
-        print(account)
-        return render(request, 'management/tradingaccount.html', context=context)
+        serialize = AccountSerializer(account)
+        print(serialize.data)
+        return restful.result(data=serialize.data)
 
 
 class EditAccount(View):
@@ -106,7 +110,8 @@ class EditAccount(View):
             platform = form.cleaned_data.get('platform')
             pk = form.cleaned_data.get('pk')
             user_id = request.session.get("user_id")
-            Account.objects.filter(pk=pk).update(title=title,accesskey=accesskey,secretkey=secretkey,platform=platform,user_id=user_id)
+            print(title,accesskey,secretkey,platform,pk,user_id)
+            Account.objects.filter(pk=pk).update(title=title,accesskey=accesskey,secretkey=secretkey,platform=platform,users=user_id)
             return restful.ok()
         else:
             return restful.params_error(form.get_errors())
@@ -138,8 +143,8 @@ class ShowAssert(View):
         con = GetAssets(id, account_obj, platform)
         data = con.showassets()
         print(type(data))
-        return render(request, 'management/tradingaccount.html')
-        # return restful.result(data=data)
+        # return render(request, 'management/tradingaccount.html')
+        return restful.result(data=data)
 
 
 class ShowCollectAsset(View):
@@ -147,12 +152,20 @@ class ShowCollectAsset(View):
     汇总资产信息
     """
     def post(self, request):
+        user_id = request.session.get("user_id")
+
+        ids = serializers.Serializer('json',Account.objects.filter(users__id=user_id).values('id'))
+        print(ids)
+        # ids = Account.objects.filter(users__id=user_id).values('id')
+        # ids = json.dumps(ids)
+        # print(ids)
         # 多个账户
         # ids = request.POST.get("pk")
-        ids = [1, 2]
         flag = True
         context_list = list()
         for id in ids:
+            print("***")
+            print(id)
             account_obj = Account.objects.get(id=id)  # 获取账户信息
             platform = account_obj.platform  # 账户对应的平台
             # 创建对象
@@ -171,7 +184,7 @@ class ShowCollectAsset(View):
         # 汇总资产变化/初始总资产/历史盈亏/
         print('资产汇总', '-'*20)
         print(context_list[0])
-        return render(request, 'management/tradingaccount.html', context_list[0])
+        return restful.result(context_list[0])
 
 
 class ChargeAccount(View):

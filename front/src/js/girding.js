@@ -498,14 +498,15 @@ Robot.prototype.listenSubmitRobot = function () {
     btnComplete.click(function () {
         console.log("dafasdf")
         var robotGroup = $('.set-risk-strategy')
-        var curry = robotGroup.find('.curry').text()        //交易对
+        var curry = robotGroup.find('.strategy-curry .curry').text()        //交易对
         var strr = curry.split('/')
         var curreny = strr[0]
         var market = strr[1]
-        console.log(curreny, market)
-        var user = robotGroup.find('.user').text() //交易账户
-        var strategy = ('.strategy-parameters-top .strategy').text() //交易策略
-        var account = robotGroup.find('.account-value').text()  //账户
+        console.log(curreny )
+        console.log(market)
+        var account = robotGroup.find('.strategy-parameters-top .user"').text() //交易账户
+        var strategy = robotGroup.find('.strategy-value').text()
+        console.log(strategy)//交易策略
         var resistance = robotGroup.find('.resistance-value').text() //阻力位
         var support = robotGroup.find('.support-value').text()
         var girding_num = robotGroup.find('.girding-value').text()
