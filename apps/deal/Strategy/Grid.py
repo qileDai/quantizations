@@ -8,7 +8,7 @@ from dealapi.exx.exxService import ExxService
 from dealapi.exx.exxMarket import MarketCondition
 from apps.deal.models import Account, Property, LastdayAssets
 import traceback
-
+import threading
 
 class GridStrategy(Thread):
 
@@ -189,9 +189,10 @@ class GridStrategy(Thread):
         """
         try:
             if order_info.get("status") in [2]:
-                print(order_info.get("status"), '部分挂单')
+                amount = float(order_info["trade_amount"])-float(item[b_id]["trade_amount"])
                 res = self.server_api.order(
-                    str(item[b_id]["amount"]),  # 已完成的委托单信息，获取成交的数量
+                    # str(item[b_id]["amount"]),  # 已完成的委托单信息，获取成交的数量
+                    str(amount),
                     self.currency_type,  # 交易对
                     str(price),
                     order_type
@@ -271,6 +272,28 @@ class GridStrategy(Thread):
                     str(closing_time), self.robot_obj.id)
             self.connect_db(sql)
 
+    # def cancel_orders(self):
+    #     # 撤单，不同平台
+    #     for item in self.id_list:
+    #         order_id = list(item.keys())
+    #         res = self.server_api.cancel_order(self.currency_type, order_id[0])
+    #         if res.get("code") in [100, 211, 212]:
+    #             self.id_list.remove(item)
+
+    def cancel_orders(self):
+        for i in range(1, 10):
+            # time.sleep(1)
+            results = self.server_api.get_openorders(self.currency_type, i, self.order_type)
+            try:
+                if results:
+                    for result in results:
+                        if result:
+                            id = result['id']
+                            response = self.server_api.cancel_order(self.currency_type, id)
+                            print(response)
+            except Exception as e:
+                print("%s单撤单完成:" % self.order_type, e)
+
     def update_order_info(self):
         """
         更新挂单信息
@@ -344,7 +367,6 @@ class GridStrategy(Thread):
                             # 挂单在一段时间内未成交，撤单并重新下单，不包括反向挂单
                             elif (order_info.get("status") in [0, 1]) and (limit is not None) and num == 19:
                                 res = self.server_api.cancel_order(self.currency_type, b_id)
-                                # print("*"*50, res.get("code"))
                                 if res.get("code") in [100, 211, 212]:
                                     # 撤单成功再下单
                                     self.place_order(item, order_type, 1, 1)
@@ -361,6 +383,13 @@ class GridStrategy(Thread):
                     if num == 20:
                         num = 0
                     time.sleep(0.2)
+            if not self.Flag:
+                # 停止线程，撤销挂单
+                print(threading.enumerate())
+                for i in range(10):
+                    # self.cancel_orders()
+                    cancel_thread = Thread(target=self.cancel_orders)
+                    cancel_thread.start()
 
     def run(self):
         self.place_order()

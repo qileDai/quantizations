@@ -84,6 +84,10 @@ class Robot(models.Model):
         ("运行中", 1),
         ("已停止", 0),
     )
+    Robot_Protect = (
+        ("保护", 1),
+        ("解除保护", 2),
+    )
     trading_account = models.ForeignKey('Account', on_delete=models.CASCADE)    # 交易账户外键account
     currency = models.CharField(max_length=32)                                  # 交易币种
     market = models.CharField(max_length=32)                                    # 交易市场
@@ -95,6 +99,7 @@ class Robot(models.Model):
     annual_yield = models.DecimalField(max_digits=5, decimal_places=2)          # 年化收益率
     create_time = models.DateTimeField(auto_now_add=True)                       # 创建时间
     status = models.SmallIntegerField(choices=Robot_Status)                     # 状态
+    protection = models.SmallIntegerField(choices=Robot_Protect)                # 机器人保护状态
     current_price = models.DecimalField(max_digits=10, decimal_places=2)        # 当前价
     orders_frequency = models.IntegerField()                                    # 挂单频率
     resistance = models.DecimalField(max_digits=10, decimal_places=2)           # 阻力位
