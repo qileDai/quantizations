@@ -569,7 +569,7 @@ Robot.prototype.listenSubmitRobot = function () {
         console.log(strategy, account, resistance, support, girding_num, free, girding_profit)
 
         xfzajax.post({
-            
+
         })
 
     })
