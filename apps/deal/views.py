@@ -303,9 +303,8 @@ def get_account_info(currency, market, id):
     :param id: 机器人id
     :return:
     """
-    robot_obj = Robot.objects.get(id=id)
     # 获取账户所属的用户信息
-    account_obj = Account.objects.get(id=robot_obj.trading_account_id)
+    account_obj = Account.objects.get(id=id)
     # 账户对应的平台
     platform = account_obj.platform
     # 获取用户信息
@@ -330,9 +329,9 @@ class GetAccountInfo(View):
     def post(self, request):
         currency = request.POST.get('curry-title')
         market = request.POST.get('market-title')
-        # 获取机器人id
-        id = request.POST.get('robot_id')
-        # 调用函数
+        # 获取账户id
+        id = request.POST.get('account_id')
+        # 调用get_account_info函数
         user_obj, service_obj, market_obj = get_account_info(currency, market, id)
         info = service_obj.get_balance()
         info = info.get('funds')
@@ -360,29 +359,29 @@ class GetAccountInfo(View):
         return restful.result(data=context)
 
 
+class RobotProtection(View):
+    """
+    机器人保护
+    """
+    def post(self, request):
+        id = request.POST.get('robot_id')
+        protection = request.POST.get('protect')
+        Robot.objects.filter(id=id).update(protection=protection)
+
+
 class StartRobot(View):
     """
     管理机器人
     """
     order_list = ""
 
-    def cancel_orders(self, robot, order_list):
-        # 撤单，不同平台
-        account_obj = Account.objects.get(id=robot.trading_account_id)
-        user_obj, service_obj, market_obj = get_account_info(robot.currency, robot.market, robot.id)
-        currency_pair = robot.currency + '_' + robot.market
-        for order_id in order_list:
-            order_id = list(order_id.keys())
-            service_obj.cancel_order(currency_pair, order_id[0])
-
     def post(self, request):
         # 多个和一个
         ids = request.POST.get('robot_id')
         if ids:
             robots = Robot.objects.filter(id=ids)
-            print(robots)
         else:
-            robots = Robot.objects.all()
+            robots = Robot.objects.filter(protection=0)
         # Flag为1启动，为0停止
         Flag = request.POST.get('flag')
         # 调用对应策略
@@ -400,13 +399,8 @@ class StartRobot(View):
                     try:
                         # 获取线程对应的机器人
                         robot = item.robot_obj
-                        if id == robot.id:
+                        if robot_obj.id == robot.id:
                             item.setFlag(False)
-                        if not item.isAlive():
-                            # 撤单
-                            print(item.id_list)
-                            cancel_thread = threading.Thread(target=self.cancel_orders, args=(robot, item.id_list))
-                            cancel_thread.start()
                     except:
                         print('对象没有属性robot_obj')
                         continue
@@ -415,6 +409,7 @@ class StartRobot(View):
                 pass
             elif robot_obj.trading_strategy == '搬砖套利V1.0':
                 pass
+
         StartRobot.order_list = threading.enumerate()
         return HttpResponse("OK")
 
@@ -430,7 +425,7 @@ class ShowTradeDetail(View):
         currency = robot_obj.currency
         market = robot_obj.market
         # 调用函数
-        user_obj, service_obj, market_obj = get_account_info(currency, market, id)
+        user_obj, service_obj, market_obj = get_account_info(currency, market, robot_obj.trading_account_id)
         info = service_obj.get_balance()
         info = info.get('funds')
         info1 = market_obj.get_ticker()
@@ -439,15 +434,17 @@ class ShowTradeDetail(View):
         closed_order = OrderInfo.objects.filter(robot=id)
 
         # 获取挂单信息
-        order_list = list()
-        for item in StartRobot.robot_list:
+        order_lists = list()
+        for item in StartRobot.order_list:
             try:
                 # 获取机器人对应的线程对象
                 robot = item.robot_obj
                 if id == robot.id:
-                    order_list += item.id_list
+                    order_lists += item.id_list
                 running_time = item.start_time - datetime.datetime.now()
             except:
+                order_lists = None
+                running_time = None
                 print('对象没有属性robot_obj')
                 continue
 
@@ -457,9 +454,9 @@ class ShowTradeDetail(View):
             # 已完成挂单信息
             'closed_info': closed_order,
             # 未完成笔数
-            'open_num': len(order_list),
+            'open_num': len(order_lists),
             # 未完成挂单信息
-            'open_info': order_list,
+            'open_info': order_lists,
             # 总投入
             'total_input': property_obj.original_assets,
             # 运行时间
@@ -475,8 +472,10 @@ class ShowTradeDetail(View):
             # 当前价
             'last': info1['ticker'].get('last'),
             # 总收益
-            'profit': (info[currency.upper()].get('total')-property_obj.original_assets)*info1['ticker'].get('last'),
+            'profit': (float(info[currency.upper()].get('total'))-float(property_obj.original_assets))*
+                      float(info1['ticker'].get('last')),
         }
+        print(context)
         return render(request, 'management/gridding.html', context)
 
 
@@ -484,7 +483,8 @@ class ShowConfig(View):
     """
     展示机器人配置信息
     """
-    pass
+    def post(self, request):
+        pass
 
 
 # ----------------------------------------------------------------------------------------------------------------------
