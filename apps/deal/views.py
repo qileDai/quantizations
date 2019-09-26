@@ -15,6 +15,9 @@ from apps.deal.Strategy.Grid import GridStrategy
 import threading
 import datetime
 from rest_framework import serializers
+from django.core import serializers
+from django.core.serializers import serialize
+from django.contrib.sessions import serializers
 import json
 from apps.deal.serializers import AccountSerializer
 # Create your views here.r
@@ -337,6 +340,7 @@ class GetAccountInfo(View):
         info = info.get('funds')
         info1 = market_obj.get_ticker()
         info2 = market_obj.get_klines('1day', '30')
+        print(info2)
         info2 = info2.get('datas')
 
         # 计算阻力位/支撑位的默认值
@@ -346,14 +350,13 @@ class GetAccountInfo(View):
             for i in info2['data']:
                 max += float(i[2])
                 min += float(i[3])
-
         context = {
             'currency': info[currency.upper()].get('balance'),
             'market': info[market.upper()].get('balance'),
             'last': info1['ticker'].get('last'),
             'resistance': float(max/int(info2['limit'])),
             'support_level': float(min/int(info2['limit'])),
-            # 'users': user_obj,
+            'users': serialize("json", user_obj.order_by("-id")),
         }
         print(context)
         return restful.result(data=context)
@@ -484,11 +487,29 @@ class ShowConfig(View):
     展示机器人配置信息
     """
     def post(self, request):
-        pass
+        # 获取机器人id
+        id = request.POST.get('robot_id')
+        # 获取挂单频率
+        orders_frequency = request.POST.get('orders_frequency')
+        # 获取挂单最小数量
+        min_num = request.POST.get('min_num')
+        # 获取挂单最大数量
+        max_num = request.POST.get('max_num')
+        # 获取止损价
+        stop_price = request.POST.get('stop_price')
+        # 获取预警价
+        warning_price = request.POST.get('warning_price')
+
+        Robot.objects.filter(id=id).update(
+            orders_frequency=orders_frequency,
+            min_num=min_num,
+            max_num=max_num,
+            stop_price=stop_price,
+            warning_price=warning_price,
+        )
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# 机器人管理
 class RobotList(View):
     """
     机器人管理列表页面

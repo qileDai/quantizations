@@ -10,6 +10,7 @@ from apps.deal.models import Account, Property, LastdayAssets
 import traceback
 import threading
 
+
 class GridStrategy(Thread):
 
     def __init__(self, **kwargs):
@@ -135,8 +136,11 @@ class GridStrategy(Thread):
                     a, b = min_sell1+self.grid_range*i, max_sell1+self.grid_range*i
                     # 获取挂买单价的小数位
                     price = round(random.uniform(a, b), markets_data.get("amountScale", 2))
-                # 获取挂单数量
-                amount = round(random.uniform(self.robot_obj.min_num, self.robot_obj.max_num), 3)
+                # 获取挂单数量，实时查询数据库
+                sql = "select min_num,max_num from deal_robot where id = %s"
+                print(type(self.robot_obj.id))
+                ret = self.connect_db(sql, (self.robot_obj.id,))
+                amount = round(random.uniform(ret[0], ret[1]), 3)
                 try:
                     if order_type is None:
                         # 如果order_type为空，挂原始单
@@ -272,14 +276,6 @@ class GridStrategy(Thread):
                     str(closing_time), self.robot_obj.id)
             self.connect_db(sql)
 
-    # def cancel_orders(self):
-    #     # 撤单，不同平台
-    #     for item in self.id_list:
-    #         order_id = list(item.keys())
-    #         res = self.server_api.cancel_order(self.currency_type, order_id[0])
-    #         if res.get("code") in [100, 211, 212]:
-    #             self.id_list.remove(item)
-
     def cancel_orders(self):
         for i in range(1, 10):
             # time.sleep(1)
@@ -307,13 +303,16 @@ class GridStrategy(Thread):
             print("获取挂单信息失败...", e)
         else:
             # 循环控制，读取数据库数据
-            # num = self.robot_obj.orders_frequency
+
             num = 0
             while True:
                 if not self.Flag:
                     break
                 else:
-                    # print("id列表", self.id_list, len(self.id_list))
+                    # 实时查询数据库中的刷单频率
+                    sql = "select orders_frequency from deal_robot where id = %s"
+                    orders_frequency = self.connect_db(sql, (self.robot_obj.id,))
+                    print(orders_frequency, type(orders_frequency[0]))
                     for item in self.id_list:
                         # 获取要更新挂单id
                         b_id = list(item.keys())[0]
@@ -365,7 +364,8 @@ class GridStrategy(Thread):
                                     t.start()
 
                             # 挂单在一段时间内未成交，撤单并重新下单，不包括反向挂单
-                            elif (order_info.get("status") in [0, 1]) and (limit is not None) and num == 19:
+                            elif (order_info.get("status") in [0, 1]) and (limit is not None) and num == orders_frequency[0]:
+
                                 res = self.server_api.cancel_order(self.currency_type, b_id)
                                 if res.get("code") in [100, 211, 212]:
                                     # 撤单成功再下单
@@ -380,16 +380,17 @@ class GridStrategy(Thread):
                             print("获取委托单失败...", e)
                     # 控制已完成和未完成挂单的更新频率
                     num += 1
-                    if num == 20:
+                    if num == orders_frequency[0]+1:
                         num = 0
                     time.sleep(0.2)
+
             if not self.Flag:
                 # 停止线程，撤销挂单
                 print(threading.enumerate())
-                for i in range(10):
-                    # self.cancel_orders()
-                    cancel_thread = Thread(target=self.cancel_orders)
-                    cancel_thread.start()
+                for i in range(self.robot_obj.girding_num):
+                    self.cancel_orders()
+                    # cancel_thread = Thread(target=self.cancel_orders)
+                    # cancel_thread.start()
 
     def run(self):
         self.place_order()
