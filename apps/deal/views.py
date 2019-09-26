@@ -353,7 +353,7 @@ class GetAccountInfo(View):
             'last': info1['ticker'].get('last'),
             'resistance': float(max/int(info2['limit'])),
             'support_level': float(min/int(info2['limit'])),
-            'users': user_obj,
+            # 'users': user_obj,
         }
         print(context)
         return restful.result(data=context)

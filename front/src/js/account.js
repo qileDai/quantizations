@@ -14,7 +14,7 @@ Account.prototype.run = function () {
     self.listenShowHideAddAccount();
     self.listenShowHideCurryWrapper();
     self.listPropertyTotalShowHideEvent();
-    // self.listenPropertyDetailsShowEvent();
+    self.listenPropertyDetailsShowEvent();
     self.listtenToalAccountCloseEvent();
     self.listtenPropertyDetailsCloseEvent();
     self.deleteAccount();

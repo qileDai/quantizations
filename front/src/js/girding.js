@@ -495,16 +495,32 @@ Robot.prototype.getAccountInfoEvent = function () {
             'data':{
                 'curry-title':curry,
                 'market-title':market,
-                'id':id,
+                'account_id':id,
             },
             'success':function (result) {
                 if(result['code'] === 200){
                     var data = result['data']
+                    console.log(data)
                     var resistance = data['resistance']
                     var support_level = data['support_level']
+                    console.log(resistance,support_level)
                     $('.resistance-value').text(resistance)
                     $('.support-value').text(support_level)
-                    
+                    $('#stratery-girding-num').on('blur',function () {
+                        if(!$('#stratery-girding-num').val() == ''){
+                            var num = $('#stratery-girding-num ').val()
+                            var girding = (resistance-support_level)/num     //单网格=（阻力位价格-支撑位价格）/网格数量
+                            console.log(num)
+                        }
+                    })
+
+                    $('#one-girding-free').on('blur',function () {
+                        if(!$('#one-girding-free').val() == ''){
+                            var free = $('#one-girding-free').val()
+                            console.log(free)
+                        }
+                    })
+
 
                 }
             }
