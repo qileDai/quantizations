@@ -504,6 +504,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                     var resistance = data['resistance']
                     var support_level = data['support_level']
                     console.log(resistance,support_level)
+                    console.log(resistance,support_level)
                     $('.resistance-value').text(resistance)
                     $('.support-value').text(support_level)
                     $('#stratery-girding-num').on('blur',function () {
@@ -555,16 +556,21 @@ Robot.prototype.listenSubmitRobot = function () {
         var market = strr[1]
         console.log(curreny)
         console.log(market)
-        var account = robotGroup.find('.strategy-parameters-top .user"').text() //交易账户
-        var strategy = robotGroup.find('.strategy-value').text()
+        // var account = robotGroup.find('.strategy-parameters-top .user"').text() //交易账户
+        var strategy = $('.set-risk-strategy .strategy-title .curry').text()
         console.log(strategy)//交易策略
-        var resistance = robotGroup.find('.resistance-value').text() //阻力位
-        var support = robotGroup.find('.support-value').text()
-        var girding_num = robotGroup.find('.girding-value').text()
-        var free = robotGroup.find('.deal-account-free').text()
-        var girding_profit = robotGroup.find('.girding-profit-value').text()
-        console.log("diaqle")
+        var account = $('.strategy-parameters-top .user').text()
+        var resistance = $('.strategy-parameters-top .resistance').text()//阻力位
+        var support = $('.strategy-parameters-top .support-level').text()
+        var girding_num = $('.strategy-parameters-top .girding-num').text()
+
+        var free = $('.strategy-parameters-below .deal-account').text()  //交易手续费
+        var girding_profit = $('.strategy-parameters-below .resistance').text()  //单网格利润
         console.log(strategy, account, resistance, support, girding_num, free, girding_profit)
+
+        xfzajax.post({
+            
+        })
 
     })
 
