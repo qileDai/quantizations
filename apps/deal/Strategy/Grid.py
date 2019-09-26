@@ -138,7 +138,6 @@ class GridStrategy(Thread):
                     price = round(random.uniform(a, b), markets_data.get("amountScale", 2))
                 # 获取挂单数量，实时查询数据库
                 sql = "select min_num,max_num from deal_robot where id = %s"
-                print(type(self.robot_obj.id))
                 ret = self.connect_db(sql, (self.robot_obj.id,))
                 amount = round(random.uniform(ret[0], ret[1]), 3)
                 try:
@@ -370,8 +369,6 @@ class GridStrategy(Thread):
                                 if res.get("code") in [100, 211, 212]:
                                     # 撤单成功再下单
                                     self.place_order(item, order_type, 1, 1)
-                                    # t1 = Thread(target=self.place_order, args=(item, order_type, 1))
-                                    # t1.start()
 
                         except Exception as e:
                             # self.log_info("api")
@@ -387,7 +384,7 @@ class GridStrategy(Thread):
             if not self.Flag:
                 # 停止线程，撤销挂单
                 print(threading.enumerate())
-                for i in range(self.robot_obj.girding_num):
+                for i in range(int(self.robot_obj.girding_num/2)):
                     self.cancel_orders()
                     # cancel_thread = Thread(target=self.cancel_orders)
                     # cancel_thread.start()

@@ -465,7 +465,7 @@ class ShowTradeDetail(View):
             # 未完成挂单信息
             'open_info': order_lists,
             # 总投入
-            'total_input': property_obj.original_assets,
+            'total_input': str(property_obj.original_assets),
             # 运行时间
             'running_time': running_time,
             # 交易币种可用
@@ -490,6 +490,12 @@ class ShowConfig(View):
     """
     展示机器人配置信息
     """
+    def get(self, request):
+        id = request.POST.get('robot_id')
+        robot_obj = Robot.objects.get(id=id)
+        context = serialize("json", robot_obj)
+        return restful.result(data=context)
+
     def post(self, request):
         # 获取机器人id
         id = request.POST.get('robot_id')
