@@ -351,11 +351,17 @@ class GetAccountInfo(View):
                 max += float(i[2])
                 min += float(i[3])
         context = {
+            # 交易币种可用
             'currency': info[currency.upper()].get('balance'),
+            # 交易市场可用
             'market': info[market.upper()].get('balance'),
+            # 当前价
             'last': info1['ticker'].get('last'),
-            'resistance': float(max/int(info2['limit'])),
-            'support_level': float(min/int(info2['limit'])),
+            # 阻力位
+            'resistance': round(float(max/int(info2['limit'])), 2),
+            # 支撑位
+            'support_level': round(float(min/int(info2['limit'])), 2),
+            # 用户信息
             'users': serialize("json", user_obj.order_by("-id")),
         }
         print(context)
@@ -442,12 +448,10 @@ class ShowTradeDetail(View):
             try:
                 # 获取机器人对应的线程对象
                 robot = item.robot_obj
-                if id == robot.id:
-                    order_lists += item.id_list
+                if id == str(robot.id):
+                    order_lists.extend(item.id_list)
                 running_time = item.start_time - datetime.datetime.now()
             except:
-                order_lists = None
-                running_time = None
                 print('对象没有属性robot_obj')
                 continue
 
@@ -455,7 +459,7 @@ class ShowTradeDetail(View):
             # 已完成笔数
             'closed_num': len(closed_order),
             # 已完成挂单信息
-            'closed_info': closed_order,
+            'closed_info': serialize("json", closed_order.order_by("-id")),
             # 未完成笔数
             'open_num': len(order_lists),
             # 未完成挂单信息
@@ -475,11 +479,11 @@ class ShowTradeDetail(View):
             # 当前价
             'last': info1['ticker'].get('last'),
             # 总收益
-            'profit': (float(info[currency.upper()].get('total'))-float(property_obj.original_assets))*
-                      float(info1['ticker'].get('last')),
+            'profit': (float(info[currency.upper()].get('total'))-float(property_obj.original_assets))
+                    * float(info1['ticker'].get('last')),
         }
         print(context)
-        return render(request, 'management/gridding.html', context)
+        return restful.result(data=context)
 
 
 class ShowConfig(View):
@@ -580,5 +584,3 @@ def get_pagination_data(paginator, page_obj, around_count=2):
         'num_pages': num_pages
     }
 
-def afafd(request):
-    return render(request,'cms/asdfa.html')

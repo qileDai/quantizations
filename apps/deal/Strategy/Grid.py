@@ -312,7 +312,7 @@ class GridStrategy(Thread):
                     # 实时查询数据库中的刷单频率
                     sql = "select orders_frequency from deal_robot where id = %s"
                     orders_frequency = self.connect_db(sql, (self.robot_obj.id,))
-                    print(orders_frequency, type(orders_frequency[0]))
+                    # print(orders_frequency, type(orders_frequency[0]))
                     for item in self.id_list:
                         # 获取要更新挂单id
                         b_id = list(item.keys())[0]
