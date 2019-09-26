@@ -17,9 +17,8 @@ urlpatterns = [
     path('robotList/', views.RobotList.as_view(), name='robotList'),
     path('accountinfo/', views.accountinfo, name='accountinfo'),
 
-    path('getaccountinfo/', views.GetAccountInfo.as_view(), name='getaccountinfo'),
-    path('showtradedetail/', views.ShowTradeDetail.as_view(), name='showtradedetail'),
     path('startrobot/', views.StartRobot.as_view(), name='startrobot'),
+    path('showtradedetail/', views.ShowTradeDetail.as_view(), name='showtradedetail'),
 
 
 ]

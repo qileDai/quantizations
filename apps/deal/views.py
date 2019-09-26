@@ -439,13 +439,13 @@ class ShowTradeDetail(View):
         closed_order = OrderInfo.objects.filter(robot=id)
 
         # 获取挂单信息
-        order_list = list()
-        for item in StartRobot.robot_list:
+        order_lists = list()
+        for item in StartRobot.order_list:
             try:
                 # 获取机器人对应的线程对象
                 robot = item.robot_obj
                 if id == robot.id:
-                    order_list += item.id_list
+                    order_lists += item.id_list
                 running_time = item.start_time - datetime.datetime.now()
             except:
                 print('对象没有属性robot_obj')
@@ -457,9 +457,9 @@ class ShowTradeDetail(View):
             # 已完成挂单信息
             'closed_info': closed_order,
             # 未完成笔数
-            'open_num': len(order_list),
+            'open_num': len(order_lists),
             # 未完成挂单信息
-            'open_info': order_list,
+            'open_info': order_lists,
             # 总投入
             'total_input': property_obj.original_assets,
             # 运行时间
@@ -475,8 +475,10 @@ class ShowTradeDetail(View):
             # 当前价
             'last': info1['ticker'].get('last'),
             # 总收益
-            'profit': (info[currency.upper()].get('total')-property_obj.original_assets)*info1['ticker'].get('last'),
+            'profit': (float(info[currency.upper()].get('total'))-float(property_obj.original_assets))*
+                      float(info1['ticker'].get('last')),
         }
+        print(context)
         return render(request, 'management/gridding.html', context)
 
 

@@ -116,9 +116,9 @@ class OrderInfo(models.Model):
     """
     已完成挂单信息
     """
-    order_type = models.CharField(max_length=10)
-    closing_price = models.DecimalField(max_digits=18, decimal_places=8)
-    total_price = models.DecimalField(max_digits=18, decimal_places=8)
-    closing_time = models.DateTimeField()
+    order_type = models.CharField(max_length=10)                            # 订单类型
+    closing_price = models.DecimalField(max_digits=18, decimal_places=8)    # 成交价
+    total_price = models.DecimalField(max_digits=18, decimal_places=8)      # 成交总价
+    closing_time = models.DateTimeField()                                   # 订单完成时间
     robot = models.ForeignKey("Account", on_delete=models.CASCADE, null=True, blank=True)
 

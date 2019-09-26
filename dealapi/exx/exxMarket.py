@@ -132,7 +132,7 @@ class MarketCondition(object):
 
 if __name__ == "__main__":
     market = MarketCondition('eth_usdt')
-    result = market.get_ticker()
+    result = market.get_markets()
     print(result)
 
 

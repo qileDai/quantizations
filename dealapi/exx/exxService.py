@@ -47,13 +47,13 @@ class ExxService(object):
                 response = requests.get(url, timeout=5)
                 result = response.json()
             except(ConnectionError, ReadTimeout) as e:
-                self.log.error("请求下单链接失败", e)
+                print("请求下单链接失败", e)
             # 签名验证不通过，开始重新3次连接，3次连接不成功退出连接
             if result['code'] == 103:
                 for i in range(1, 4):
                     response = requests.get(url)
                     result = response.json()
-                    self.log.info("请求第%s次" % str(i))
+                    print("请求第%s次" % str(i))
                     # if result['code'] != 100:
                     #     return result.update({"code":400,"message":"请求失败"})
         except Exception as e:
@@ -237,7 +237,7 @@ class ExxService(object):
 
 
 # service_api = ExxService('c6b2ee35465dfddf535e8ddaeaaaf4ee8a90894e', '3b56369d-8072-461e-91f6-243b6277af01')
-# data = service_api.get_balance()
+# data = service_api.order('1', 'eth_usdt', '666', 'sell')
 # print(data)
 
 
