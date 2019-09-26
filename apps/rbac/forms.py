@@ -101,7 +101,6 @@ class RoleModelForm(forms.ModelForm, FormMixin):
     class Meta:
         model = Role
         fields = '__all__'
-        # fields = ('username','password','email')
         labels = {
             'rolename': '角色',
             'permission': '权限',
@@ -114,7 +113,6 @@ class PermissionModelForm(forms.ModelForm, FormMixin):
     class Meta:
         model = Permission
         fields = ('title', 'url')
-
 
 class MenuModelForm(ModelForm, FormMixin):
     class Meta:

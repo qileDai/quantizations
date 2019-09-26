@@ -65,7 +65,7 @@
                                 <td>{{ account.platform.Platform_name }}</td>
                                 <td>{{ account.createtime }}</td>
                                 <td>
-                                    <a class="check-property" id="check-property-total" href="#">查看资产</a>
+                                    <a class="check-property" id="check-property-total" href="{% url 'deal:afafd' %}">查看资产</a>
                                     <a class="update-property" href="#">修改</a>
                                     <a class="delete-property" href="#">删除</a>
                                     <a class="add-property" href="#">增资</a>
@@ -471,13 +471,14 @@
                     <div class="property-modal-header-inner">资产信息</div>
                 </div>
                 <div class="property-body" id="property-details-ids">
+
+                    <div class="property-right">
+                        <span class="property-account">账户</span>
+                        <span class="property-account-value"> {{ properties.Platform_name }}</span>
+                        <button href="#" class="refersh" id="details-refersh">刷新账户</button>
+                    </div>
                     <script id="property-details" type="text/html">
                         {% verbatim %}
-                        <div class="property-right">
-                            <span class="property-account">账户</span>
-                            <span class="property-account-value"> {{ properties.Platform_name }}</span>
-                            <button class="refersh">刷新账户</button>
-                        </div>
                         <div class="property-profit">
                             <div class="assets-change">
                                 <span class="change">24小时资产变化</span>

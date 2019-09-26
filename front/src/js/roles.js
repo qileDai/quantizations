@@ -43,8 +43,8 @@ Role.prototype.listRoleSubmitEvent = function () {
     roleBtn.click(function () {
         rolename = roleGroup.find("input[name='rolename']").val()
         permission = roleGroup.find("select[name='permission']").val()
+        console.log(permission)
         console.log(rolename, permission)
-
         xfzajax.post({
             'url': '/rbac/add_roles/',
             'data': {
@@ -52,6 +52,7 @@ Role.prototype.listRoleSubmitEvent = function () {
                 'permission': permission
             },
             'success': function (result) {
+                console.log(result)
                 if (result['code'] === 200) {
                     console.log("sdf")
                     xfzalert.alertSuccess("添加角色成功", function () {

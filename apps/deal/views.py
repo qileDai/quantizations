@@ -357,7 +357,7 @@ class GetAccountInfo(View):
             'users': user_obj,
         }
         print(context)
-        return render(request, 'management/gridding.html', context)
+        return restful.result(data=context)
 
 
 class StartRobot(View):
@@ -558,3 +558,6 @@ def get_pagination_data(paginator, page_obj, around_count=2):
         'right_has_more': right_has_more,
         'num_pages': num_pages
     }
+
+def afafd(request):
+    return render(request,'cms/asdfa.html')

@@ -136,6 +136,7 @@ Robot.prototype.run = function () {
     self.listenSubmitRobot();
     self.runRobotEvent();
     self.protectRelieve();
+    self.getAccountInfoEvent();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
@@ -418,10 +419,10 @@ Robot.prototype.listenCreatTradingEvent = function () {
         var robot_id = tr.attr('data-id');
         xfzajax.post({
             'url': '/deal/showtradedetail/',
-            'data':{
-                'robot_id':robot_id
+            'data': {
+                'robot_id': robot_id
             },
-            'success':function (result) {
+            'success': function (result) {
                 console.log(result)
             }
         })
@@ -473,10 +474,44 @@ Robot.prototype.listenparameterEven = function () {
     })
 }
 
+//获取账户信息
 Robot.prototype.getAccountInfoEvent = function () {
-    var parantersGroup = $('.strategy-parameters')
-    id = parantersGroup.find("select['name='account']").val()
-    console.log(id)
+    // var parantersGroup = $('.strategy-parameters')
+    // id = parantersGroup.find("select['name='account']").val()
+    console.log("sfsfsfsdf")
+    // console.log(id)
+    $('#robot-account').change(function () {
+        console.log("daiile")
+        var parantersGroup = $('.set-strategy')
+        var currency = parantersGroup.find('.strategy-curry .curry').text()
+        var strr = currency.split('/')
+        var curry = strr[0]
+        var market = strr[1]
+        console.log(curry, market)
+        var id = $('#robot-account').find("option:selected").val()
+        console.log(id)
+        xfzajax.post({
+            'url': '/deal/getaccountinfo/',
+            'data':{
+                'curry-title':curry,
+                'market-title':market,
+                'id':id,
+            },
+            'success':function (result) {
+                if(result['code'] === 200){
+                    var data = result['data']
+                    var resistance = data['resistance']
+                    var support_level = data['support_level']
+                    $('.resistance-value').text(resistance)
+                    $('.support-value').text(support_level)
+                    
+
+                }
+            }
+
+        })
+
+    })
 
 
 }
@@ -502,7 +537,7 @@ Robot.prototype.listenSubmitRobot = function () {
         var strr = curry.split('/')
         var curreny = strr[0]
         var market = strr[1]
-        console.log(curreny )
+        console.log(curreny)
         console.log(market)
         var account = robotGroup.find('.strategy-parameters-top .user"').text() //交易账户
         var strategy = robotGroup.find('.strategy-value').text()

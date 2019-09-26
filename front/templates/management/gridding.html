@@ -139,7 +139,6 @@
                                 {% for propertty in properties %}
                                     <option value="">{{ propertty.currency }}</option>
                                 {% endfor %}
-
                             </select>
                         </div>
                         <div class="trading-market">
@@ -194,7 +193,7 @@
                         <div class="trading-parameters account-curry">
 
                             <span class="title">交易账户</span>
-                            <select class="parameters-control" name="account" id="">
+                            <select class="parameters-control" name="account" id="robot-account">
                                 <option value="" selected>---请选择---</option>
                                 {% for account in accounts %}
                                     <option value="{{ account.pk }}">{{ account.title }}</option>
@@ -223,7 +222,7 @@
                         </div>
                         <div class="trading-parameters support-level ">
                             <span class="title">支撑位</span>
-                            <input class="parameters-control support" type="text">
+                            <input class="parameters-control support-value" type="text">
                         </div>
                         <div class="trading-parameters girding-num ">
                             <span class="title">网格数量</span>

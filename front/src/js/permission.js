@@ -6,6 +6,7 @@ Permission.prototype.run = function () {
     var self = this;
     self.listenPermissionSubmitEvent();
     self.listenPermissionDeleteEvent();
+    self.editPermission();
 
 };
 Permission.prototype.listenPermissionSubmitEvent = function () {
@@ -49,10 +50,10 @@ Permission.prototype.listenPermissionDeleteEvent = function () {
                         'pk': pk
                     },
                     'success': function (result) {
+                        console.log(result)
                         if (result['code'] === 200) {
-                            xfzalert.alertSuccess("删除成功！", function () {
-                                window.location.reload()
-                            })
+                            console.log("fsd")
+                            window.location.reload()
                         }
                     }
                 })
@@ -60,6 +61,22 @@ Permission.prototype.listenPermissionDeleteEvent = function () {
         })
     })
 };
+
+Permission.prototype.editPermission = function () {
+    var self = this;
+    $('#edit-permission').click(function () {
+        console.log("sfd")
+        $('.permission-wrapper').show();
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var pk = tr.attr('data-permission-id');
+        console.log(pk);
+        $('#permission-confirm').attr('permission-id',pk)
+        xfzajax.post({
+
+        })
+    })
+}
 
 $(function () {
     var permission = new Permission();

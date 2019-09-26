@@ -116,10 +116,9 @@ def users_list(request):
 @is_login
 def add_roles(request):
     form = RoleModelForm(request.POST)
-    print('*'*20)
-    print("sdf")
     if form.is_valid():
         form.save()
+        print("dfsd")
         return restful.ok()
     else:
         return restful.params_error(message=form.get_errors())
