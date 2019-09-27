@@ -209,20 +209,20 @@
                             <span class="title">当前价</span>
                             <span class="price">72.56 usdt</span>
                             <input class="set-price">
-                            <a href="">设置当前价</a>
+                            <a href="#" id="set-currenPrice">设置当前价</a>
                         </div>
                         <div class="trading-parameters">
                             <span class="title">重新挂单频率</span>
-                            <input class="parameters-control" type="text">
+                            <input class="parameters-control millisecond-value" type="text" value="">
                             <span class="millisecond">毫秒</span>
                         </div>
                         <div class="trading-parameters resistance">
                             <span class="title">阻力位</span>
-                            <input class="parameters-control  resistance-value" type="text">
+                            <input class="parameters-control  resistance-value" type="text" >
                         </div>
                         <div class="trading-parameters support-level ">
                             <span class="title">支撑位</span>
-                            <input class="parameters-control support-value" type="text">
+                            <input class="parameters-control support-value" type="text" value="">
                         </div>
                         <div class="trading-parameters girding-num ">
                             <span class="title">网格数量</span>
@@ -230,16 +230,16 @@
                         </div>
                         <div class="trading-parameters procudere-fee ">
                             <span class="title">单次交易手续费</span>
-                            <input class="parameters-control" id="one-girding-free" value="0.1%" type="text">
+                            <input class="parameters-control" id="one-girding-free" value="0.1" type="text">
                             <span class="percent">%</span>
                         </div>
                         <div class="trading-parameters mix-number ">
                             <span class="title">单网格最小交易数量</span>
-                            <input class="parameters-control" type="text">
+                            <input class="parameters-control value" type="text" value="">
                         </div>
                         <div class="trading-parameters max-number ">
                             <span class="title">单网格最大交易数量</span>
-                            <input class="parameters-control" type="text">
+                            <input class="parameters-control value" type="text" value="">
                         </div>
                         <div class="trading-parameters profit ">
                             <span class="title">单网格利润</span>
@@ -278,10 +278,10 @@
                         </div>
                         <div class="riskstrategy">
                             <div>设置风险策略</div>
-                            <div class="stopLoss">止损价 <input class="parameters-control" type="text"
+                            <div class="stopLoss">止损价 <input class="parameters-control loss" type="text"
                                                              value="">
                             </div>
-                            <div class="warning">预警价<input class="parameters-control" type="text" value="70.21usdt">
+                            <div class="warning">预警价<input class="parameters-control value" type="text" value="">
                             </div>
                         </div>
                         {#                        需要获取账户列表#}

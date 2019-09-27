@@ -28,6 +28,9 @@ Account.prototype.run = function () {
 
 }
 
+/**
+ * 账户
+ */
 Account.prototype.showDetailProperty = function () {
     var self = this;
     $('.update-property').on('click', function () {
@@ -72,6 +75,9 @@ Account.prototype.showDetailProperty = function () {
         })
     })
 }
+/**
+ * 账户弹出框显示隐藏
+ */
 Account.prototype.listenShowHideAddAccount = function () {
     var self = this;
     var closeBtn = $('.close-btn');

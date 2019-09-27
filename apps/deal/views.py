@@ -280,19 +280,68 @@ class ConfigCurrency(View):
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 创建机器人
-class GetParams(View):
+class createRobot(View):
     """
     获取配置策略的参数
     """
     def post(self, request):
-        model_form = RobotFrom(request.POST)
-        print('-' * 30, model_form)
+        form = RobotFrom(request.POST)
         # is_valid()方法会根据model字段的类型以及自定义方法来验证提交的数据
-        if model_form.is_valid():
-            model_form.save()
+        if form.is_valid():
+            # model_form.save()
+            trading_account = form.cleaned_data('trading_account')
+            print(threading)
+            currency = form.cleaned_data('currency')
+            print(currency)
+            market = form.cleaned_data('market')
+            print(market)
+            total_money = form.cleaned_data('total_money')
+            print(total_money)
+            trading_strategy = form.cleaned_data('trading_strategy')
+            print(trading_strategy)
+            total_money = form.cleaned_data('total_money')
+            print(total_money)
+            float_profit = form.cleaned_data('float_profit')
+            print(float_profit)
+            realized_profit = form.cleaned_data('realized_profit')
+            print(realized_profit)
+            total_profit = form.cleaned_data('total_profit')
+            print(total_profit)
+            annual_yield = form.cleaned_data('annual_yield')
+            print(annual_yield)
+            protection = form.cleaned_data('protection')
+            print(protection)
+            status = form.cleaned_data('status')
+            print(status)
+            current_price = form.cleaned_data('current_price')
+            print(current_price)
+            orders_frequency = form.cleaned_data('orders_frequency')
+            print(orders_frequency)
+            resistance = form.cleaned_data('resistance')
+            print(resistance)
+            support_level = form.cleaned_data('support_level')
+            print(support_level)
+            girding_num = form.cleaned_data('girding_num')
+            print(girding_num)
+            procudere_fee = form.cleaned_data('procudere_fee')
+            print(procudere_fee)
+            min_num = form.cleaned_data('min_num')
+            print(min_num)
+            max_num = form.cleaned_data('max_num')
+            print(max_num)
+            girding_profit = form.cleaned_data('girding_profit')
+            print(girding_profit)
+            stop_price = form.cleaned_data('stop_price')
+            print(stop_price)
+            warning_price = form.cleaned_data('warning_price')
+            print(warning_price)
+            warning_account = form.cleaned_data('warning_account')
+            print(warning_account)
+
+
             return restful.ok()
         else:
-            return restful.params_error(message="创建机器人失败")
+            return restful.params_error(message=form.get_errors())
 
 
 def get_account_info(currency, market, id):
@@ -460,7 +509,7 @@ class ShowTradeDetail(View):
             # 总投入
             'total_input': property_obj.original_assets,
             # 运行时间
-            'running_time': running_time,
+            'running_time': "2019-09-29",
             # 交易币种可用
             'currency_balance': info[currency.upper()].get('balance'),
             # 交易市场可用

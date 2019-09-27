@@ -34,20 +34,22 @@ class EditAccountFrom(forms.ModelForm,FormMixin):
         fields = ('users', 'title', 'accesskey', 'secretkey')
 
 
-class RobotFrom(forms.ModelForm):
+class RobotFrom(forms.ModelForm,FormMixin):
 
     class Meta:
         model = Robot
-        fields = '__all__'
+        fields = ['trading_account','currency','market','trading_strategy','total_money','float_profit','realized_profit','total_profit',
+                  'annual_yield','protection','status','current_price','orders_frequency','resistance','support_level',
+                  'girding_num','procudere_fee','min_num','max_num','girding_profit','stop_price','warning_price','warning_account']
 
-    def clean_resistance(self):
-        resistance = self.cleaned_data.get('resistance')
-        print(resistance)
-        last = self.cleaned_data.get('current_price')
-        if float(resistance) < float(last):
-            raise ValidationError('阻力位不能低于当前价,请重新输入!')
-        else:
-            return resistance
+    # def clean_resistance(self):
+    #     resistance = self.cleaned_data.get('resistance')
+    #     print(resistance)
+    #     last = self.cleaned_data.get('current_price')
+    #     if float(resistance) < float(last):
+    #         raise ValidationError('阻力位不能低于当前价,请重新输入!')
+    #     else:
+    #         return resistance
 
     def clean_support_level(self):
         support_level = self.cleaned_data.get('support_level')
