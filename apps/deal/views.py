@@ -15,6 +15,9 @@ from apps.deal.Strategy.Grid import GridStrategy
 import threading
 import datetime
 from rest_framework import serializers
+from django.core import serializers
+from django.core.serializers import serialize
+from django.contrib.sessions import serializers
 import json
 from apps.deal.serializers import AccountSerializer
 # Create your views here.r
@@ -386,6 +389,7 @@ class GetAccountInfo(View):
         info = info.get('funds')
         info1 = market_obj.get_ticker()
         info2 = market_obj.get_klines('1day', '30')
+        print(info2)
         info2 = info2.get('datas')
 
         # 计算阻力位/支撑位的默认值
@@ -395,14 +399,19 @@ class GetAccountInfo(View):
             for i in info2['data']:
                 max += float(i[2])
                 min += float(i[3])
-
         context = {
+            # 交易币种可用
             'currency': info[currency.upper()].get('balance'),
+            # 交易市场可用
             'market': info[market.upper()].get('balance'),
+            # 当前价
             'last': info1['ticker'].get('last'),
-            'resistance': float(max/int(info2['limit'])),
-            'support_level': float(min/int(info2['limit'])),
-            # 'users': user_obj,
+            # 阻力位
+            'resistance': round(float(max/int(info2['limit'])), 2),
+            # 支撑位
+            'support_level': round(float(min/int(info2['limit'])), 2),
+            # 用户信息
+            'users': serialize("json", user_obj.order_by("-id")),
         }
         print(context)
         return restful.result(data=context)
@@ -488,12 +497,10 @@ class ShowTradeDetail(View):
             try:
                 # 获取机器人对应的线程对象
                 robot = item.robot_obj
-                if id == robot.id:
-                    order_lists += item.id_list
+                if id == str(robot.id):
+                    order_lists.extend(item.id_list)
                 running_time = item.start_time - datetime.datetime.now()
             except:
-                order_lists = None
-                running_time = None
                 print('对象没有属性robot_obj')
                 continue
 
@@ -501,13 +508,13 @@ class ShowTradeDetail(View):
             # 已完成笔数
             'closed_num': len(closed_order),
             # 已完成挂单信息
-            'closed_info': closed_order,
+            'closed_info': serialize("json", closed_order.order_by("-id")),
             # 未完成笔数
             'open_num': len(order_lists),
             # 未完成挂单信息
             'open_info': order_lists,
             # 总投入
-            'total_input': property_obj.original_assets,
+            'total_input': str(property_obj.original_assets),
             # 运行时间
             'running_time': "2019-09-29",
             # 交易币种可用
@@ -521,23 +528,47 @@ class ShowTradeDetail(View):
             # 当前价
             'last': info1['ticker'].get('last'),
             # 总收益
-            'profit': (float(info[currency.upper()].get('total'))-float(property_obj.original_assets))*
-                      float(info1['ticker'].get('last')),
+            'profit': (float(info[currency.upper()].get('total'))-float(property_obj.original_assets))
+                    * float(info1['ticker'].get('last')),
         }
         print(context)
-        return render(request, 'management/gridding.html', context)
+        return restful.result(data=context)
 
 
 class ShowConfig(View):
     """
     展示机器人配置信息
     """
+    def get(self, request):
+        id = request.POST.get('robot_id')
+        robot_obj = Robot.objects.get(id=id)
+        context = serialize("json", robot_obj)
+        return restful.result(data=context)
+
     def post(self, request):
-        pass
+        # 获取机器人id
+        id = request.POST.get('robot_id')
+        # 获取挂单频率
+        orders_frequency = request.POST.get('orders_frequency')
+        # 获取挂单最小数量
+        min_num = request.POST.get('min_num')
+        # 获取挂单最大数量
+        max_num = request.POST.get('max_num')
+        # 获取止损价
+        stop_price = request.POST.get('stop_price')
+        # 获取预警价
+        warning_price = request.POST.get('warning_price')
+
+        Robot.objects.filter(id=id).update(
+            orders_frequency=orders_frequency,
+            min_num=min_num,
+            max_num=max_num,
+            stop_price=stop_price,
+            warning_price=warning_price,
+        )
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# 机器人管理
 class RobotList(View):
     """
     机器人管理列表页面
@@ -608,5 +639,3 @@ def get_pagination_data(paginator, page_obj, around_count=2):
         'num_pages': num_pages
     }
 
-def afafd(request):
-    return render(request,'cms/asdfa.html')
