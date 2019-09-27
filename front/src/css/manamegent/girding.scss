@@ -52,7 +52,7 @@
     left: 33%;
     top: 10%;
     width: 706px;
-    height: 750px;
+    height: 850px;
     background: white;
     border-radius: 5px;
 
@@ -222,8 +222,17 @@
           margin-top: 5px;
           //float: right;
         }
+        .resistance-error-message{
+          .error{
+            font-size: 6px;
+            color: red;
+            text-align: center;
+            margin-top: -10px;
+          }
+        }
 
         .strategy-parameters {
+          //margin-bottom: 20px;
           margin-top: 20px;
           text-align: right;
           //margin-left: 100px;
@@ -232,8 +241,12 @@
 
           .trading-parameters {
             //overflow: hidden;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             //margin-left: 100px;
+            .error-account{
+              color: red;
+              font-size: 12px;
+            }
             .millisecond {
               position: absolute;
               right: 100px;
@@ -341,6 +354,7 @@
         }
 
         .warninguser {
+          margin-top: 40px;
           label {
             width: 120px;
             margin: 10px 10px
@@ -350,6 +364,8 @@
     }
 
     .trading-footer {
+      //margin-bottom: 30px;
+      margin-top: 100px;
       #btnComplete{
         width: 140px;
         height: 40px;
@@ -359,7 +375,7 @@
         color: white;
         display: none;
       }
-      height: 80px;
+
       //border-bottom: 20px;
 
       .trading-button {

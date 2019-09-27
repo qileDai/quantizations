@@ -86,19 +86,19 @@
                         </thead>
                         <tbody>
                         {% for robot in robots %}
-                            <tr data-id="{{ robot.pk }}">
+                            <tr data-id="{{ robot.pk }}" statu="{{ robot.status }}">
                                 <td>{{ robot.pk }}</td>
                                 <td>{{ robot.trading_account.title }}</td>
                                 <td>{{ robot.currency }}</td>
                                 <td>{{ robot.market }}</td>
                                 <td>{{ robot.trading_strategy }}</td>
-                                <td>1,000,000.00 usdt</td>
-                                <td>+56.33 usdt</td>
-                                <td>+0.01 usdt</td>
-                                <td>+56.33 usdt</td>
-                                <td>68%</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
                                 <td>{{ robot.create_time }}</td>
-                                <td>{{ robot.status }}</td>
+                                <td>{{ robot.get_status_display }}</td>
                                 <td>
                                     <a class="run-stop" id="run-robot" href="#">运行</a>
                                     <a class="robot-details" href="javascript:;">详情</a>
@@ -191,7 +191,6 @@
                     </div>
                     <div class="strategy-parameters">
                         <div class="trading-parameters account-curry">
-
                             <span class="title">交易账户</span>
                             <select class="parameters-control" name="account" id="robot-account">
                                 <option value="" selected>---请选择---</option>
@@ -202,13 +201,16 @@
                         </div>
                         <div class="trading-parameters account-details">
                             <span class="title">可用:</span>
-                            <span class=""> 45,000.00 usdt</span>
-                            <span> 6,000.0000 ltc</span>
+                            <span class="currency"> 45,000.00 usdt</span>
+                            <span class="market"> 6,000.0000 ltc</span>
                         </div>
                         <div class="trading-parameters  current-price">
                             <span class="title">当前价</span>
-                            <span class="price">72.56 usdt</span>
-                            <input class="set-price">
+                            <span class="price">200</span>
+                            <span class="df">usdt</span>
+                            <span>
+                                <input class="set-price" value="" type="text">
+                            </span>
                             <a href="#" id="set-currenPrice">设置当前价</a>
                         </div>
                         <div class="trading-parameters">
@@ -218,7 +220,10 @@
                         </div>
                         <div class="trading-parameters resistance">
                             <span class="title">阻力位</span>
-                            <input class="parameters-control  resistance-value" type="text" >
+                            <input class="parameters-control  resistance-value" type="text">
+                        </div>
+                        <div class="resistance-error-message">
+                            <span class="error"></span>
                         </div>
                         <div class="trading-parameters support-level ">
                             <span class="title">支撑位</span>
@@ -226,7 +231,8 @@
                         </div>
                         <div class="trading-parameters girding-num ">
                             <span class="title">网格数量</span>
-                            <input class="parameters-control grid-number" id="stratery-girding-num" value="100" type="text">
+                            <input class="parameters-control grid-number" id="stratery-girding-num" value="100"
+                                   type="text">
                         </div>
                         <div class="trading-parameters procudere-fee ">
                             <span class="title">单次交易手续费</span>
@@ -235,11 +241,11 @@
                         </div>
                         <div class="trading-parameters mix-number ">
                             <span class="title">单网格最小交易数量</span>
-                            <input class="parameters-control value" type="text" value="">
+                            <input class="parameters-control value" type="text">
                         </div>
                         <div class="trading-parameters max-number ">
                             <span class="title">单网格最大交易数量</span>
-                            <input class="parameters-control value" type="text" value="">
+                            <input class="parameters-control value" type="text">
                         </div>
                         <div class="trading-parameters profit ">
                             <span class="title">单网格利润</span>
@@ -263,9 +269,9 @@
                             <span class="deal-account">交易账户</span>
                             <span class="user">EXX账户</span>
                             <span>阻力位:</span>
-                            <span class="resistance">93.45 usdt</span>
+                            <span class="resistance">93.45</span>
                             <span class="">支撑位:</span>
-                            <span class="support-level">93.45 usdt</span>
+                            <span class="support-level">93.45</span>
                             <span class="">网格数量:</span>
                             <span class="girding-num">68</span>
                         </div>
@@ -274,14 +280,14 @@
                             <span class="deal-account">0.1%</span>
                             <span class="girding-profit">单网格利润:</span>
                             <span class="resistance">0.21%-0.46%</span>
-
                         </div>
+
                         <div class="riskstrategy">
                             <div>设置风险策略</div>
                             <div class="stopLoss">止损价 <input class="parameters-control loss" type="text"
                                                              value="">
                             </div>
-                            <div class="warning">预警价<input class="parameters-control value" type="text" value="">
+                            <div class="warning">预警价<input class="parameters-control value" type="text">
                             </div>
                         </div>
                         {#                        需要获取账户列表#}
@@ -289,53 +295,30 @@
                             <div>预警账户</div>
                             <div class="btn-group" data-toggle="buttons">
                                 <label class="btn btn-default">
-                                    <input type="checkbox"> 524135494218
+                                    <input type="checkbox" class="user"> 524135494218
                                 </label>
                                 <label class="btn btn-default">
-                                    <input type="checkbox"> @68451816548
+                                    <input type="checkbox" class="user"> 524135494218
                                 </label>
                                 <label class="btn btn-default">
-                                    <input type="checkbox"> 66@454519684
+                                    <input type="checkbox" class="user"> 524135494218
                                 </label>
                                 <label class="btn btn-default">
-                                    <input type="checkbox"> 318416518687
+                                    <input type="checkbox" class="user"> 524135494218
                                 </label>
                                 <label class="btn btn-default">
-                                    <input type="checkbox"> 684651684654
+                                    <input type="checkbox" class="user"> 524135494218
                                 </label>
                                 <label class="btn btn-default">
-                                    <input type="checkbox"> 546843216874
+                                    <input type="checkbox" class="user"> 524135494218
                                 </label>
                                 <label class="btn btn-default">
-                                    <input type="checkbox"> 356468513544
+                                    <input type="checkbox" class="user"> 524135494218
                                 </label>
                                 <label class="btn btn-default">
-                                    <input type="checkbox"> 546846516848
+                                    <input type="checkbox" class="user"> 524135494218
                                 </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox"> 683548946848
-                                </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox"> 684651684654
-                                </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox"> 684651684654
-                                </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox"> 546843216874
-                                </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox"> 356468513544
-                                </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox"> 546846516848
-                                </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox"> 683548946848
-                                </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox"> 684651684654
-                                </label>
+
                             </div>
 
                         </div>

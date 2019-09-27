@@ -122,6 +122,7 @@ function Robot() {
     self.setStrategyWrapper = $('.set-strategy');
     self.setRiskWrapper = $('.set-risk-strategy');
 
+
 };
 
 Robot.prototype.run = function () {
@@ -137,6 +138,7 @@ Robot.prototype.run = function () {
     self.runRobotEvent();
     self.protectRelieve();
     self.getAccountInfoEvent();
+    self.setCurrentPrice();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
@@ -352,8 +354,6 @@ Robot.prototype.listenClickRobotEvent = function () {
             var parameterscontrol = $('.parameters-control').find(" option:selected").text()//交易账户
             var resistancevalue = $('.strategy-parameters .trading-parameters .resistance-value').val()//阻力值
             var support = $('.strategy-parameters .trading-parameters .support').val()//支撑位
-            console.log(support
-            )
             var gridnumber = $('.strategy-parameters .trading-parameters .grid-number').val()//网格数量
 
             // alert('请选择交易币种/交易市场')
@@ -436,6 +436,7 @@ Robot.prototype.listenCreatTradingEvent = function () {
             },
             'success': function (result) {
                 var robot = result['data']
+                console.log(robot)
 
             }
         })
@@ -514,8 +515,17 @@ Robot.prototype.getAccountInfoEvent = function () {
                 if (result['code'] === 200) {
                     var data = result['data']
                     console.log(data)
-                    var resistance = data['resistance']
-                    var support_level = data['support_level']
+                    var resistance = data['resistance']  //阻力位
+                    var support_level = data['support_level'] //支撑位
+                    var currency = data['currency']  //可用
+                    var last = data['last']    //当前价
+                    var market = data['market']  //市场价
+                    //往设置策略中插入请求到的账户信息
+                    $('.current-price .price').val(last)
+                    $('.account-details .currency').text(currency)
+                    $('.account-details .market').text(market)
+
+
                     var num = $('#stratery-girding-num ').val()
                     var free = $('#one-girding-free').val()
                     var girding = (resistance - support_level) / num
@@ -548,18 +558,20 @@ Robot.prototype.getAccountInfoEvent = function () {
                             $('.profit-value').text(profit)
                         }
                     });
-                    $('#set-currenPrice').click(function () {
-                        console.log("serjl")
-                        var price = $('#set-price').val()
-                        if(price == null){
-
-                        }else {
-                            var price = $('#set-price').val()
-                            $('.price').text(price)
+                    $('.resistance-value').on('blur',function () {
+                        var resistance = $('.resistance-value').val()
+                        var price = $('.current-price .price').val()
+                        if(!resistance == ''){
+                            if(resistance <= price){
+                                console.log("sf")
+                                $('.resistance-error-message .error').text("阻力位不得低于等于当前价")
+                                // $('.resistance-value').after("<span class='error-account'>阻力位不得低于等于当前价</span>")
+                            }else {
+                                $('.resistance-error-message .error').text("")
+                            }
                         }
-                    })
-
-
+                    });
+                    $('')
                 }
             }
 
@@ -606,15 +618,29 @@ Robot.prototype.listenSubmitRobot = function () {
         var support = $('.strategy-parameters-top .support-level').text()
         var girding_num = $('.strategy-parameters-top .girding-num').text()
         var curren_price = $('.current-price .price').text()
-        var millisecond = $('.millisecond-value').text()
-        var mix_num = $('.mix-number .value ').text()
-        var max_num = $('.max-number .value ').text()
+        var millisecond = $('.millisecond-value').val()
+        var mix_num = $('.mix-number .value ').val()
+        var max_num = $('.max-number .value ').val()
         console.log('当前价:',curren_price,'毫秒:',millisecond,'最小数量:',mix_num,'最大数量',max_num)
 
         var free = $('.strategy-parameters-below .deal-account').text()  //交易手续费
         var girding_profit = $('.strategy-parameters-below .resistance').text()  //单网格利润
-        var stoploss = $('.stopLoss .loss').text()
-        var waring = $('.warning .value').text()
+        var stoploss = $('.stopLoss .loss').val()
+        var waring = $('.warning .value').val()
+
+        var userList = $('.warninguser .active')
+        console.log(userList)
+        var users = ""
+        for(var i = 0; i<userList.length; i++){
+            var element = userList[i]
+            console.log(element)
+           var  user = $(element).text()
+            // console.log(user)
+            // users.push(user)
+            users += user + ''
+        }
+        console.log(users)
+
 
         console.log('止损价',stoploss,waring)
         console.log('策略：',strategy, '账户：',account,'阻力位:', resistance, '支撑位:',support, '网格数量:',girding_num, '交易手续费',free, '网格利润',girding_profit)
@@ -626,28 +652,33 @@ Robot.prototype.listenSubmitRobot = function () {
                 'currency':curreny,
                 'market':market,
                 'trading_strategy':strategy,
-                'total_money':'',
-                'float_profit':'',
-                'realized_profit':'',
-                'total_profit':'',
-                'annual_yield':'',
-                'protection':1,
-                'status':1,
+                'total_money':0,
+                'float_profit':0,
+                'realized_profit':0,
+                'total_profit':0,
+                'annual_yield':0,
+                'protection':2,
+                'status':0,
                 'current_price':curren_price,
-                'orders_frequency':22,
+                'orders_frequency':millisecond,
                 'resistance':resistance,
                 'support_level':support,
-                'girding_num':25,
+                'girding_num':girding_num,
                 'procudere_fee':free,
-                'min_num':23,
-                'max_num':234,
+                'min_num':mix_num,
+                'max_num':max_num,
                 'girding_profit':girding_profit,
-                'stop_price':"23423",
-                'warning_price':"65465",
-                'warning_account':'4545'
+                'stop_price':stoploss,
+                'warning_price':waring,
+                'warning_account':users,
             },
             'success':function (result) {
                 console.log(result)
+                if(result['code'] === 200){
+                    xfzalert.alertSuccess('添加机器人成功',function () {
+                        window.location.reload()
+                    })
+                }
             }
         })
 
@@ -682,6 +713,17 @@ Robot.prototype.runRobotEvent = function () {
     })
 
 };
+
+/**
+ * 设置当前价
+ */
+Robot.prototype.setCurrentPrice = function(){
+    $('#set-currenPrice').click(function () {
+        var price1 = $('.set-price').val()
+        console.log(price1)
+        $('.current-price .price').text(price1)
+    })
+}
 
 /**
  * 机器人运行|禁止保护解除
