@@ -6,6 +6,7 @@
 {% block head %}
     <link rel="stylesheet" href="{% static 'ystep-master/css/ystep.css' %}">
     <link rel="stylesheet" href="{% static 'css/manamegent/girding.min.css' %}">
+    <script src="{% static 'arttemplate/template-web.js' %}"></script>
 {% endblock %}
 {% block header %}
     <p>网格交易</p>
@@ -348,7 +349,9 @@
                 <div class="robot-modal-header-inner ystep1">交易详情</div>
             </div>
         </div>
-        <div class="trading-particulars">
+        <script id="robot-deal-details" type="text/html">
+        {% verbatim %}
+         <div class="trading-particulars">
             <ul>
                 <li class="trading-loading green">待成交<span>(21)</span></li>
                 <li class="trading-ending">已完成<span>(87)</span></li>
@@ -632,6 +635,9 @@
             </table>
             {% include 'cms/box_footer.html' %}
         </div>
+        {% endverbatim %}
+        </script>
+
     </div>
     <div class="parameter-configuration">
         <div class="parameter-content">
@@ -642,91 +648,95 @@
                 <div class="robot-modal-header-inner ystep1">参数配置</div>
             </div>
         </div>
-        <div class="parameter-list-content">
-            <div class="parameter-strategy-parameters">
+        <div class="parameter-list-content" id="parameter-list-content">
+            <script id="robots-details" type="text/html">
+                {% verbatim %}
+                <div class="parameter-strategy-parameters">
                 <div>策略参数</div>
                 <ul>
-                    <li><span>交易账户</span><input type="text" disabled="disabled" value="EXX账户1"></li>
-                    <li style="text-align: center"><span>可用</span><span>45.000.00usdt  6.000.0000itc</span></li>
-                    <li><span>当前价</span><input type="text" disabled="disabled"></li>
-                    <li><span>重新挂单频率</span><input type="text" disabled="disabled" value="1000"></li>
-                    <li><span>阻力值</span><input type="text" disabled="disabled " value="94.45usdt"></li>
-                    <li><span>支撑位</span><input type="text" disabled="disabled" value="70.21"></li>
-                    <li><span>网格数量</span><input type="text" disabled="disabled" value="100"></li>
-                    <li><span>单次交易手续费</span><input type="text" disabled="disabled" value="0.1"></li>
-                    <li><span>单网格最小交易数量</span><input type="text"></li>
-                    <li><span>单网格最小交易数量</span><input type="text"></li>
-                    <li style="text-align: center"><span>单网格利润 </span><span>0.21%-0.46%</span></li>
+                    <li><span>交易账户</span><input type="text" disabled="disabled" value="{{ robot.trading_account
+                     }}"></li>
+                    <li style="text-align: center"><span>可用</span><span>{{  }} 6.000.0000itc</span></li>
+                    <li><span>当前价</span><input type="text" disabled="disabled" value="{{ robot.current_price }}"></li>
+                    <li><span>重新挂单频率</span><input type="text" disabled="disabled" value="{{ robot.orders_frequency }}"></li>
+                    <li><span>阻力值</span><input type="text" disabled="disabled " value="{{ robot.resistance }}"></li>
+                    <li><span>支撑位</span><input type="text" disabled="disabled" value="{{ robot.support_level }}"></li>
+                    <li><span>网格数量</span><input type="text" disabled="disabled" value="{{ robot.girding_num }}"></li>
+                    <li><span>单次交易手续费</span><input type="text" disabled="disabled" value="{{ robot.procudere_fee }}%"></li>
+                    <li><span>单网格最小交易数量</span><input type="text" value="{{ robot.min_num }}"></li>
+                    <li><span>单网格最小交易数量</span><input type="text" value="{{ robot.max_num }}"></li>
+                    <li style="text-align: center"><span>单网格利润 </span><span>{{ robot.girding_profit }}</span></li>
                 </ul>
             </div>
             <div class="risk-strategy">
                 <div>风险策略</div>
                 <ul>
-                    <li><span>止损价</span><input type="text" value="66.82usdt"></li>
-                    <li><span>止损价</span><input type="text" value="70.21usdt"></li>
+                    <li><span>止损价</span><input type="text" value="{{ robot.stop_price }}"></li>
+                    <li><span>止损价</span><input type="text" value="{{ robot.warning_price }}"></li>
                 </ul>
             </div>
-            <div>
-                <div class="risk-strategy-warninguser">
-                    <div>预警账户</div>
-                    <div class="btn-group" data-toggle="buttons">
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 524135494218
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> @68451816548
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 66@454519684
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 318416518687
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 684651684654
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 546843216874
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 356468513544
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 546846516848
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 683548946848
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 684651684654
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 683548946848
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 684651684654
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 683548946848
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 684651684654
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 683548946848
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="checkbox"> 684651684654
-                        </label>
+            <div class="risk-strategy-warninguser">
+                <div>预警账户</div>
+                <div class="btn-group" data-toggle="buttons">
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 524135494218
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> @68451816548
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 66@454519684
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 318416518687
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 684651684654
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 546843216874
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 356468513544
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 546846516848
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 683548946848
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 684651684654
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 683548946848
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 684651684654
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 683548946848
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 684651684654
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 683548946848
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="checkbox"> 684651684654
+                    </label>
 
-                    </div>
                 </div>
             </div>
-            <div class="risk-footer">
-                <div class="risk-button">
-                    <button class="prevent-btn  " id="btnPre1">取消</button>
-                    <button class="next-btn" id="btnNext1">完成</button>
-                </div>
+                {% endverbatim %}
+            </script>
+
+        </div>
+        <div class="risk-footer">
+            <div class="risk-button">
+                <button class="prevent-btn  " id="btnPre1">取消</button>
+                <button class="next-btn" id="btnNext1">完成</button>
             </div>
         </div>
     </div>

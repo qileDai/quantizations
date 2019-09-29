@@ -431,7 +431,8 @@ class StartRobot(View):
                 pass
 
         StartRobot.order_list = threading.enumerate()
-        return HttpResponse("OK")
+        return restful.ok(message="机器人：运行成功")
+
 
 
 class ShowTradeDetail(View):

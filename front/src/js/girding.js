@@ -437,7 +437,9 @@ Robot.prototype.listenCreatTradingEvent = function () {
             'success': function (result) {
                 var robot = result['data']
                 console.log(robot)
-
+                var tpl = template('',{'robots':robot})
+                var details = $('.tradingParticulars')
+                details.append(tpl)
             }
         })
     })
@@ -491,9 +493,12 @@ Robot.prototype.listenparameterEven = function () {
             },
             'success':function (result) {
                 var robot = JSON.parse(result['data'])
-                data = robot['fields']
+                console.log(robot['0']['fields'])
+                var data = robot['0']['fields']
+                var tpl = template('robots-details',{'robot':data})
                 console.log(data)
-
+                var robotGroup = $('#parameter-list-content')
+                robotGroup.append(tpl)
             }
         })
 
@@ -705,18 +710,19 @@ Robot.prototype.listenSubmitRobot = function () {
  * 机器人运行
  */
 Robot.prototype.runRobotEvent = function () {
-    var robotBnt = $('#run-robot')
-    robotBnt.click(function () {
+
+    $('.run-stop').click(function () {
         var currentbtn = $(this);
         var tr = currentbtn.parent().parent();
-        var robot = tr.attr('data-id');
-        var robot_id = []
-        robot_id.push(robot)
-        console.log(robot_id)
+        var robot_id = tr.attr('data-id');
+
+        var status = tr.attr('statu')
+
         xfzajax.post({
             'url': '/deal/startrobot/',
             'data': {
                 'robot_id': robot_id,
+                'flag':status
             },
             traditional: true,
             'success': function (result) {
