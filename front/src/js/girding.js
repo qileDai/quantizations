@@ -777,6 +777,7 @@ Robot.prototype.protectRelieve = function () {
         } else {
             $(element[0]).text(flg_text)
             $(this).text('保护')
+            
         }
         xfzajax.post({
             'url':"/deal/robot_protection/",
