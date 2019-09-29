@@ -87,7 +87,7 @@
                         </thead>
                         <tbody>
                         {% for robot in robots %}
-                            <tr data-id="{{ robot.pk }}" statu="{{ robot.status }}">
+                            <tr data-id="{{ robot.pk }}" statu="{{ robot.status }}" protect="{{ robot.protection }}">
                                 <td>{{ robot.pk }}</td>
                                 <td>{{ robot.trading_account.title }}</td>
                                 <td>{{ robot.currency }}</td>

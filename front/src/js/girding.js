@@ -758,9 +758,10 @@ Robot.prototype.protectRelieve = function () {
         var currentbtn = $(this);
         var tr = currentbtn.parent().parent();
         var robot_id = tr.attr('data-id');
-        var status = tr.attr('status');
+        var status = tr.attr('statu');
+        var protect = tr.attr('protect')
         console.log(robot_id,status)
-        // var flag = $(this).text()
+         var flag = $(this).text()
         // console.log(flag)
         // var element = $(this).siblings()
         // var runflg = $(element[0]).text()
@@ -782,11 +783,13 @@ Robot.prototype.protectRelieve = function () {
         //     $(this).text('保护')
         //
         // }
+
         xfzajax.post({
             'url':"/deal/robot_protection/",
             'data':{
                 'robot_id':robot_id,
-                'status':status,
+                'flag':status,
+                'protect':protect,
             },
             'success':function (result) {
                 console.log(result)
