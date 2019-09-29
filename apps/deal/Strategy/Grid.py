@@ -19,10 +19,11 @@ class GridStrategy(Thread):
         self.robot_obj = kwargs['robot_obj']                                          # 机器人对象
         self.currency_type = self.robot_obj.currency.lower() + '_' + self.robot_obj.market.lower()    # 交易对
         self.order_type = kwargs['order_type']                                        # 挂单类型
-        self.id_list = list()                                                         # 挂单id列表
+        self.id_dict = dict()                                                         # 挂单字典，保存挂单信息
         self.grid_range = float(self.robot_obj.resistance - self.robot_obj.support_level) / float(self.robot_obj.girding_num)
         self.Flag = True  # 停止标志位
         self.start_time = datetime.datetime.now()       # 启动时间
+        self.lock = threading.Lock()
 
         # 初始化平台接口对象
         account_obj = Account.objects.get(id=self.robot_obj.trading_account_id)  # 获取账户信息
@@ -64,14 +65,6 @@ class GridStrategy(Thread):
             level=logging.DEBUG,
         )
 
-    def get_markets_data(self):
-        """
-        获取市场行情数据
-        :return:
-        """
-        markets_data = self.market_api.get_markets()    # --------------------------------API
-        return markets_data.get(self.currency_type)
-
     def connect_db(self, sql, params=None):
         """
         数据库操作
@@ -100,18 +93,17 @@ class GridStrategy(Thread):
             conn.close()
             return cur.fetchone()
 
-    def place_order(self, item=None, order_type=None, flag=0, counts=None):
+    def place_order(self, item=None, counts=None):
         """
-        下单，根据flag判断批量or单笔
-        :param flag: 默认参数
-        :param item: {res.get("id"): {"price_range": (a, b), "order_type": self.order_type, "price": price,
-                    "amount": amount}}
-        :param order_type: 下单类型
+        下单，根据counts判断批量or单笔
+        :param counts: 默认参数
+        :param item: "买n": {""id": res.get("id"),price_range": (a, b),"order_type": self.order_type,
+                            "price": price,"amount": amount}
         :return:
         """
         try:
             # 调用实例方法,获取市场行情数据
-            markets_data = self.get_markets_data()
+            markets_data = self.market_api.get_markets()
         except Exception as e:
             # self.log_info("api")
             # logging.exception("GET MARKETS DATA FAILED...", e)
@@ -125,130 +117,60 @@ class GridStrategy(Thread):
 
             n = self.robot_obj.girding_num      # 批量挂原始单
             if counts:
-                n = counts      # 单笔更新挂单
+                n = counts                      # 单笔更新挂单
             for i in range(n):
-                # 根据挂单类型计算挂单价格区间
-                if self.order_type == "buy" and flag == 0:
+                # 挡位
+                grade = self.order_type + str(i+1)
+
+                # 计算原始挂单价格区间
+                if self.order_type == "buy" and counts is None:
                     a, b = min_buy1-self.grid_range*i, max_buy1-self.grid_range*i
                     # 获取挂卖单价的小数位
                     price = round(random.uniform(a, b), markets_data.get("priceScale", 2))
-                elif self.order_type == "sell" and flag == 0:
+                elif self.order_type == "sell" and counts is None:
                     a, b = min_sell1+self.grid_range*i, max_sell1+self.grid_range*i
                     # 获取挂买单价的小数位
                     price = round(random.uniform(a, b), markets_data.get("amountScale", 2))
+
                 # 获取挂单数量，实时查询数据库
                 sql = "select min_num,max_num from deal_robot where id = %s"
                 ret = self.connect_db(sql, (self.robot_obj.id,))
                 amount = round(random.uniform(ret[0], ret[1]), 3)
                 try:
-                    if order_type is None:
-                        # 如果order_type为空，挂原始单
-                        res = self.server_api.order(str(amount), self.currency_type, str(price), self.order_type)
-                        # 下单成功，添加下单id
-                        if res.get("id") is not None:
-                            self.id_list.append(
-                                {res.get("id"): {"price_range": (a, b),
-                                                 "order_type": self.order_type,
-                                                 "price": price,
-                                                 "amount": amount,
-                                                 "trade_amount": None}}
-                            )
-                    else:
+                    if counts is not None:
                         # 如果order_type不为空，更新挂单
-                        b_id = list(item.keys())[0]
-                        a, b = item[b_id]["price_range"]
+                        self.order_type = item[1]["order_type"]
+                        a, b = item[1]["price_range"]
                         price = random.uniform(a, b)
-                        res = self.server_api.order(str(amount), self.currency_type, str(price), order_type)
-                        if res.get("id") is not None:
-                            if item is not None:
-                                # item不为空，移除需要撤单的数据
-                                self.id_list.remove(item)
-                            self.id_list.append(
-                                {res.get("id"): {"price_range": (a, b),
-                                                 "order_type": order_type,
-                                                 "price": price,
-                                                 "amount": amount,
-                                                 "trade_amount": None}}
-                            )
+                        self.lock.acquire()
+                        del self.id_dict[item[0]]
+                        # print('删除--------------------------------------------------------------')
+                        self.lock.release()
 
+                    res = self.server_api.order(str(amount), self.currency_type, str(price), self.order_type)
+                    # 下单成功，添加下单id
+                    if res.get("id") is not None:
+                        self.lock.acquire()
+                        self.id_dict[res.get("id")] = {
+                            "grade": grade,
+                            "price_range": (a, b),
+                            "order_type": self.order_type,
+                            "price": price,
+                            "amount": amount,
+                            "trade_amount": 0,
+                            "reverse": False,
+                        }
+                        self.lock.release()
                 except Exception as e:
                     # self.log_info("api")
                     # logging.exception("PLACE ORDER ERROR...", e)
+                    print('traceback.print_exc():', traceback.print_exc())
                     print("下单失败", e)
+        print(self.id_dict, '-'*10, len(self.id_dict))
 
-        # print(self.id_list)
-
-    def completed_order_info(self, b_id, price, item, order_info, order_type):
-        """
-        已完成订单进行反向挂单
-        :param price: 反向挂单的价格
-        :param b_id: 挂单id
-        :param status: 挂单状态
-        :param item: {res.get("id"): {"price_range": (a, b),"order_type": self.order_type,"price": price,
-                    "amount": amount}}
-        :param order_info: 委托单信息
-        :param order_type: 挂单类型
-        :return:
-        """
-        try:
-            if order_info.get("status") in [2]:
-                amount = float(order_info["trade_amount"])-float(item[b_id]["trade_amount"])
-                res = self.server_api.order(
-                    # str(item[b_id]["amount"]),  # 已完成的委托单信息，获取成交的数量
-                    str(amount),
-                    self.currency_type,  # 交易对
-                    str(price),
-                    order_type
-                )
-                if res.get("id") is not None:
-                    self.id_list.remove(item)
-                    self.id_list.append(
-                        {res.get("id"): {"price_range": None,
-                                         "order_type": self.order_type,
-                                         "price": price,
-                                         "amount": order_info["trade_amount"],
-                                         "trade_amount": None}}
-                    )
-            elif order_info.get("status") in [3]:
-                # 更新部分成交订单的数据
-                if item[b_id].get("trade_amount") is None:
-                    nums = order_info["trade_amount"]
-                else:
-                    nums = float(order_info["trade_amount"])-float(item[b_id]["trade_amount"])
-                self.id_list.remove(item)
-                item[b_id]["price_range"] = None
-                item[b_id]["trade_amount"] = order_info["trade_amount"]
-                item[b_id]["amount"] = str(nums)
-                self.id_list.append(item)
-                # 下单
-                print('挂单数量', nums, type(nums))
-                res = self.server_api.order(
-                    str(nums),  # 挂单数量
-                    self.currency_type,  # 交易对
-                    str(price),
-                    order_type,
-                )
-                print('挂单数量', nums, type(nums), res)
-                if res.get("id") is not None:
-                    # 添加部分成交订单中的已完成订单
-                    self.id_list.append(
-                        {res.get("id"): {"price_range": None,
-                                         "order_type": self.order_type,
-                                         "price": price,
-                                         "amount": str(nums),
-                                         "trade_amount": order_info["trade_amount"]}}
-                )
-        except Exception as e:
-            # self.log_info("api")
-            # logging.exception("UPDATE ORDER FAILED...", e)
-            print('traceback.print_exc():', traceback.print_exc())
-            print("更新挂单失败", e)
-
-    def save_completedorder(self, item, order_info):
+    def save_completedorder(self, order_info):
         """
         保存已完成订单信息
-        :param item: {res.get("id"): {"price_range": (a, b),"order_type": self.order_type,"price": price,
-                    "amount": amount}}
         :param order_info: 委托单信息
         :return:
         """
@@ -276,6 +198,10 @@ class GridStrategy(Thread):
             self.connect_db(sql)
 
     def cancel_orders(self):
+        """
+        撤单
+        :return:
+        """
         for i in range(1, 10):
             # time.sleep(1)
             results = self.server_api.get_openorders(self.currency_type, i, self.order_type)
@@ -289,36 +215,108 @@ class GridStrategy(Thread):
             except Exception as e:
                 print("%s单撤单完成:" % self.order_type, e)
 
-    def update_order_info(self):
+    def completed_order_info(self, price, item, order_info, order_type):
         """
-        更新挂单信息
+        已完成订单进行反向挂单
+        :param price: 反向挂单的价格
+        :param item: "id": {"grade": grade,price_range": (a, b),"order_type": self.order_type,
+                            "price": price,"amount": amount,"trade_amount": None}
+        :param order_info: 委托单信息
+        :param order_type: 挂单类型
         :return:
         """
         try:
-            markets_data = self.get_markets_data()
+            if order_info.get("status") in [2]:
+                print(order_info["trade_amount"], item[1]["trade_amount"])
+                amount = float(order_info["trade_amount"])-float(item[1]["trade_amount"])
+
+                # 反向挂单
+                res = self.server_api.order(str(amount), self.currency_type, str(price), order_type)
+                # 下单成功，添加反向挂单数据
+                if item[1]["reverse"]:
+                    mark = False
+                else:
+                    mark = True
+
+                if res.get("id") is not None:
+                    self.lock.acquire()
+                    del self.id_dict[item[0]]
+                    self.id_dict[res.get("id")] = {
+                        "grade": item[1]["grade"],
+                        "price_range": item[1]["price_range"],
+                        "order_type": order_type,
+                        "price": price,
+                        "amount": amount,
+                        "trade_amount": 0,
+                        "reverse": mark
+                    }
+                    self.lock.release()
+            elif order_info.get("status") in [3] and (item[1]["reverse"] is False):
+
+                if item[1].get("trade_amount") == 0:
+                    nums = order_info["trade_amount"]
+                else:
+                    nums = float(order_info["trade_amount"])-float(item[1]["trade_amount"])
+                # 更新部分成交订单的数据
+                self.lock.acquire()
+                self.id_dict[item[0]]["trade_amount"] = order_info["trade_amount"]
+                self.id_dict[item[0]]["amount"] = str(nums)
+                self.lock.release()
+                # 下单
+                res = self.server_api.order(str(nums), self.currency_type, str(price), order_type)
+                print('挂单数量', nums, type(nums), res)
+                # 下单成功，添加部分成交订单中的已完成订单
+                if res.get("id") is not None:
+                    self.lock.acquire()
+                    self.id_dict[res.get("id")] = {
+                        "grade": item[1]["grade"],
+                        "price_range": item[1]["price_range"],
+                        "order_type": order_type,
+                        "price": price,
+                        "amount": str(nums),
+                        # "trade_amount": order_info["trade_amount"],
+                        "trade_amount": 0,
+                        "reverse": True,
+                    }
+                    self.lock.release()
+        except Exception as e:
+            # self.log_info("api")
+            # logging.exception("UPDATE ORDER FAILED...", e)
+            print('traceback.print_exc():', traceback.print_exc())
+            print("反向挂单失败", e)
+
+    def reverse_order(self):
+        """
+        反向挂单
+        :return:
+        """
+        try:
+            markets_data = self.market_api.get_markets()
         except Exception as e:
             # self.log_info("api")
             # logging.exception("GET_ORDER_INFO...", e)
             print("获取挂单信息失败...", e)
         else:
             # 循环控制，读取数据库数据
-
-            num = 0
             while True:
                 if not self.Flag:
                     break
                 else:
-                    # 实时查询数据库中的刷单频率
-                    sql = "select orders_frequency from deal_robot where id = %s"
-                    orders_frequency = self.connect_db(sql, (self.robot_obj.id,))
-                    # print(orders_frequency, type(orders_frequency[0]))
-                    for item in self.id_list:
+                    # 根据价格排序
+                    if self.order_type == "sell":
+                        self.lock.acquire()
+                        id_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"])
+                        self.lock.release()
+                    elif self.order_type == "buy":
+                        self.lock.acquire()
+                        id_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"], reverse=True)
+                        self.lock.release()
+                    # 循环挂单信息
+                    for item in list(id_dicts[0:5]):
+                        # item格式[('123456',{"id": res.get("id"),price_range": (a, b),"order_type": self.order_type,
+                        # "price": price,"amount": amount,"trade_amount": None}),...]
                         # 获取要更新挂单id
-                        b_id = list(item.keys())[0]
-                        # 挂单价格区间
-                        limit = item[b_id]["price_range"]
-                        # 挂单类型
-                        order_type = item[b_id]["order_type"]
+                        b_id = item[0]
                         try:
                             # 调用接口，获取委托单信息，如status,type,price等----------------------------API
                             order_info = self.server_api.get_order(self.currency_type, b_id)
@@ -327,68 +325,119 @@ class GridStrategy(Thread):
                             if order_info.get("status") in [2]:
                                 print('已完成反向挂单', order_info.get("status"))
                                 # 保存已完成的挂单信息
-                                self.save_completedorder(item, order_info)
+                                self.save_completedorder(order_info)
                                 if order_info.get("type") == "buy":
                                     # 反向挂单价，不做更新
                                     price = order_info.get("price")+self.grid_range
                                     price = round(price, markets_data.get("priceScale"))
-                                    # 启动反向挂单线程
-                                    t = Thread(target=self.completed_order_info,
-                                               args=(b_id, price, item, order_info, "sell"))
-                                    t.start()
+                                    # 启动反向挂单
+                                    self.completed_order_info(price, item, order_info, "sell")
+
                                 elif order_info.get("type") == "sell":
                                     price = order_info.get("price")-self.grid_range
                                     price = round(price, markets_data.get("amountScale"))
-                                    t = Thread(target=self.completed_order_info,
-                                               args=(b_id, price, item, order_info, "buy"))
-                                    t.start()
+                                    self.completed_order_info(price, item, order_info, "buy")
+
                             # 部分成交挂单
-                            elif order_info.get("status") == 3 and (item[b_id].get("trade_amount") != order_info.get("trade_amount")):
-                                print('部分成交反向挂单', item[b_id].get("trade_amount"), order_info.get("trade_amount"))
+                            elif order_info.get("status") == 3 and (item[1].get("trade_amount") != order_info.get("trade_amount")):
+                                print('部分成交反向挂单', item[1].get("trade_amount"), order_info.get("trade_amount"))
                                 # 保存已完成的挂单信息
-                                self.save_completedorder(item, order_info)
+                                self.save_completedorder(order_info)
                                 if order_info.get("type") == "buy":
                                     # 反向挂单价，不做更新
                                     price = order_info.get("price")+self.grid_range
                                     price = round(price, markets_data.get("priceScale"))
-                                    # 启动反向挂单线程
-                                    t = Thread(target=self.completed_order_info,
-                                               args=(b_id, price, item, order_info, "sell"))
-                                    t.start()
+                                    # 启动反向挂单
+                                    self.completed_order_info(price, item, order_info, "sell")
+
                                 elif order_info.get("type") == "sell":
                                     price = order_info.get("price")-self.grid_range
                                     price = round(price, markets_data.get("amountScale"))
-                                    t = Thread(target=self.completed_order_info,
-                                               args=(b_id, price, item, order_info, "buy"))
-                                    t.start()
-
-                            # 挂单在一段时间内未成交，撤单并重新下单，不包括反向挂单
-                            elif (order_info.get("status") in [0, 1]) and (limit is not None) and num == orders_frequency[0]:
-
-                                res = self.server_api.cancel_order(self.currency_type, b_id)
-                                if res.get("code") in [100, 211, 212]:
-                                    # 撤单成功再下单
-                                    self.place_order(item, order_type, 1, 1)
+                                    self.completed_order_info(price, item, order_info, "buy")
 
                         except Exception as e:
                             # self.log_info("api")
                             # logging.exception("GET_ORDER_INFO...", e)
                             print('traceback.print_exc():', traceback.print_exc())
                             print("获取委托单失败...", e)
-                    # 控制已完成和未完成挂单的更新频率
-                    num += 1
-                    if num == orders_frequency[0]+1:
-                        num = 0
-                    time.sleep(0.2)
+                        time.sleep(0.1)
 
             if not self.Flag:
-                # 停止线程，撤销挂单
-                print(threading.enumerate())
-                for i in range(int(self.robot_obj.girding_num/2)):
+                for i in range(2):
                     self.cancel_orders()
                     # cancel_thread = Thread(target=self.cancel_orders)
                     # cancel_thread.start()
 
+    def update_order_info(self):
+        """
+        更新一段时间内
+        :return:
+        """
+        # 挂单，检测卖一和买一update_order_info
+        while True:
+            if not self.Flag:
+                break
+            else:
+                # 实时查询数据库中的刷单频率
+                sql = "select orders_frequency from deal_robot where id = %s"
+                orders_frequency = self.connect_db(sql, (self.robot_obj.id,))
+                print('刷单频率', orders_frequency[0])
+                self.lock.acquire()
+                if len(self.id_dict) < 20:
+                    order_dicts = self.id_dict.items()
+                else:
+                    # 对价格进行排序
+                    if self.order_type == "sell":
+                        temp_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"])
+                        order_dicts = random.sample(temp_dicts[0:20], 10)
+                    elif self.order_type == "buy":
+                        temp_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"], reverse=True)
+                        order_dicts = random.sample(temp_dicts[0:20], 10)
+                # print('*'*20, list(order_dicts))
+                self.lock.release()
+                # 循环挂单信息
+                for item in list(order_dicts):
+                    # 获取要更新挂单id
+                    b_id = item[0]
+                    try:
+                        # 调用接口，获取委托单信息，如status,type,price等----------------------------API
+                        order_info = self.server_api.get_order(self.currency_type, b_id)
+                        # 挂单在一段时间内未成交，撤单并重新下单，不包括反向挂单
+                        if (order_info.get("status") in [0, 1]) and (item[1]["reverse"] is False):
+                            res = self.server_api.cancel_order(self.currency_type, b_id)
+                            if res.get("code") in [100, 211, 212]:
+                                # 撤单成功再下单
+                                self.place_order(item, 1)
+
+                    except Exception as e:
+                        # self.log_info("api")
+                        # logging.exception("GET_ORDER_INFO...", e)
+                        print('traceback.print_exc():', traceback.print_exc())
+                        print("获取委托单失败...", e)
+            # 控制更新频率
+                time.sleep(orders_frequency[0])
+
+        if not self.Flag:
+            for i in range(2):
+                self.cancel_orders()
+                # cancel_thread = Thread(target=self.cancel_orders)
+                # cancel_thread.start()
+
+    def run_thread(self):
+        """
+        运行更新挂单和反向挂单
+        :return:
+        """
+        thread1 = Thread(target=self.reverse_order,)
+        thread2 = Thread(target=self.update_order_info,)
+        thread1.start()
+        thread2.start()
+        thread1.join()
+        thread2.join()
+
     def run(self):
         self.place_order()
-        self.update_order_info()
+        self.run_thread()
+
+
+

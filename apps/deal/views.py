@@ -35,10 +35,6 @@ class AccountList(LoginRequireMixin, View):
             return render(request, "cms/login.html", {'error': '账户失效，请重新登陆！'})
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
-        # ids = Account.objects.filter(users__id=user_id).values('id')
-        # print(ids)
-        # for id in ids:
-        #     print(id)
         # 获取用户所有币种
         currency_list = Property.objects.filter(account__users__id=user_id).distinct()
         print(currency_list)
@@ -93,7 +89,7 @@ class EditAccount(View):
     """
     编辑账户
     """
-    def get(self,request):
+    def get(self, request):
         accout_id = request.GET.get('account_id')
         print(accout_id)
         account = Account.objects.get(pk=accout_id)
@@ -113,8 +109,10 @@ class EditAccount(View):
             platform = form.cleaned_data.get('platform')
             pk = form.cleaned_data.get('pk')
             user_id = request.session.get("user_id")
-            print(title,accesskey,secretkey,platform,pk,user_id)
-            Account.objects.filter(pk=pk).update(title=title,accesskey=accesskey,secretkey=secretkey,platform=platform,users=user_id)
+            print(title, accesskey, secretkey, platform, pk, user_id)
+            Account.objects.filter(pk=pk).update(
+                title=title, accesskey=accesskey, secretkey=secretkey, platform=platform, users=user_id
+            )
             return restful.ok()
         else:
             return restful.params_error(form.get_errors())
@@ -146,7 +144,6 @@ class ShowAssert(View):
         con = GetAssets(id, account_obj, platform)
         data = con.showassets()
         print(type(data))
-        # return render(request, 'management/tradingaccount.html')
         return restful.result(data=data)
 
 
@@ -237,14 +234,12 @@ class WithDraw(View):
                 currency_pair = currency.lower() + '_usdt'
                 market_api = MarketCondition(currency_pair)
                 info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
-                # 调用提币接口
-                withdraw_info = ExxService.xx()
             elif str(platform) == 'HUOBI':
                 pass
         except:
             info = dict()
             info['ticker'] = {}
-            info['last'] = 0
+            info['ticker']['last'] = 0
         if currency:
             # 提币折合成usdt
             property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
@@ -302,7 +297,7 @@ def get_account_info(currency, market, id):
     获取用户信息
     :param currency: 交易币种
     :param market: 交易市场
-    :param id: 机器人id
+    :param id: 账户id
     :return:
     """
     # 获取账户所属的用户信息
@@ -326,7 +321,7 @@ def get_account_info(currency, market, id):
 
 class GetAccountInfo(View):
     """
-    展示交易对可用额度/当前价,计算默认值
+    展示交易对可用额度/当前价/用户信息,计算阻力位/支撑位
     """
     def post(self, request):
         currency = request.POST.get('curry-title')
@@ -408,6 +403,7 @@ class StartRobot(View):
                         # 获取线程对应的机器人
                         robot = item.robot_obj
                         if robot_obj.id == robot.id:
+                            print(robot)
                             item.setFlag(False)
                     except:
                         print('对象没有属性robot_obj')
@@ -442,15 +438,18 @@ class ShowTradeDetail(View):
         closed_order = OrderInfo.objects.filter(robot=id)
 
         # 获取挂单信息
-        order_lists = list()
+        order_info = dict()
+        running_time = 0
         for item in StartRobot.order_list:
             try:
                 # 获取机器人对应的线程对象
                 robot = item.robot_obj
                 if id == str(robot.id):
-                    order_lists.extend(item.id_list)
-                running_time = item.start_time - datetime.datetime.now()
+                    order_info = dict(order_info, **item.id_dict)
+                    # order_lists.append(item.id_dict)
+                    running_time = item.start_time - datetime.datetime.now()
             except:
+                order_info = []
                 print('对象没有属性robot_obj')
                 continue
 
@@ -460,13 +459,13 @@ class ShowTradeDetail(View):
             # 已完成挂单信息
             'closed_info': serialize("json", closed_order.order_by("-id")),
             # 未完成笔数
-            'open_num': len(order_lists),
+            'open_num': len(order_info),
             # 未完成挂单信息
-            'open_info': order_lists,
+            'open_info': order_info,
             # 总投入
             'total_input': str(property_obj.original_assets),
             # 运行时间
-            'running_time': "2019-09-29",
+            'running_time': running_time,
             # 交易币种可用
             'currency_balance': info[currency.upper()].get('balance'),
             # 交易市场可用
