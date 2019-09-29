@@ -382,9 +382,10 @@ class RobotProtection(View):
     def post(self, request):
         id = request.POST.get('robot_id')
         flag = request.POST.get('flag')
-
+        protect = request.POST.get('protect')
         print(id)
         Robot.objects.filter(id=id).update(status=flag)
+        Robot.objects.filter(id=id).update(protection=protect)
 
 
 class StartRobot(View):
