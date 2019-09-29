@@ -492,11 +492,10 @@ Robot.prototype.listenparameterEven = function () {
                 'robot_id':robot_id,
             },
             'success':function (result) {
-                var robot = JSON.parse(result['data'])
-                console.log(robot['0']['fields'])
-                var data = robot['0']['fields']
-                var tpl = template('robots-details',{'robot':data})
-                console.log(data)
+                var robot = result['data']
+                console.log(robot)
+                var tpl = template('robots-details',{'robots':robot})
+
                 var robotGroup = $('#parameter-list-content')
                 robotGroup.append(tpl)
             }
