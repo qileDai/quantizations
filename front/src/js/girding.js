@@ -139,6 +139,7 @@ Robot.prototype.run = function () {
     self.protectRelieve();
     self.getAccountInfoEvent();
     self.setCurrentPrice();
+    self.oneStepRun();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
@@ -727,6 +728,7 @@ Robot.prototype.runRobotEvent = function () {
             traditional: true,
             'success': function (result) {
                 if (result['code'] === 200) {
+
                     xfzalert.alertSuccess("机器人ID:"+robot_id+" 运行成功")
                 }else {
                     xfzalert.alertError("机器人ID: "+robot_id+" 运行失败")
@@ -756,33 +758,35 @@ Robot.prototype.protectRelieve = function () {
         var currentbtn = $(this);
         var tr = currentbtn.parent().parent();
         var robot_id = tr.attr('data-id');
-        console.log(robot_id)
-        var flag = $(this).text()
-        console.log(flag)
-        var element = $(this).siblings()
-        var runflg = $(element[0]).text()
-        console.log("****")
-        console.log(runflg)
-        if (runflg === '运行' || runflg === '运行(保护)') {
-            var flg_text = '运行'
-        }
-        if (runflg === '停止' || runflg === '停止(保护)') {
-            var flg_text = '停止'
-        }
-        if (flag === '保护') {
-            var new_value = runflg + '(' + flag + ')'
-            console.log(new_value)
-            $(element[0]).text(new_value)
-            $(this).text('解除')
-        } else {
-            $(element[0]).text(flg_text)
-            $(this).text('保护')
-            
-        }
+        var status = tr.attr('status');
+        console.log(robot_id,status)
+        // var flag = $(this).text()
+        // console.log(flag)
+        // var element = $(this).siblings()
+        // var runflg = $(element[0]).text()
+        // console.log("****")
+        // console.log(runflg)
+        // if (runflg === '运行' || runflg === '运行(保护)') {
+        //     var flg_text = '运行'
+        // }
+        // if (runflg === '停止' || runflg === '停止(保护)') {
+        //     var flg_text = '停止'
+        // }
+        // if (flag === '保护') {
+        //     var new_value = runflg + '(' + flag + ')'
+        //     console.log(new_value)
+        //     $(element[0]).text(new_value)
+        //     $(this).text('解除')
+        // } else {
+        //     $(element[0]).text(flg_text)
+        //     $(this).text('保护')
+        //
+        // }
         xfzajax.post({
             'url':"/deal/robot_protection/",
             'data':{
-                'robot_id':robot_id
+                'robot_id':robot_id,
+                'status':status,
             },
             'success':function (result) {
                 console.log(result)
@@ -791,6 +795,38 @@ Robot.prototype.protectRelieve = function () {
     })
 }
 
+/**
+ * 一键运行]
+ */
+
+Robot.prototype.oneStepRun = function(){
+    $('#one-key-stop').click(function () {
+        xfzajax.post({
+            'url': '/deal/startrobot/',
+            'data':{
+                'robot_id': '',
+                'flag':'0',
+            },
+            'success':function (result) {
+                console.log(result)
+            }
+
+        })
+    })
+    $('#one-key-run').click(function () {
+        xfzajax.post({
+            'url': '/deal/startrobot/',
+            'data':{
+                'robot_id': '',
+                'flag':'1',
+            },
+            'success':function (result) {
+                console.log(result)
+            }
+
+        })
+    })
+}
 
 $(function () {
     var robot = new Robot();
