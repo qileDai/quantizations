@@ -381,9 +381,9 @@ class RobotProtection(View):
 
     def post(self, request):
         id = request.POST.get('robot_id')
+        flag = request.POST.get('flag')
         print(id)
-        protection = request.POST.get('protect')
-        Robot.objects.filter(id=id).update(protection=protection)
+        Robot.objects.filter(id=id).update(status=flag)
 
 
 class StartRobot(View):
@@ -407,6 +407,7 @@ class StartRobot(View):
         # 调用对应策略
         for robot_obj in robots:
             if robot_obj.trading_strategy == '网格策略V1.0' and Flag == '1':
+                Robot.objects.filter(id=robot_obj.id).update(status=1)
                 # 启动线程
                 thread1 = GridStrategy(robot_obj=robot_obj, order_type="buy")
                 thread2 = GridStrategy(robot_obj=robot_obj, order_type="sell")
@@ -414,6 +415,7 @@ class StartRobot(View):
                 thread2.start()
                 print('-' * 30, '启动线程')
             elif robot_obj.trading_strategy == '网格策略V1.0' and Flag == '0':
+                Robot.objects.filter(id=robot_obj.id).update(status=0)
                 # 停止线程
                 for item in threading.enumerate():
                     try:
