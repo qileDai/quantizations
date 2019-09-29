@@ -369,7 +369,7 @@ class GetAccountInfo(View):
             # 支撑位
             'support_level': round(float(min / int(info2['limit'])), 2),
             # 用户信息
-            'users': serialize("json", user_obj.order_by("-id"))[1:-1],
+            'users': json.loads(serialize("json", user_obj.order_by("-id"))[1:-1]),
         }
         print(context)
         return restful.result(data=context)
@@ -471,7 +471,7 @@ class ShowTradeDetail(View):
             # 已完成笔数
             'closed_num': len(closed_order),
             # 已完成挂单信息
-            'closed_info': serialize("json", closed_order.order_by("-id"))[1:-1],
+            'closed_info': json.loads(serialize("json", closed_order.order_by("-id"))[1:-1]),
             # 未完成笔数
             'open_num': len(order_info),
             # 未完成挂单信息
@@ -507,9 +507,10 @@ class ShowConfigInfo(View):
         robot_obj = Robot.objects.filter(id=id)
         account_obj = Account.objects.get(id=robot_obj.first().trading_account_id)
         data = serialize("json", robot_obj)[1:-1]
+        # print(json.loads(data)['pk'], type(json.loads(data)))
         context = {
             'account_name': str(account_obj.title),
-            'robot': data,
+            'robot': json.loads(data),
         }
         print(context)
         return restful.result(data=context)
