@@ -120,7 +120,7 @@ class GetAssets(object):
         history_profit = dict()
         history_profit['number'] = self.data_format(current_total + withdraw_record - original_total) + "usdt"
         if self.flag:
-            history_profit['original_total'] = original_total
+            history_profit['original_total'] = self.data_format(original_total)
         else:
             if original_total != 0:
                 history_profit['percent'] = self.data_format((current_total + withdraw_record - original_total)
@@ -137,7 +137,7 @@ class GetAssets(object):
             # 今日资产变化
             'asset_change': asset_change,
             # 初始总资产
-            'original_assets': original_total,
+            'original_assets': self.data_format(original_total) + "usdt",
             # 历史盈亏
             'history_profit': history_profit,
             # 总提币
