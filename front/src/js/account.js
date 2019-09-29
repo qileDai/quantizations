@@ -396,9 +396,10 @@ Account.prototype.listtencuyyencyShow = function () {
 Account.prototype.listenWithDraw = function (pk) {
     var self = this;
     var btn = $('.carry-confirm')
+    console.log(pk)
     btn.click(function () {
-        num = $('#currency-number').val()
-        currency = $('#currency').val()
+        num = $('#carry-currency-number').val()
+        currency = $('#carry-currency').val()
         console.log("*")
         console.log(num, currency, pk)
         xfzajax.post({

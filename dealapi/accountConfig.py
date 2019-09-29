@@ -30,6 +30,8 @@ HUOBI = {
 BITVC = {
     "CNY_1":
         {
+            "ACCESS_KEY": "",
+            "SECRET_KEY": "",
             "SERVICE_API": "https://api.bitvc.com/api/",
             "FUTURE_SERVICE_API": "https://api.bitvc.com/futures/"
         }
@@ -39,11 +41,15 @@ BITVC = {
 OKCOIN = {
     "CNY_1":
         {
+            "ACCESS_KEY": "",
+            "SECRET_KEY": "",
             "SERVICE_API": "https://www.okcoin.cn",  # okcoin国内站
         },
 
     "USD_1":
         {
+            "ACCESS_KEY": "",
+            "SECRET_KEY": "",
             "SERVICE_API": "https://www.okcoin.com",  # okcoin国际站
         },
 }

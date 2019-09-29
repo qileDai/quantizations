@@ -481,6 +481,21 @@ Robot.prototype.listenparameterEven = function () {
     deleteproperty.click(function () {
         parameterconfiguration.show();
         tradingShade.show();
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var robot_id = tr.attr('data-id');
+        xfzajax.post({
+            'url':'/deal/showconfiginfo/',
+            'data':{
+                'robot_id':robot_id,
+            },
+            'success':function (result) {
+                var robot = JSON.parse(result['data'])
+                data = robot['fields']
+                console.log(data)
+
+            }
+        })
 
     })
     parameterclosebtn.click(function () {
@@ -521,7 +536,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                     var last = data['last']    //当前价
                     var market = data['market']  //市场价
                     //往设置策略中插入请求到的账户信息
-                    $('.current-price .price').val(last)
+                    $('.current-price .price').text(last)
                     $('.account-details .currency').text(currency)
                     $('.account-details .market').text(market)
 
@@ -730,10 +745,16 @@ Robot.prototype.setCurrentPrice = function(){
  */
 Robot.prototype.protectRelieve = function () {
     $('.protect-relieve').on('click', function () {
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var robot_id = tr.attr('data-id');
+        console.log(robot_id)
         var flag = $(this).text()
         console.log(flag)
         var element = $(this).siblings()
         var runflg = $(element[0]).text()
+        console.log("****")
+        console.log(runflg)
         if (runflg === '运行' || runflg === '运行(保护)') {
             var flg_text = '运行'
         }
@@ -749,6 +770,15 @@ Robot.prototype.protectRelieve = function () {
             $(element[0]).text(flg_text)
             $(this).text('保护')
         }
+        xfzajax.post({
+            'url':"/deal/robot_protection/",
+            'data':{
+                'robot_id':robot_id
+            },
+            'success':function (result) {
+                console.log(result)
+            }
+        })
     })
 }
 
