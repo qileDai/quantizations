@@ -146,13 +146,14 @@ class ShowAssert(View):
 
     def post(self, request):
         id = request.POST.get('pk')
-        account_obj = Account.objects.get(id=id)  # 获取账户信息
-        platform = account_obj.platform  # 账户对应的平台
+        # 获取账户信息
+        account_obj = Account.objects.get(id=id)
+        # 账户对应的平台
+        platform = account_obj.platform
         # 创建对象
         con = GetAssets(id, account_obj, platform)
         data = con.showassets()
         print(type(data))
-        # return render(request, 'management/tradingaccount.html')
         return restful.result(data=data)
 
 
@@ -174,10 +175,11 @@ class ShowCollectAsset(View):
         flag = True
         context_list = list()
         for id in ids:
-            print("***")
-            print(id)
-            account_obj = Account.objects.get(id=id)  # 获取账户信息
-            platform = account_obj.platform  # 账户对应的平台
+            print("*"*20, id)
+            # 获取账户信息
+            account_obj = Account.objects.get(id=id)
+            # 账户对应的平台
+            platform = account_obj.platform
             # 创建对象
             con = GetAssets(id, account_obj, platform, flag)
             context = con.showassets()
@@ -244,19 +246,15 @@ class WithDraw(View):
                 currency_pair = currency.lower() + '_usdt'
                 market_api = MarketCondition(currency_pair)
                 info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
-
+                last = info['ticker']['last']
             elif str(platform) == 'HUOBI':
                 pass
         except:
-            print("dfkl")
-            info = dict()
-            info['ticker'] = {}
-            info['ticker']['last'] = 0
+            last = 0
         if currency:
             # 提币折合成usdt
             property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
-            print(info['ticker']['last'])
-            original_assets = float(property_obj.original_assets) + float(num) * float(info['ticker']['last'])
+            original_assets = float(property_obj.original_assets) + float(num) * float(last)
             Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
             return restful.ok()
 
@@ -456,13 +454,14 @@ class ShowTradeDetail(View):
         closed_order = OrderInfo.objects.filter(robot=id)
 
         # 获取挂单信息
-        order_lists = list()
+        order_info = dict()
+        running_time = 0
         for item in StartRobot.order_list:
             try:
                 # 获取机器人对应的线程对象
                 robot = item.robot_obj
                 if id == str(robot.id):
-                    order_lists.extend(item.id_list)
+                    order_info = dict(order_info, **item)
                 running_time = item.start_time - datetime.datetime.now()
             except:
                 print('对象没有属性robot_obj')
@@ -474,13 +473,13 @@ class ShowTradeDetail(View):
             # 已完成挂单信息
             'closed_info': serialize("json", closed_order.order_by("-id")),
             # 未完成笔数
-            'open_num': len(order_lists),
+            'open_num': len(order_info),
             # 未完成挂单信息
-            'open_info': order_lists,
+            'open_info': order_info,
             # 总投入
             'total_input': str(property_obj.original_assets),
             # 运行时间
-            'running_time': "2019-09-29",
+            'running_time': running_time,
             # 交易币种可用
             'currency_balance': info[currency.upper()].get('balance'),
             # 交易市场可用
@@ -500,11 +499,18 @@ class ShowTradeDetail(View):
 
 
 class ShowConfigInfo(View):
+    """
+    展示机器人配置信息
+    """
     def post(self, request):
         id = request.POST.get('robot_id')
-        robot_obj = Robot.objects.filter(pk=id)
-        print(robot_obj)
-        context = serialize("json", robot_obj)
+        robot_obj = Robot.objects.filter(id=id)
+        account_obj = Account.objects.get(id=robot_obj.first().trading_account_id)
+        data = serialize("json", robot_obj)
+        context = {
+            'account_name': str(account_obj.title),
+            'data': data,
+        }
         return restful.result(data=context)
 
 
@@ -512,14 +518,6 @@ class ShowConfig(View):
     """
     展示机器人配置信息
     """
-
-    def get(self, request):
-        id = request.POST.get('robot_id')
-        print(id)
-        robot_obj = Robot.objects.filter(pk=id)
-        print(robot_obj)
-        context = serialize("json", robot_obj)
-        return restful.result(data=context)
 
     def post(self, request):
         # 获取机器人id

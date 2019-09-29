@@ -54,8 +54,10 @@ class ExxService(object):
                     response = requests.get(url)
                     result = response.json()
                     print("请求第%s次" % str(i))
-                    # if result['code'] != 100:
-                    #     return result.update({"code":400,"message":"请求失败"})
+                    time.sleep(0.2)
+                    # 关闭多余连接
+                    s = requests.session()
+                    s.keep_alive = False
         except Exception as e:
             print("委托下单失败", e)
         return result
