@@ -146,13 +146,14 @@ class ShowAssert(View):
 
     def post(self, request):
         id = request.POST.get('pk')
-        account_obj = Account.objects.get(id=id)  # 获取账户信息
-        platform = account_obj.platform  # 账户对应的平台
+        # 获取账户信息
+        account_obj = Account.objects.get(id=id)
+        # 账户对应的平台
+        platform = account_obj.platform
         # 创建对象
         con = GetAssets(id, account_obj, platform)
         data = con.showassets()
         print(type(data))
-        # return render(request, 'management/tradingaccount.html')
         return restful.result(data=data)
 
 
@@ -174,10 +175,11 @@ class ShowCollectAsset(View):
         flag = True
         context_list = list()
         for id in ids:
-            print("***")
-            print(id)
-            account_obj = Account.objects.get(id=id)  # 获取账户信息
-            platform = account_obj.platform  # 账户对应的平台
+            print("*"*20, id)
+            # 获取账户信息
+            account_obj = Account.objects.get(id=id)
+            # 账户对应的平台
+            platform = account_obj.platform
             # 创建对象
             con = GetAssets(id, account_obj, platform, flag)
             context = con.showassets()
