@@ -21,7 +21,6 @@ from django.contrib.sessions import serializers
 import json
 from apps.deal.serializers import AccountSerializer
 
-
 # Create your views here.r
 
 
@@ -359,9 +358,9 @@ class GetAccountInfo(View):
                 min += float(i[3])
         context = {
             # 交易币种可用
-            'currency': info[currency.upper()].get('balance'),
+            'currency': info[currency.upper()].get('balance') + currency,
             # 交易市场可用
-            'market': info[market.upper()].get('balance'),
+            'market': info[market.upper()].get('balance') + market,
             # 当前价
             'last': info1['ticker'].get('last'),
             # 阻力位
@@ -382,9 +381,9 @@ class RobotProtection(View):
 
     def post(self, request):
         id = request.POST.get('robot_id')
+        flag = request.POST.get('flag')
         print(id)
-        protection = request.POST.get('protect')
-        Robot.objects.filter(id=id).update(protection=protection)
+        Robot.objects.filter(id=id).update(status=flag)
 
 
 class StartRobot(View):
@@ -396,15 +395,19 @@ class StartRobot(View):
     def post(self, request):
         # 多个和一个
         ids = request.POST.get('robot_id')
-        if ids:
-            robots = Robot.objects.filter(id=ids)
-        else:
-            robots = Robot.objects.filter(protection=0)
         # Flag为1启动，为0停止
         Flag = request.POST.get('flag')
+        if ids:
+            robots = Robot.objects.filter(id=ids)
+        elif Flag == 1:
+            robots = Robot.objects.filter(status=0)
+        elif Flag == 0:
+            robots = Robot.objects.filter(status=1)
+
         # 调用对应策略
         for robot_obj in robots:
             if robot_obj.trading_strategy == '网格策略V1.0' and Flag == '1':
+                Robot.objects.filter(id=robot_obj.id).update(status=1)
                 # 启动线程
                 thread1 = GridStrategy(robot_obj=robot_obj, order_type="buy")
                 thread2 = GridStrategy(robot_obj=robot_obj, order_type="sell")
@@ -412,6 +415,7 @@ class StartRobot(View):
                 thread2.start()
                 print('-' * 30, '启动线程')
             elif robot_obj.trading_strategy == '网格策略V1.0' and Flag == '0':
+                Robot.objects.filter(id=robot_obj.id).update(status=0)
                 # 停止线程
                 for item in threading.enumerate():
                     try:
@@ -429,8 +433,7 @@ class StartRobot(View):
                 pass
 
         StartRobot.order_list = threading.enumerate()
-        return restful.ok(message="机器人：运行成功")
-
+        return HttpResponse("OK")
 
 
 class ShowTradeDetail(View):
@@ -452,7 +455,9 @@ class ShowTradeDetail(View):
 
         property_obj = Property.objects.get(Q(account_id=robot_obj.trading_account_id) & Q(currency=currency))
         closed_order = OrderInfo.objects.filter(robot=id)
-
+        data = serialize("json", closed_order.order_by("-id"))[1:-1]
+        data_dict = json.loads(data)
+        print(data_dict)
         # 获取挂单信息
         order_info = dict()
         running_time = 0
@@ -466,12 +471,11 @@ class ShowTradeDetail(View):
             except:
                 print('对象没有属性robot_obj')
                 continue
-
         context = {
             # 已完成笔数
             'closed_num': len(closed_order),
             # 已完成挂单信息
-            'closed_info': serialize("json", closed_order),
+            'closed_info': serialize("json", closed_order.order_by("-id")),
             # 未完成笔数
             'open_num': len(order_info),
             # 未完成挂单信息
