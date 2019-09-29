@@ -382,6 +382,7 @@ class RobotProtection(View):
     def post(self, request):
         id = request.POST.get('robot_id')
         flag = request.POST.get('flag')
+
         print(id)
         Robot.objects.filter(id=id).update(status=flag)
 
