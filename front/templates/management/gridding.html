@@ -353,14 +353,14 @@
         {% verbatim %}
          <div class="trading-particulars">
             <ul>
-                <li class="trading-loading green">待成交<span>(21)</span></li>
-                <li class="trading-ending">已完成<span>(87)</span></li>
+                <li class="trading-loading green">待成交<span>{{ robots.open_num }}</span></li>
+                <li class="trading-ending">已完成<span>{{ robots.closed_num }}</span></li>
             </ul>
             <div class="trading-container">
                 <div class="trding-information">
                     <div class="trding-information-1">
-                        <span class="account-total">总投入:</span>4500000usdt
-                        <span class="strategy-time">策略已运行:</span>2天21小时34分15秒
+                        <span class="account-total">总投入:</span>{{ robots.total_input }}
+                        <span class="strategy-time">策略已运行:</span>{{ robots.running_time }}
                     </div>
                     <div class="trding-information-2">
                         <span class="title">账户可用:</span>

@@ -437,7 +437,7 @@ Robot.prototype.listenCreatTradingEvent = function () {
             'success': function (result) {
                 var robot = result['data']
                 console.log(robot)
-                var tpl = template('',{'robots':robot})
+                var tpl = template('robot-deal-details',{'robots':robot})
                 var details = $('.tradingParticulars')
                 details.append(tpl)
             }
@@ -457,6 +457,7 @@ Robot.prototype.listenTradingRobotEvent = function () {
     tradingclosebtn.click(function () {
         tradingParticulars.hide();
         tradingShade.hide();
+        window.location.reload()
     })
     tradingending.click(function () {
 
@@ -715,18 +716,20 @@ Robot.prototype.runRobotEvent = function () {
         var tr = currentbtn.parent().parent();
         var robot_id = tr.attr('data-id');
 
-        var status = tr.attr('statu')
+        var status = tr.attr('status')
 
         xfzajax.post({
             'url': '/deal/startrobot/',
             'data': {
                 'robot_id': robot_id,
-                'flag':status
+                'flag':status,
             },
             traditional: true,
             'success': function (result) {
                 if (result['code'] === 200) {
-                    console.log(result)
+                    xfzalert.alertSuccess("机器人ID:"+robot_id+" 运行成功")
+                }else {
+                    xfzalert.alertError("机器人ID: "+robot_id+" 运行失败")
                 }
             }
         })

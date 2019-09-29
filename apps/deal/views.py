@@ -369,7 +369,7 @@ class GetAccountInfo(View):
             # 支撑位
             'support_level': round(float(min / int(info2['limit'])), 2),
             # 用户信息
-            'users': json.loads(serialize("json", user_obj.order_by("-id"))[1:-1]),
+            'users': serialize("json", user_obj.order_by("-id")),
         }
         print(context)
         return restful.result(data=context)
@@ -471,7 +471,7 @@ class ShowTradeDetail(View):
             # 已完成笔数
             'closed_num': len(closed_order),
             # 已完成挂单信息
-            'closed_info': json.loads(serialize("json", closed_order.order_by("-id"))[1:-1]),
+            'closed_info': serialize("json", closed_order),
             # 未完成笔数
             'open_num': len(order_info),
             # 未完成挂单信息
