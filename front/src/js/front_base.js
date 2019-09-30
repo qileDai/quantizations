@@ -138,7 +138,7 @@ User.prototype.listRoleSubmitEvent = function () {
             'url': '/rbac/add_roles/',
             'data': {
                 'rolename': rolename,
-                'permission': permission
+                'permissions': permission
             },
             'success': function (result) {
                 if (result['code'] === 200) {
