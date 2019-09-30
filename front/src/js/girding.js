@@ -678,8 +678,9 @@ Robot.prototype.listenSubmitRobot = function () {
                 'realized_profit':0,
                 'total_profit':0,
                 'annual_yield':0,
-                'protection':2,
+                'protection':1,
                 'status':0,
+                'run_status':0,
                 'current_price':curren_price,
                 'orders_frequency':millisecond,
                 'resistance':resistance,
@@ -760,8 +761,8 @@ Robot.prototype.protectRelieve = function () {
         var robot_id = tr.attr('data-id');
         var status = tr.attr('statu');
         var protect = tr.attr('protect')
-        console.log(robot_id,status)
-         var flag = $(this).text()
+        console.log(robot_id,status,protect)
+
         // console.log(flag)
         // var element = $(this).siblings()
         // var runflg = $(element[0]).text()
@@ -783,7 +784,20 @@ Robot.prototype.protectRelieve = function () {
         //     $(this).text('保护')
         //
         // }
-
+        if(status == 1 && protect == 1){
+            status = 2
+            protect = 0
+        }else if(status == 2 && protect == 0){
+            status = 1
+            protect = 1
+        }else if(status == 0 && protect == 1){
+            status = 3
+            protect = 0
+        }else if(status == 3 && protect == 0){
+            status = 0
+            protect = 1
+        }
+        console.log('status:'+status,'protect:'+protect)
         xfzajax.post({
             'url':"/deal/robot_protection/",
             'data':{
@@ -793,6 +807,7 @@ Robot.prototype.protectRelieve = function () {
             },
             'success':function (result) {
                 console.log(result)
+                window.location.reload()
             }
         })
     })

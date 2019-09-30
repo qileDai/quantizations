@@ -101,10 +101,10 @@
                                 <td>{{ robot.create_time }}</td>
                                 <td>{{ robot.get_status_display }}</td>
                                 <td>
-                                    <a class="run-stop" id="run-robot" href="#">运行</a>
+                                    <a class="run-stop" id="run-robot"  href="#">运行</a>
                                     <a class="robot-details" href="javascript:;">详情</a>
                                     <a class="allocation" href="javascript:;">配置</a>
-                                    <a class="protect-relieve" href="#">保护</a>
+                                    <a class="protect-relieve" href="#">{{ robot.get_protection_display }}</a>
                                 </td>
                             </tr>
                         {% endfor %}
