@@ -404,9 +404,9 @@ class StartRobot(View):
         if ids:
             robots = Robot.objects.filter(id=ids)
         elif Flag == 1:
-            robots = Robot.objects.filter(status=0)
+            robots = Robot.objects.filter(Q(status=0) & Q(protection=0))
         elif Flag == 0:
-            robots = Robot.objects.filter(status=1)
+            robots = Robot.objects.filter(Q(status=1) & Q(protection=0))
 
         # 调用对应策略
         for robot_obj in robots:
