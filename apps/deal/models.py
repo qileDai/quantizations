@@ -91,8 +91,8 @@ class Robot(models.Model):
         (0, "解除"),
     )
     Run_Status = (
-        (0,'禁止'),
-        (1,'运行')
+        (0, '禁止'),
+        (1, '运行')
     )
     trading_account = models.ForeignKey('Account', on_delete=models.CASCADE)    # 交易账户外键account
     currency = models.CharField(max_length=32)                                  # 交易币种
@@ -119,7 +119,7 @@ class Robot(models.Model):
     stop_price = models.DecimalField(max_digits=19, decimal_places=2)           # 止损价
     warning_price = models.DecimalField(max_digits=19, decimal_places=2)        # 预警价
     warning_account = models.CharField(max_length=1024, null=True)                           # 预警账户
-    run_status = models.SmallIntegerField(choices=Run_Status,default=0)
+    run_status = models.SmallIntegerField(choices=Run_Status, default=0)
 
     class Meta:
         ordering = ['-create_time']
