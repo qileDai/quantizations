@@ -658,21 +658,21 @@
                      }}"></li>
                     <li style="text-align: center"><span>可用</span><span>{{  }} 6.000.0000itc</span></li>
                     <li><span>当前价</span><input type="text" disabled="disabled" value="{{ robots.robot.fields.current_price }}"></li>
-                    <li><span>重新挂单频率</span><input type="text" disabled="disabled" value="{{ robots.robot.fields.orders_frequency }}"></li>
+                    <li><span>重新挂单频率</span><input type="text" class="edit-orders-frequency" disabled="disabled" value="{{ robots.robot.fields.orders_frequency }}"></li>
                     <li><span>阻力值</span><input type="text" disabled="disabled " value="{{ robots.robot.fields.resistance }}"></li>
                     <li><span>支撑位</span><input type="text" disabled="disabled" value="{{ robots.robot.fields.support_level }}"></li>
                     <li><span>网格数量</span><input type="text" disabled="disabled" value="{{ robots.robot.fields.girding_num }}"></li>
                     <li><span>单次交易手续费</span><input type="text" disabled="disabled" value="{{robots.robot.fields.procudere_fee }}%"></li>
-                    <li><span>单网格最小交易数量</span><input type="text" value="{{ robots.robot.fields.min_num }}"></li>
-                    <li><span>单网格最小交易数量</span><input type="text" value="{{ robots.robot.fields.max_num }}"></li>
+                    <li><span>单网格最小交易数量</span><input type="text" class="edit-mix-num" value="{{ robots.robot.fields.min_num }}"></li>
+                    <li><span>单网格最大交易数量</span><input type="text" class="edit-max-numx" value="{{ robots.robot.fields.max_num }}"></li>
                     <li style="text-align: center"><span>单网格利润 </span><span>{{ robots.robot.fields.girding_profit }}</span></li>
                 </ul>
             </div>
             <div class="risk-strategy">
                 <div>风险策略</div>
                 <ul>
-                    <li><span>止损价</span><input type="text" value="{{ robots.robot.fields.stop_price }}"></li>
-                    <li><span>止损价</span><input type="text" value="{{ robots.robot.fields.warning_price }}"></li>
+                    <li><span>止损价</span><input type="text" class="edit-stoploss" value="{{ robots.robot.fields.stop_price }}"></li>
+                    <li><span>预警价</span><input type="text" class="edit-waring"  value="{{ robots.robot.fields.warning_price }}"></li>
                 </ul>
             </div>
             <div class="risk-strategy-warninguser">

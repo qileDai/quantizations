@@ -140,6 +140,7 @@ Robot.prototype.run = function () {
     self.getAccountInfoEvent();
     self.setCurrentPrice();
     self.oneStepRun();
+    self.editRobotEvent();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
@@ -438,7 +439,7 @@ Robot.prototype.listenCreatTradingEvent = function () {
             'success': function (result) {
                 var robot = result['data']
                 console.log(robot)
-                var tpl = template('robot-deal-details',{'robots':robot})
+                var tpl = template('robot-deal-details', {'robots': robot})
                 var details = $('.tradingParticulars')
                 details.append(tpl)
             }
@@ -489,14 +490,14 @@ Robot.prototype.listenparameterEven = function () {
         var tr = currentbtn.parent().parent();
         var robot_id = tr.attr('data-id');
         xfzajax.post({
-            'url':'/deal/showconfiginfo/',
-            'data':{
-                'robot_id':robot_id,
+            'url': '/deal/showconfiginfo/',
+            'data': {
+                'robot_id': robot_id,
             },
-            'success':function (result) {
+            'success': function (result) {
                 var robot = result['data']
                 console.log(robot)
-                var tpl = template('robots-details',{'robots':robot})
+                var tpl = template('robots-details', {'robots': robot})
 
                 var robotGroup = $('#parameter-list-content')
                 robotGroup.append(tpl)
@@ -563,7 +564,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                             var girding = (resistance - support_level) / num     //单网格=（阻力位价格-支撑位价格）/网格数量
                             var mix_profit = (girding - (resistance * 2 + girding) * free) / resistance
                             var max_price = (girding - (support_level * 2 + girding) * free) / support_level
-                            var profit = mix_profit + '%' + '-' + max_price  + '%'
+                            var profit = mix_profit + '%' + '-' + max_price + '%'
                             $('.profit-value').text(profit)
                         }
                     })
@@ -575,19 +576,19 @@ Robot.prototype.getAccountInfoEvent = function () {
                             var girding = (resistance - support_level) / num     //单网格=（阻力位价格-支撑位价格）/网格数量
                             var mix_profit = (girding - (resistance * 2 + girding) * free) / resistance
                             var max_price = (girding - (support_level * 2 + girding) * free) / support_level
-                            var profit = mix_profit + '%' + '-' + max_price  + '%'
+                            var profit = mix_profit + '%' + '-' + max_price + '%'
                             $('.profit-value').text(profit)
                         }
                     });
-                    $('.resistance-value').on('blur',function () {
+                    $('.resistance-value').on('blur', function () {
                         var resistance = $('.resistance-value').val()
                         var price = $('.current-price .price').val()
-                        if(!resistance == ''){
-                            if(resistance <= price){
+                        if (!resistance == '') {
+                            if (resistance <= price) {
                                 console.log("sf")
                                 $('.resistance-error-message .error').text("阻力位不得低于等于当前价")
                                 // $('.resistance-value').after("<span class='error-account'>阻力位不得低于等于当前价</span>")
-                            }else {
+                            } else {
                                 $('.resistance-error-message .error').text("")
                             }
                         }
@@ -629,8 +630,8 @@ Robot.prototype.listenSubmitRobot = function () {
         var strr = curry.split('/')
         var curreny = strr[0]
         var market = strr[1]
-        console.log('交易币种',curreny)
-        console.log('交易市场',market)
+        console.log('交易币种', curreny)
+        console.log('交易市场', market)
         // var account = robotGroup.find('.strategy-parameters-top .user"').text() //交易账户
         var strategy = $('.set-risk-strategy .strategy-title .curry').text()
         console.log(strategy)//交易策略
@@ -642,7 +643,7 @@ Robot.prototype.listenSubmitRobot = function () {
         var millisecond = $('.millisecond-value').val()
         var mix_num = $('.mix-number .value ').val()
         var max_num = $('.max-number .value ').val()
-        console.log('当前价:',curren_price,'毫秒:',millisecond,'最小数量:',mix_num,'最大数量',max_num)
+        console.log('当前价:', curren_price, '毫秒:', millisecond, '最小数量:', mix_num, '最大数量', max_num)
 
         var free = $('.strategy-parameters-below .deal-account').text()  //交易手续费
         var girding_profit = $('.strategy-parameters-below .resistance').text()  //单网格利润
@@ -652,10 +653,10 @@ Robot.prototype.listenSubmitRobot = function () {
         var userList = $('.warninguser .active')
         console.log(userList)
         var users = ""
-        for(var i = 0; i<userList.length; i++){
+        for (var i = 0; i < userList.length; i++) {
             var element = userList[i]
             console.log(element)
-           var  user = $(element).text()
+            var user = $(element).text()
             // console.log(user)
             // users.push(user)
             users += user + ''
@@ -663,41 +664,41 @@ Robot.prototype.listenSubmitRobot = function () {
         console.log(users)
 
 
-        console.log('止损价',stoploss,waring)
-        console.log('策略：',strategy, '账户：',account,'阻力位:', resistance, '支撑位:',support, '网格数量:',girding_num, '交易手续费',free, '网格利润',girding_profit)
+        console.log('止损价', stoploss, waring)
+        console.log('策略：', strategy, '账户：', account, '阻力位:', resistance, '支撑位:', support, '网格数量:', girding_num, '交易手续费', free, '网格利润', girding_profit)
 
         xfzajax.post({
-            'url':'/deal/createrobot/',
-            'data':{
-                'trading_account':account,
-                'currency':curreny,
-                'market':market,
-                'trading_strategy':strategy,
-                'total_money':0,
-                'float_profit':0,
-                'realized_profit':0,
-                'total_profit':0,
-                'annual_yield':0,
-                'protection':1,
-                'status':0,
-                'run_status':0,
-                'current_price':curren_price,
-                'orders_frequency':millisecond,
-                'resistance':resistance,
-                'support_level':support,
-                'girding_num':girding_num,
-                'procudere_fee':free,
-                'min_num':mix_num,
-                'max_num':max_num,
-                'girding_profit':girding_profit,
-                'stop_price':stoploss,
-                'warning_price':waring,
-                'warning_account':users,
+            'url': '/deal/createrobot/',
+            'data': {
+                'trading_account': account,
+                'currency': curreny,
+                'market': market,
+                'trading_strategy': strategy,
+                'total_money': 0,
+                'float_profit': 0,
+                'realized_profit': 0,
+                'total_profit': 0,
+                'annual_yield': 0,
+                'protection': 1,
+                'status': 0,
+                'run_status': 0,
+                'current_price': curren_price,
+                'orders_frequency': millisecond,
+                'resistance': resistance,
+                'support_level': support,
+                'girding_num': girding_num,
+                'procudere_fee': free,
+                'min_num': mix_num,
+                'max_num': max_num,
+                'girding_profit': girding_profit,
+                'stop_price': stoploss,
+                'warning_price': waring,
+                'warning_account': users,
             },
-            'success':function (result) {
+            'success': function (result) {
                 console.log(result)
-                if(result['code'] === 200){
-                    xfzalert.alertSuccess('添加机器人成功',function () {
+                if (result['code'] === 200) {
+                    xfzalert.alertSuccess('添加机器人成功', function () {
                         window.location.reload()
                     })
                 }
@@ -711,8 +712,7 @@ Robot.prototype.listenSubmitRobot = function () {
 /**
  * 机器人运行
  */
-Robot.prototype.runRobotEvent = function ()
-{
+Robot.prototype.runRobotEvent = function () {
 
     $('.run-stop').click(function () {
         var currentbtn = $(this);
@@ -720,32 +720,32 @@ Robot.prototype.runRobotEvent = function ()
         var robot_id = tr.attr('data-id');
         var run_status = $(this).attr('run_status')
         var status = tr.attr('status')
-        if(run_status == 0 && status == 1){
+        if (run_status == 0 && status == 1) {
             run_status = 1
             status = 0
-        }else if(run_status ==1 && status ==0){
+        } else if (run_status == 1 && status == 0) {
             run_status = 0
             status = 1
-        }else if(status ==2 || status==3){
-            $(this).attr('disabled',true)
+        } else if (status == 2 || status == 3) {
+            $(this).attr('disabled', true)
         }
 
         xfzajax.post({
             'url': '/deal/startrobot/',
             'data': {
                 'robot_id': robot_id,
-                'flag':status,
-                'run_status':run_status,
+                'flag': status,
+                'run_status': run_status,
             },
             traditional: true,
             'success': function (result) {
                 if (result['code'] === 200) {
 
-                    xfzalert.alertSuccess("机器人ID:"+robot_id+" 运行成功",function () {
+                    xfzalert.alertSuccess("机器人ID:" + robot_id + " 运行成功", function () {
                         window.location.reload()
                     })
-                }else {
-                    xfzalert.alertError("机器人ID: "+robot_id+" 运行失败")
+                } else {
+                    xfzalert.alertError("机器人ID: " + robot_id + " 运行失败")
                 }
             }
         })
@@ -756,7 +756,7 @@ Robot.prototype.runRobotEvent = function ()
 /**
  * 设置当前价
  */
-Robot.prototype.setCurrentPrice = function(){
+Robot.prototype.setCurrentPrice = function () {
     $('#set-currenPrice').click(function () {
         var price1 = $('.set-price').val()
         console.log(price1)
@@ -774,7 +774,7 @@ Robot.prototype.protectRelieve = function () {
         var robot_id = tr.attr('data-id');
         var status = tr.attr('status');
         var protect = tr.attr('protect')
-        console.log(robot_id,status,protect)
+        console.log(robot_id, status, protect)
 
         // console.log(flag)
         // var element = $(this).siblings()
@@ -797,34 +797,34 @@ Robot.prototype.protectRelieve = function () {
         //     $(this).text('保护')
         //
         // }
-        if(status == 1 && protect == 1){
+        if (status == 1 && protect == 1) {
             status = 2
             protect = 0
             var element = $(this).siblings()[0];
             console.log(element)
-            $(element).attr('disabled',true)
-        }else if(status == 2 && protect == 0){
+            $(element).attr('disabled', true)
+        } else if (status == 2 && protect == 0) {
             status = 1
             protect = 1
-        }else if(status == 0 && protect == 1){
+        } else if (status == 0 && protect == 1) {
             status = 3
             protect = 0
             var element = $(this).siblings()[0];
             console.log(element)
-            $(element).attr('disabled',true)
-        }else if(status == 3 && protect == 0){
+            $(element).attr('disabled', true)
+        } else if (status == 3 && protect == 0) {
             status = 0
             protect = 1
         }
-        console.log('status:'+status,'protect:'+protect)
+        console.log('status:' + status, 'protect:' + protect)
         xfzajax.post({
-            'url':"/deal/robot_protection/",
-            'data':{
-                'robot_id':robot_id,
-                'flag':status,
-                'protect':protect,
+            'url': "/deal/robot_protection/",
+            'data': {
+                'robot_id': robot_id,
+                'flag': status,
+                'protect': protect,
             },
-            'success':function (result) {
+            'success': function (result) {
                 console.log(result)
                 window.location.reload()
             }
@@ -833,18 +833,67 @@ Robot.prototype.protectRelieve = function () {
 }
 
 /**
- * 一键运行]
+ * 一键运行停止
  */
 
-Robot.prototype.oneStepRun = function(){
+/**
+ * 机器人配置编辑
+ */
+Robot.prototype.editRobotEvent = function () {
+    $("#btnNext1").click(function () {
+        console.log("配置")
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var robot_id = tr.attr('data-id');
+        var mix_num = $('.edit-mix-num').val()
+        var max_num = $('.edit-max-numx').val()
+        var stoploss = $('.edit-stoploss').val()
+        var waring = $('.edit-waring').val()
+        var orders_frequency = $('.edit-orders-frequency').val()
+
+        xfzajax.post({
+            'url': '/deal/showconfig/',
+            'data': {
+                'robot_id':robot_id,
+                'min_num':mix_num,
+                'max_num':max_num,
+                'stop_price':stoploss,
+                'warning_price':waring,
+                'orders_frequency':orders_frequency,
+            },
+            'succcess':function (result) {
+              if(result['code'] === 200){
+                  xfzalert.alertSuccess("机器人配置成功",function () {
+                      window.location.reload()
+                  })
+              }
+            }
+        })
+    })
+}
+Robot.prototype.oneStepRun = function () {
     $('#one-key-stop').click(function () {
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var robot_id = tr.attr('data-id');
+        var run_status = $(this).attr('run_status')
+        var status = tr.attr('status')
+
+        if (run_status == 0 && status == 1) {
+            run_status = 1
+            status = 0
+        } else if (run_status == 1 && status == 0) {
+            run_status = 0
+            status = 1
+        }
         xfzajax.post({
             'url': '/deal/startrobot/',
-            'data':{
+            'data': {
                 'robot_id': '',
-                'flag':'0',
+                'flag': 0,
+
             },
-            'success':function (result) {
+            'success': function (result) {
                 console.log(result)
             }
 
@@ -853,11 +902,11 @@ Robot.prototype.oneStepRun = function(){
     $('#one-key-run').click(function () {
         xfzajax.post({
             'url': '/deal/startrobot/',
-            'data':{
+            'data': {
                 'robot_id': '',
-                'flag':'1',
+                'flag': 1,
             },
-            'success':function (result) {
+            'success': function (result) {
                 console.log(result)
             }
 
