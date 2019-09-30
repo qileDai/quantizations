@@ -6,6 +6,7 @@ function Menu() {
 Menu.prototype.run = function () {
     var self = this;
     self.listenDeleteMenuEvent();
+    self.listenLevelmenuEvent();
 };
 
 Menu.prototype.listenDeleteMenuEvent = function(){
@@ -31,6 +32,21 @@ Menu.prototype.listenDeleteMenuEvent = function(){
             }
         });
     })
+}
+Menu.prototype.listenLevelmenuEvent = function () {
+    $('.menu-level').on('change', function () {
+        if ($(this).val() == 1) {
+            console.log($(this).val())
+            $('.menu-modal-body .from-group1').hide()
+
+            $('.menu-modal-body .menu-model-title2').text('一级菜单名称')
+
+        } else {
+            $('.menu-modal-body .from-group1').show()
+            $('.menu-modal-body .menu-model-title2').text('二级菜单名称')
+        }
+    })
+
 }
 
 $(function () {
