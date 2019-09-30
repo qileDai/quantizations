@@ -40,10 +40,12 @@ Menu.prototype.listenLevelmenuEvent = function () {
             $('.menu-modal-body .from-group1').hide()
 
             $('.menu-modal-body .menu-model-title2').text('一级菜单名称')
+            $('.level2-wrapper .form-control').attr('placeholder',"请输入一级菜单名称")
 
         } else {
             $('.menu-modal-body .from-group1').show()
             $('.menu-modal-body .menu-model-title2').text('二级菜单名称')
+            $('.level2-wrapper .form-control').attr('placeholder',"请输入二级菜单名称")
         }
     })
 
