@@ -741,7 +741,9 @@ Robot.prototype.runRobotEvent = function ()
             'success': function (result) {
                 if (result['code'] === 200) {
 
-                    xfzalert.alertSuccess("机器人ID:"+robot_id+" 运行成功")
+                    xfzalert.alertSuccess("机器人ID:"+robot_id+" 运行成功",function () {
+                        window.location.reload()
+                    })
                 }else {
                     xfzalert.alertError("机器人ID: "+robot_id+" 运行失败")
                 }
