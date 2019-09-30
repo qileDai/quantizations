@@ -594,6 +594,20 @@
     border-radius: 5px;
     display:none;
     padding: 15px;
+      .new-currency{
+      select{
+        width: 100px;
+      }
+      buttom{
+        display: inline-block;
+        width: 30px;
+        height: 20px;
+        color: #fff;
+        background-color: #00c0ef;
+        cursor:pointer;
+
+      }
+    }
 
     .denomination-account-modal-footer{
 
