@@ -711,20 +711,31 @@ Robot.prototype.listenSubmitRobot = function () {
 /**
  * 机器人运行
  */
-Robot.prototype.runRobotEvent = function () {
+Robot.prototype.runRobotEvent = function ()
+{
 
     $('.run-stop').click(function () {
         var currentbtn = $(this);
         var tr = currentbtn.parent().parent();
         var robot_id = tr.attr('data-id');
-
+        var run_status = $(this).attr('run_status')
         var status = tr.attr('status')
-
+        if(run_status == 0 && status == 1){
+            run_status = 1
+            status = 0
+        }else if(run_status ==1 && status ==0){
+            run_status = 0
+            status = 1
+        }else if(status ==2 || status==3){
+            $(this).attr('disabled',true)
+        }
+        
         xfzajax.post({
             'url': '/deal/startrobot/',
             'data': {
                 'robot_id': robot_id,
                 'flag':status,
+                'run_status':run_status,
             },
             traditional: true,
             'success': function (result) {

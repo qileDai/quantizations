@@ -87,7 +87,7 @@
                         </thead>
                         <tbody>
                         {% for robot in robots %}
-                            <tr data-id="{{ robot.pk }}" statu="{{ robot.status }}" protect="{{ robot.protection }}">
+                            <tr data-id="{{ robot.pk }}" status="{{ robot.status }}" protect="{{ robot.protection }}">
                                 <td>{{ robot.pk }}</td>
                                 <td>{{ robot.trading_account.title }}</td>
                                 <td>{{ robot.currency }}</td>
@@ -101,7 +101,7 @@
                                 <td>{{ robot.create_time }}</td>
                                 <td>{{ robot.get_status_display }}</td>
                                 <td>
-                                    <a class="run-stop" id="run-robot"  href="#">运行</a>
+                                    <a class="run-stop" id="run-robot" run_status="{{ robot.run_status }}" href="#">{{ robot.get_run_status_display }}</a>
                                     <a class="robot-details" href="javascript:;">详情</a>
                                     <a class="allocation" href="javascript:;">配置</a>
                                     <a class="protect-relieve" href="#">{{ robot.get_protection_display }}</a>
