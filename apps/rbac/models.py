@@ -84,7 +84,6 @@ class Menu(models.Model):
     url = models.CharField(max_length=32)
     parent = models.ForeignKey("Menu", on_delete=models.CASCADE, null=True, blank=True)
 
-
     # 定义菜单间的自引用关系
     # 权限url 在 菜单下；菜单可以有父级菜单；还要支持用户创建菜单，因此需要定义parent字段（parent_id）
     # blank=True 意味着在后台管理中填写可以为空，根菜单没有父级菜单
@@ -117,7 +116,7 @@ class Role(models.Model):
     角色：绑定权限
     """
     rolename = models.CharField(max_length=32, unique=True)
-    permissions = models.ManyToManyField("Permission")
+    permission = models.ManyToManyField("Permission")
 
     # 定义角色和权限的多对多关系
     def __str__(self):

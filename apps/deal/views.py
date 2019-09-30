@@ -383,7 +383,6 @@ class RobotProtection(View):
         id = request.POST.get('robot_id')
         flag = request.POST.get('flag')
         protect = request.POST.get('protect')
-        print('flag:'+flag,'protect:'+protect)
 
         Robot.objects.filter(id=id).update(status=flag)
         Robot.objects.filter(id=id).update(protection=protect)
@@ -401,6 +400,7 @@ class StartRobot(View):
         ids = request.POST.get('robot_id')
         # Flag为1启动，为0停止
         Flag = request.POST.get('flag')
+        run_status = request.POST.get('run_status')
         if ids:
             robots = Robot.objects.filter(id=ids)
         elif Flag == 1:
@@ -411,7 +411,8 @@ class StartRobot(View):
         # 调用对应策略
         for robot_obj in robots:
             if robot_obj.trading_strategy == '网格策略V1.0' and Flag == '1':
-                Robot.objects.filter(id=robot_obj.id).update(status=1)
+                Robot.objects.filter(id=robot_obj.id).update(run_status=run_status)
+                Robot.objects.filter(id=robot_obj.id).update(status=Flag)
                 # 启动线程
                 thread1 = GridStrategy(robot_obj=robot_obj, order_type="buy")
                 thread2 = GridStrategy(robot_obj=robot_obj, order_type="sell")
@@ -419,7 +420,8 @@ class StartRobot(View):
                 thread2.start()
                 print('-' * 30, '启动线程')
             elif robot_obj.trading_strategy == '网格策略V1.0' and Flag == '0':
-                Robot.objects.filter(id=robot_obj.id).update(status=0)
+                Robot.objects.filter(id=robot_obj.id).update(status=Flag)
+                Robot.objects.filter(id=robot_obj.id).update(run_status=run_status)
                 # 停止线程
                 for item in threading.enumerate():
                     try:

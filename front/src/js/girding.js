@@ -729,7 +729,7 @@ Robot.prototype.runRobotEvent = function ()
         }else if(status ==2 || status==3){
             $(this).attr('disabled',true)
         }
-        
+
         xfzajax.post({
             'url': '/deal/startrobot/',
             'data': {
