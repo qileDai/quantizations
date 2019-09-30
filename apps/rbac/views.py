@@ -118,7 +118,6 @@ def add_roles(request):
     form = RoleModelForm(request.POST)
     if form.is_valid():
         form.save()
-        print("dfsd")
         return restful.ok()
     else:
         return restful.params_error(message=form.get_errors())
@@ -127,7 +126,6 @@ def add_roles(request):
 @is_login
 def add_users(request):
     form = UserInfoModelForm(request.POST)
-    print("afadf")
     if form.is_valid():
         print("sdaf")
         form.save()

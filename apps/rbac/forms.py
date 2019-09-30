@@ -8,7 +8,7 @@ from utils.forms import FormMixin
 from django import forms
 
 
-class UserInfoModelForm(forms.ModelForm,FormMixin):
+class UserInfoModelForm(forms.ModelForm, FormMixin):
     # role = forms.IntegerField()
     class Meta:
         model = UserInfo
@@ -98,6 +98,7 @@ class UserInfoAddModelForm(ModelForm):
 
 
 class RoleModelForm(forms.ModelForm, FormMixin):
+
     class Meta:
         model = Role
         fields = '__all__'
@@ -113,6 +114,7 @@ class PermissionModelForm(forms.ModelForm, FormMixin):
     class Meta:
         model = Permission
         fields = ('title', 'url')
+
 
 class MenuModelForm(ModelForm, FormMixin):
     class Meta:

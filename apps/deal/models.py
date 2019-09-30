@@ -102,6 +102,7 @@ class Robot(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)                       # 创建时间
     status = models.SmallIntegerField(choices=Robot_Status, default=0)                     # 状态
     protection = models.SmallIntegerField(choices=Robot_Protect, default=2)                # 机器人保护状态
+
     current_price = models.DecimalField(max_digits=10, decimal_places=2)        # 当前价
     orders_frequency = models.IntegerField()                                    # 挂单频率
     resistance = models.DecimalField(max_digits=10, decimal_places=2)           # 阻力位
