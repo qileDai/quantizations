@@ -772,7 +772,7 @@ Robot.prototype.protectRelieve = function () {
         var currentbtn = $(this);
         var tr = currentbtn.parent().parent();
         var robot_id = tr.attr('data-id');
-        var status = tr.attr('statu');
+        var status = tr.attr('status');
         var protect = tr.attr('protect')
         console.log(robot_id,status,protect)
 
@@ -800,12 +800,18 @@ Robot.prototype.protectRelieve = function () {
         if(status == 1 && protect == 1){
             status = 2
             protect = 0
+            var element = $(this).siblings()[0];
+            console.log(element)
+            $(element).attr('disabled',true)
         }else if(status == 2 && protect == 0){
             status = 1
             protect = 1
         }else if(status == 0 && protect == 1){
             status = 3
             protect = 0
+            var element = $(this).siblings()[0];
+            console.log(element)
+            $(element).attr('disabled',true)
         }else if(status == 3 && protect == 0){
             status = 0
             protect = 1

@@ -462,8 +462,8 @@ class ShowTradeDetail(View):
         property_obj = Property.objects.get(Q(account_id=robot_obj.trading_account_id) & Q(currency=currency))
         closed_order = OrderInfo.objects.filter(robot=id)
         data = serialize("json", closed_order.order_by("-id"))[1:-1]
-        data_dict = json.loads(data)
-        print(data_dict)
+        # data_dict = json.loads(data)
+        # print(data_dict)
         # 获取挂单信息
         order_info = dict()
         running_time = 0
