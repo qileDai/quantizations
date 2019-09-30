@@ -479,6 +479,37 @@
     .trading-container {
       margin-left: 20px;
 
+      .trding-information {
+
+        .trding-information-1 {
+          margin-left: 20px;
+
+          span {
+            display: inline-block;
+            margin: 4px 15px 3px 7px;
+          }
+        }
+
+        .trding-information-2 {
+          margin-left: 20px;
+
+          span {
+            display: inline-block;
+            margin: 4px 15px 3px 7px;
+          }
+        }
+
+        .trding-information-3 {
+          margin-left: 20px;
+
+          span {
+            display: inline-block;
+            margin: 4px 15px 3px 7px;
+          }
+        }
+
+      }
+
     }
 
     .trding-information {
@@ -561,10 +592,35 @@
 
       .trding-information {
         margin-bottom: 10px;
+        .trding-information-1 {
+        margin-left: 40px;
+
+        span {
+          display: inline-block;
+          margin: 4px 15px 3px 7px;
+        }
+      }
 
         .strategy-time {
           margin-left: 50px;
         }
+          .trding-information-2 {
+        margin-left: 40px;
+
+        span {
+          display: inline-block;
+          margin: 4px 15px 3px 7px;
+        }
+      }
+
+      .trding-information-3 {
+        margin-left: 40px;
+
+        span {
+          display: inline-block;
+          margin: 4px 15px 3px 7px;
+        }
+      }
       }
 
       .account-informaiton {

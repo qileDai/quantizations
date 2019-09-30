@@ -91,8 +91,8 @@ class Robot(models.Model):
         (0, "解除"),
     )
     Run_Status = (
-        (0,'禁止'),
-        (1,'运行')
+        (0, '停止'),
+        (1, '运行')
     )
     trading_account = models.ForeignKey('Account', on_delete=models.CASCADE)    # 交易账户外键account
     currency = models.CharField(max_length=32)                                  # 交易币种
