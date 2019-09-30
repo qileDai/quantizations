@@ -535,6 +535,7 @@ class ShowConfig(View):
     def post(self, request):
         # 获取机器人id
         id = request.POST.get('robot_id')
+        print(id)
         # 获取挂单频率
         orders_frequency = request.POST.get('orders_frequency')
         # 获取挂单最小数量
@@ -553,6 +554,7 @@ class ShowConfig(View):
             stop_price=stop_price,
             warning_price=warning_price,
         )
+        return restful.ok()
 
 
 # ----------------------------------------------------------------------------------------------------------------------
