@@ -386,6 +386,7 @@ class RobotProtection(View):
 
         Robot.objects.filter(id=id).update(status=flag)
         Robot.objects.filter(id=id).update(protection=protect)
+
         return restful.ok()
 
 
@@ -399,19 +400,19 @@ class StartRobot(View):
         # 多个和一个
         ids = request.POST.get('robot_id')
         # Flag为1启动，为0停止
-        Flag = request.POST.get('flag')
-        run_status = request.POST.get('run_status')
+        Flag = int(request.POST.get('flag'))
+
         if ids:
             robots = Robot.objects.filter(id=ids)
         elif Flag == 1:
-            robots = Robot.objects.filter(Q(status=0) & Q(protection=0))
+            robots = Robot.objects.filter(Q(status=0) & Q(protection=1))
         elif Flag == 0:
-            robots = Robot.objects.filter(Q(status=1) & Q(protection=0))
+            robots = Robot.objects.filter(Q(status=1) & Q(protection=1))
 
         # 调用对应策略
         for robot_obj in robots:
-            if robot_obj.trading_strategy == '网格策略V1.0' and Flag == '1':
-                Robot.objects.filter(id=robot_obj.id).update(run_status=run_status)
+            if robot_obj.trading_strategy == '网格策略V1.0' and Flag == 1:
+                Robot.objects.filter(id=robot_obj.id).update(run_status=0)
                 Robot.objects.filter(id=robot_obj.id).update(status=Flag)
                 # 启动线程
                 thread1 = GridStrategy(robot_obj=robot_obj, order_type="buy")
@@ -419,9 +420,9 @@ class StartRobot(View):
                 thread1.start()
                 thread2.start()
                 print('-' * 30, '启动线程')
-            elif robot_obj.trading_strategy == '网格策略V1.0' and Flag == '0':
+            elif robot_obj.trading_strategy == '网格策略V1.0' and Flag == 0:
                 Robot.objects.filter(id=robot_obj.id).update(status=Flag)
-                Robot.objects.filter(id=robot_obj.id).update(run_status=run_status)
+                Robot.objects.filter(id=robot_obj.id).update(run_status=1)
                 # 停止线程
                 for item in threading.enumerate():
                     try:
