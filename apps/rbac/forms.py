@@ -98,13 +98,15 @@ class UserInfoAddModelForm(ModelForm):
 
 
 class RoleModelForm(forms.ModelForm, FormMixin):
+    # 设置非必填字段
+    # permissions = forms.CharField(required=False)
 
     class Meta:
         model = Role
         fields = '__all__'
         labels = {
             'rolename': '角色',
-            'permission': '权限',
+            'permissions': '权限',
         }
 
 

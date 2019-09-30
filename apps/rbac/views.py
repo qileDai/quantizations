@@ -127,7 +127,6 @@ def add_roles(request):
 def add_users(request):
     form = UserInfoModelForm(request.POST)
     if form.is_valid():
-        print("sdaf")
         form.save()
         return restful.ok()
     else:
@@ -302,7 +301,7 @@ class edit_permission(View):
             'menus': Menu.objects.all(),
             'permissionss': permissionss
         }
-        return render(request,'cms/permission.html',context=context)
+        return render(request, 'cms/permission.html', context=context)
 
     def post(self, request):
         pass
