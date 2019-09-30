@@ -383,9 +383,11 @@ class RobotProtection(View):
         id = request.POST.get('robot_id')
         flag = request.POST.get('flag')
         protect = request.POST.get('protect')
-        print(id)
+        print('flag:'+flag,'protect:'+protect)
+
         Robot.objects.filter(id=id).update(status=flag)
         Robot.objects.filter(id=id).update(protection=protect)
+        return restful.ok()
 
 
 class StartRobot(View):
