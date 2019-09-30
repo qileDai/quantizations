@@ -430,7 +430,7 @@ Robot.prototype.listenCreatTradingEvent = function () {
         var currentbtn = $(this);
         var tr = currentbtn.parent().parent();
         var robot_id = tr.attr('data-id');
-        console.log(robot_id)
+        $('#btnNext1').attr('robot_id',robot_id)
         xfzajax.post({
             'url': '/deal/showtradedetail/',
             'data': {
@@ -459,7 +459,7 @@ Robot.prototype.listenTradingRobotEvent = function () {
     tradingclosebtn.click(function () {
         tradingParticulars.hide();
         tradingShade.hide();
-        window.location.reload()
+
     })
     tradingending.click(function () {
 
@@ -489,6 +489,7 @@ Robot.prototype.listenparameterEven = function () {
         var currentbtn = $(this);
         var tr = currentbtn.parent().parent();
         var robot_id = tr.attr('data-id');
+        $('#btnNext1').attr("robot_id",robot_id)
         xfzajax.post({
             'url': '/deal/showconfiginfo/',
             'data': {
@@ -508,6 +509,7 @@ Robot.prototype.listenparameterEven = function () {
     parameterclosebtn.click(function () {
         parameterconfiguration.hide();
         tradingShade.hide();
+        window.location.reload()
     })
 }
 
@@ -842,9 +844,9 @@ Robot.prototype.protectRelieve = function () {
 Robot.prototype.editRobotEvent = function () {
     $("#btnNext1").click(function () {
         console.log("配置")
-        var currentbtn = $(this);
-        var tr = currentbtn.parent().parent();
-        var robot_id = tr.attr('data-id');
+
+        var robot_id = $(this).attr("robot_id")
+        console.log("robotid",robot_id)
         var mix_num = $('.edit-mix-num').val()
         var max_num = $('.edit-max-numx').val()
         var stoploss = $('.edit-stoploss').val()
@@ -861,7 +863,8 @@ Robot.prototype.editRobotEvent = function () {
                 'warning_price':waring,
                 'orders_frequency':orders_frequency,
             },
-            'succcess':function (result) {
+            'success':function (result) {
+                console.log(result)
               if(result['code'] === 200){
                   xfzalert.alertSuccess("机器人配置成功",function () {
                       window.location.reload()
