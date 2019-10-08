@@ -24,17 +24,17 @@ class UserInfoModelForm(forms.ModelForm, FormMixin):
 
 class UserInfoAddModelForm(ModelForm):
 
-    confirm_password = fields.CharField(label="确认密码", max_length=64)
+    # confirm_password = fields.CharField(label="确认密码", max_length=64)
 
     class Meta:
         model = UserInfo  # 对应模型类
-        fields = ['username', 'password', 'confirm_password', 'phone_number', 'nickname', 'email', 'roles']  # 所有字段
+        fields = ['username', 'password', 'phone_number', 'email', 'roles', 'status']  # 所有字段
         labels = {
             'username': '用户名',
             'password': '密码',
-            'confirm_password': '确认密码',
+            # 'confirm_password': '确认密码',
             'phone_number': '手机号',
-            'nickname': '昵称',
+            # 'nickname': '昵称',
             'email': '邮箱',
             'roles': '角色',
         }
