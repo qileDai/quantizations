@@ -21,12 +21,14 @@ User.prototype.listUserSubmintEvent = function () {
         var emailInput = siginupGroup.find("input[name='email']")
         var userstatus = siginupGroup.find("input[name='vehicle']")
         var passwordInput = siginupGroup.find("input[name='password']")
+         var confirmpassword = siginupGroup.find("input[name='confirm_password']")
         var roleInput = siginupGroup.find("select[name='userrole']")
         var username = usernameInput.val()
         var phone_number = phonenumber.val()
         var email = emailInput.val()
         var status = userstatus.val()
         var password = passwordInput.val()
+        var confirm_password = confirmpassword.val()
         var role = roleInput.val()
         console.log(username, email, password,role)
 
@@ -36,6 +38,7 @@ User.prototype.listUserSubmintEvent = function () {
                 'username': username,
                 'phone_number':phone_number,
                 'password': password,
+                'confirm_password':confirm_password,
                 'email': email,
                 'status':status,
                 'roles':role
