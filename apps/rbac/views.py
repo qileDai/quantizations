@@ -125,12 +125,13 @@ def add_roles(request):
 
 @is_login
 def add_users(request):
-    form = UserInfoModelForm(request.POST)
+    form = UserInfoAddModelForm(request.POST)
     if form.is_valid():
         form.save()
         return restful.ok()
     else:
-        return restful.params_error(message=form.get_errors())
+        print(form.errors)
+        return restful.params_error(message="添加错误")
 
 
 @is_login
