@@ -16,11 +16,13 @@ User.prototype.listUserSubmintEvent = function () {
     var userSubmitBtn = $('#user-confirm');
     userSubmitBtn.click(function () {
         console.log("用户添加页面")
-        var usernameInput = siginupGroup.find("input[name='username']")
+        var usernameInput = siginupGroup.find("input[name='usernamea']")
+        var phonenumber =  siginupGroup.find("input[name='phone_number']")
         var emailInput = siginupGroup.find("input[name='email']")
         var passwordInput = siginupGroup.find("input[name='password']")
         var roleInput = siginupGroup.find("select[name='userrole']")
         var username = usernameInput.val()
+        var phone_number = phonenumber.val()
         var email = emailInput.val()
         var password = passwordInput.val()
         var role = roleInput.val()
@@ -30,9 +32,10 @@ User.prototype.listUserSubmintEvent = function () {
             'url': '/rbac/add_users/',
             'data': {
                 'username': username,
+                'phone_number':phone_number,
                 'password': password,
                 'email': email,
-                'role':role
+                'roles':role
             },
             'success': function (result) {
                 if (result['code'] === 200) {
