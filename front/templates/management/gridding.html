@@ -350,13 +350,16 @@
                 <div class="robot-modal-header-inner ystep1">交易详情</div>
             </div>
         </div>
+        <div class="trading-top">
+            <ul>
+                <li class="trading-loading green" style="display: inline-block">待成交<span class="deal-opening"> </span>
+                </li>
+                <li class="trading-ending" style="display: inline-block">已完成<span class="deal-completed"></span></li>
+            </ul>
+        </div>
         <script id="robot-deal-details" type="text/html">
             {% verbatim %}
             <div class="trading-particulars">
-                <ul>
-                    <li class="trading-loading green">待成交<span>{{ robots.open_num }}</span></li>
-                    <li class="trading-ending">已完成<span>{{ robots.closed_num }}</span></li>
-                </ul>
                 <div class="trading-container">
                     <div class="trding-information">
                         <div class="trding-information-1">
@@ -365,18 +368,20 @@
                         </div>
                         <div class="trding-information-2">
                             <span class="title">账户可用:</span>
-                            <span class="account-usdt">2222usdt</span>
-                            <span class="account-btc">2222btc</span>
+                            <span class="account-usdt">{{ robots.currency_balance }}</span>
+                            <span class="account-btc">{{ robots.currency_freeze }}</span>
                             <span class="freeze-title">账户冻结:</span>
-                            <span class="freeze-usdt">2222usdt</span>
-                            <span class="freeze-btc">2222btc</span>
+                            <span class="freeze-usdt">{{ robots.market_balance }}</span>
+                            <span class="freeze-btc">{{ robots.market_freeze }}</span>
                         </div>
                         <div class="trding-information-3">
-                            <span>现价(LTC/USDT):</span>7459usdt
+                            <span>现价(LTC/USDT):</span>{{ robots.last }}
                         </div>
                     </div>
                     <div class="trading-list">
-                        <h5>买入(8笔）</h5>
+                        <span>买入(8笔）</span>
+                        <span class="buy-num">数量</span>
+                        <span class="buy-price">价格</span>
                         <ul>
                             <li>
                                 <span>买1</span>
@@ -421,7 +426,9 @@
                         </ul>
                     </div>
                     <div class="trading-list-ending">
-                        <h5>买入(8笔）</h5>
+                        <span>卖出(8笔）</span>
+                        <span class="sell-num">数量</span>
+                        <span class="sell-price">价格</span>
                         <ul>
                             <li>
                                 <span>买1</span>
@@ -631,12 +638,12 @@
                         <td>2019/080722：42</td>
                         <td>+0.07654</td>
                     </tr>
-
                 </table>
                 {% include 'cms/box_footer.html' %}
             </div>
             {% endverbatim %}
         </script>
+
     </div>
     <div class="parameter-configuration">
         <div class="configuration-content">
@@ -656,7 +663,7 @@
                         <ul>
                             <li><span>交易账户</span><input type="text" disabled="disabled" value="{{ robots.account_name
                  }}"></li>
-                            <li style="text-align: center"><span>可用</span><span>{{  }} 6.000.0000itc</span></li>
+                            <li class="account_details"><span>可用</span><span>{{  }} 6.000.0000itc</span></li>
                             <li><span>当前价</span><input type="text" disabled="disabled"
                                                        value="{{ robots.robot.fields.current_price }}"></li>
                             <li><span>重新挂单频率</span><input type="text" class="edit-orders-frequency" disabled="disabled"
@@ -673,7 +680,7 @@
                                                              value="{{ robots.robot.fields.min_num }}"></li>
                             <li><span>单网格最大交易数量</span><input type="text" class="edit-max-numx"
                                                              value="{{ robots.robot.fields.max_num }}"></li>
-                            <li style="text-align: center"><span>单网格利润 </span><span>{{ robots.robot.fields.girding_profit }}</span>
+                            <li class="gird_profit"><span>单网格利润 </span><span class="grofit-value">{{ robots.robot.fields.girding_profit }}</span>
                             </li>
                         </ul>
                     </div>

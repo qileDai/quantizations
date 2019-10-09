@@ -131,6 +131,14 @@ def add_users(request):
     else:
         return restful.params_error(message=form.errors)
 
+def add_menu(request):
+    form = MenuModelForm(request.POST)
+    if form.is_valid():
+        form.save()
+        return restful.ok()
+    else:
+        return restful.params_error(message=form.get_errors())
+
 
 @is_login
 def delete_users(request):

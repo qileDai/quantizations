@@ -23,5 +23,6 @@ urlpatterns = [
     path('edit_permission/', views.edit_permission, name='edit_permission'),
     path('edit_role/', views.edit_Role, name='edit_role'),
     path('edit_menu/', views.edit_Menu, name='edit_menu'),
+    path('add_menu/', views.add_menu, name='add_menu'),
 
 ]

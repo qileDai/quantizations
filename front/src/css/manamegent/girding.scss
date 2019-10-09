@@ -461,25 +461,30 @@
     margin-top: 10px;
     margin-left: 10px;
   }
+  .trading-top {
+      margin-top: 10px;
+      .trading-ending {
 
+        display: inline-block;
+        font-size: 16px;
+        margin-right: 10px;
+        cursor: pointer;
+        margin-left: 30px;
+      }
+
+      .trading-loading {
+        cursor: pointer;
+        display: inline-block;
+        font-size: 16px;
+        margin-right: 20px;
+        margin-left: 10px;
+      }
+    }
   .trading-particulars {
     margin-top: 10px;
 
-    .trading-ending {
 
-      display: inline-block;
-      font-size: 16px;
-      margin-right: 10px;
-      cursor: pointer;
-    }
 
-    .trading-loading {
-      cursor: pointer;
-      display: inline-block;
-      font-size: 16px;
-      margin-right: 20px;
-      margin-left: 10px;
-    }
 
     .trading-container {
       margin-left: 20px;
@@ -550,6 +555,13 @@
       color: green;
       display: inline-block;
 
+      .buy-num{
+        margin-left: 30px;
+      }
+      .buy-price{
+        margin-left: 40px;
+      }
+
       ul {
         border: 1px solid #ccc;
         width: 300px;
@@ -571,6 +583,12 @@
     .trading-list-ending {
       color: red;
       display: inline-block;
+      .sell-num{
+        margin-left: 30px;
+      }
+      .sell-price{
+        margin-left: 40px;
+      }
 
       ul {
         border: 1px solid #ccc;
@@ -745,6 +763,18 @@
 
       }
 
+      .account_details {
+        margin-right: 360px;
+      }
+
+      .gird_profit {
+        margin-right: 400px;
+
+        .grofit-value {
+          margin-left: 30px;
+        }
+      }
+
     }
 
     .risk-strategy {
@@ -782,8 +812,10 @@
 
     .risk-footer {
       margin-top: 30px;
+
       .risk-button {
         margin-bottom: 30px;
+
         button {
           width: 140px;
           height: 40px;
@@ -807,5 +839,16 @@ li {
 .green {
   border-bottom: 5px solid green;
   color: green;
+}
+
+.daiiqiekadfj {
+  display: none;
+  position: absolute;
+  left: 20%;
+  top: 10%;
+
+  span {
+    color: red;
+  }
 }
 
