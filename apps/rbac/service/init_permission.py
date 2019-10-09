@@ -26,7 +26,7 @@ def init_permission(request, user_obj):
             permission_menu_list.append(temp)
 
     menu_list = list(Menu.objects.values('id', 'title', 'parent_id'))
-    # 注：session在存储时，会先对数据进行序列化，因此对于Queryset对象写入session， 加list()转为可序列化对象
+    # 注：session在存储时，会先对数据进行序列化，因此对于Queryset对象写入session，加list()转为可序列化对象
 
     from django.conf import settings
 

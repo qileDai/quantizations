@@ -130,8 +130,7 @@ def add_users(request):
         form.save()
         return restful.ok()
     else:
-        print(form.errors)
-        return restful.params_error(message="添加错误")
+        return restful.params_error(message=form.errors)
 
 
 @is_login

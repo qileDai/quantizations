@@ -101,7 +101,6 @@ class EditAccount(View):
         print(accout_id)
         account = Account.objects.get(pk=accout_id)
         # context = {
-
         #    'account': account,
         # }
         # print(account)
