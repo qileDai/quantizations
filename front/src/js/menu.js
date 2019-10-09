@@ -50,6 +50,9 @@ Menu.prototype.listenLevelmenuEvent = function () {
     })
 
 }
+Menu.prototype.editMenu = function(){
+
+}
 
 $(function () {
     var menu = new Menu();

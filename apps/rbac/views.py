@@ -9,6 +9,7 @@ import hashlib
 from django.conf import settings
 from .service.init_permission import init_permission
 from utils.mixin import LoginRequireMixin
+from .serializers import PermissonSerializer,MenuSerializer,UserSerializer,RoleSerializer
 # Create your views here.
 
 
@@ -293,18 +294,26 @@ def add_permission(request):
         return restful.params_error(form.get_errors())
 
 
-class edit_permission(View):
-    def get(self, request):
+def edit_permission(request):
         permission_id = request.POST.get('permission_id')
         permissionss = Permission.objects.get(pk=permission_id)
-        context = {
-            'menus': Menu.objects.all(),
-            'permissionss': permissionss
-        }
-        return render(request, 'cms/permission.html', context=context)
+        serialize = PermissonSerializer(permissionss)
+        return restful.result(data=serialize.data)
 
-    def post(self, request):
-        pass
+
+def edit_Role(request):
+    role_id = request.POST.get('role_id')
+    role = Role.objects.get(pk=role_id)
+    serialize = RoleSerializer(role)
+    return restful.result(data=serialize.data)
+
+def edit_Menu(request):
+    menu_id = request.POST.get('menu_id')
+    menu = Menu.objects.get(pk=menu_id)
+    serialize = MenuSerializer(menu)
+    return restful.result(serialize.data)
+
+
 
 
 def delete_permission(request):

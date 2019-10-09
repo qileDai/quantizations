@@ -7,7 +7,8 @@
 
 * td {
   text-align: center;
-  a{
+
+  a {
     margin-left: 20px;
   }
 }
@@ -222,8 +223,9 @@
           margin-top: 5px;
           //float: right;
         }
-        .resistance-error-message{
-          .error{
+
+        .resistance-error-message {
+          .error {
             font-size: 6px;
             color: red;
             text-align: center;
@@ -243,10 +245,11 @@
             //overflow: hidden;
             margin-bottom: 30px;
             //margin-left: 100px;
-            .error-account{
+            .error-account {
               color: red;
               font-size: 12px;
             }
+
             .millisecond {
               position: absolute;
               right: 100px;
@@ -355,6 +358,7 @@
 
         .warninguser {
           margin-top: 40px;
+
           label {
             width: 120px;
             margin: 10px 10px
@@ -366,7 +370,8 @@
     .trading-footer {
       //margin-bottom: 30px;
       margin-top: 100px;
-      #btnComplete{
+
+      #btnComplete {
         width: 140px;
         height: 40px;
         border-radius: 5px;
@@ -592,35 +597,37 @@
 
       .trding-information {
         margin-bottom: 10px;
-        .trding-information-1 {
-        margin-left: 40px;
 
-        span {
-          display: inline-block;
-          margin: 4px 15px 3px 7px;
+        .trding-information-1 {
+          margin-left: 40px;
+
+          span {
+            display: inline-block;
+            margin: 4px 15px 3px 7px;
+          }
         }
-      }
 
         .strategy-time {
           margin-left: 50px;
         }
-          .trding-information-2 {
-        margin-left: 40px;
 
-        span {
-          display: inline-block;
-          margin: 4px 15px 3px 7px;
+        .trding-information-2 {
+          margin-left: 40px;
+
+          span {
+            display: inline-block;
+            margin: 4px 15px 3px 7px;
+          }
         }
-      }
 
-      .trding-information-3 {
-        margin-left: 40px;
+        .trding-information-3 {
+          margin-left: 40px;
 
-        span {
-          display: inline-block;
-          margin: 4px 15px 3px 7px;
+          span {
+            display: inline-block;
+            margin: 4px 15px 3px 7px;
+          }
         }
-      }
       }
 
       .account-informaiton {
@@ -664,95 +671,128 @@
 }
 
 .parameter-configuration {
+  //display: none;
+  ////width: 633px;
+  ////height: 1086px;
+  //position: fixed;
+  //left: 50%;
+  //top: 75%;
+  //transform: translate(-50%, -50%);
+  //background-color: #fff;
+  //z-index: 3;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 100;
   display: none;
-  width: 633px;
-  height: 1086px;
-  position: absolute;
-  left: 50%;
-  top: 75%;
-  transform: translate(-50%, -50%);
-  background-color: #fff;
-  z-index: 3;
 
-  .parameter-content {
-    height: 40px;
-    border-bottom: 1px solid #ccc;
+  .configuration-content {
+    width: 633px;
+    height: auto;
+    position: absolute;
+    background: white;
+    left: 30%;
+    top: 7%;
+    border-radius: 5px;
 
-    .parameter-modal-header {
-      font-size: 16px;
-      float: left;
-      margin-top: 10px;
-      margin-left: 10px;
-    }
 
-    .parameter-close-btn {
-      width: 30px;
-      height: 30px;
-      display: inline-block;
-      float: right;
-      margin-top: 10px;
-      margin-right: 10px;
-    }
-  }
+    .parameter-content {
+      height: 40px;
+      border-bottom: 1px solid #ccc;
 
-  .parameter-strategy-parameters {
-    div {
-      margin-left: 25px;
-      margin-top: 20px;
-      margin-bottom: 20px;
-      font-size: 14px;
-      color: #ccc;
-    }
+      .parameter-modal-header {
+        font-size: 16px;
+        float: left;
+        margin-top: 10px;
+        margin-left: 10px;
+      }
 
-    li {
-      margin-top: 15px;
-      text-align: right;
-
-      input {
-        width: 300px;
-        height: 25px;
-        margin-left: 15px;
+      .parameter-close-btn {
+        width: 30px;
+        height: 30px;
+        display: inline-block;
         float: right;
-        margin-right: 150px;
-      }
-
-      span {
-
+        margin-top: 10px;
+        margin-right: 10px;
+        cursor: pointer;
       }
     }
 
-  }
+    .parameter-strategy-parameters {
+      div {
+        margin-left: 25px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #ccc;
+      }
 
-  .risk-strategy {
-    div {
-      margin-left: 25px;
-      margin-top: 20px;
-      margin-bottom: 20px;
-      font-size: 14px;
-      color: #ccc;
+      li {
+        margin-top: 15px;
+        text-align: right;
+
+        input {
+          width: 280px;
+          height: 25px;
+          margin-left: 15px;
+          float: right;
+          margin-right: 150px;
+        }
+
+
+      }
+
     }
-  }
 
-  .risk-strategy-warninguser {
-    div {
-      margin-left: 25px;
-      margin-top: 20px;
-      margin-bottom: 20px;
-      font-size: 14px;
-      color: #ccc;
+    .risk-strategy {
+      div {
+        margin-left: 25px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #ccc;
+      }
+
+      li {
+        text-align: right;
+        margin-top: 15px;
+
+        input {
+          width: 280px;
+          height: 25px;
+          margin-left: 15px;
+          float: right;
+          margin-right: 150px;
+        }
+      }
     }
-  }
 
-  .risk-footer {
-    .risk-button {
-      button {
-        width: 140px;
-        height: 40px;
-        border-radius: 5px;
-        background: #169bd5;
-        border-bottom: none;
-        margin-left: 75px;
-        margin-right: 75px;
+    .risk-strategy-warninguser {
+      div {
+        margin-left: 25px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #ccc;
+      }
+    }
+
+    .risk-footer {
+      margin-top: 30px;
+      .risk-button {
+        margin-bottom: 30px;
+        button {
+          width: 140px;
+          height: 40px;
+          border-radius: 5px;
+          background: #169bd5;
+          border-bottom: none;
+          margin-left: 75px;
+          margin-right: 75px;
+        }
       }
     }
   }
