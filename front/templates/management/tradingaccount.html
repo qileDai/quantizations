@@ -62,7 +62,7 @@
                         <tbody>
                         {% for account in accounts %}
                             <tr data-id="{{ account.pk }}">
-                                <td><input type="checkbox" id="check" name="check" style="width: 20px;height: 14px"/></td>
+                                <td><input type="checkbox" id="check" name="check" class="account-chcekbox" style="width: 20px;height: 14px"/></td>
                                 <td>{{ account.title }}</td>
                                 <td>{{ account.platform.Platform_name }}</td>
                                 <td>{{ account.createtime }}</td>

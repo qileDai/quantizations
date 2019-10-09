@@ -24,6 +24,7 @@ Account.prototype.run = function () {
     self.showCollectAsset();
     self.showDetailProperty();
     self.refershAccountEvent();
+    self.accountCuurrencyEvent()
     // self.listenEditAccount();
 
 }
@@ -237,9 +238,15 @@ Account.prototype.listenPropertyDetailsShowEvent = function () {
 
 
 Account.prototype.showCollectAsset = function () {
+    var self = this;
+    var account_list = self.accountCuurrencyEvent()
+    console.log(account_list)
     $('#property-total').click(function () {
         xfzajax.post({
             'url': '/deal/showcollectasset/',
+            'data':{
+                'account_list': account_list
+            },
             'success': function (result) {
                 console.log(result)
             }
@@ -426,7 +433,7 @@ Account.prototype.refershAccountEvent = function () {
         console.log("ssdfas")
         self.detailsProperty.hide();
         setTimeout(function () {
-           self.detailsProperty.show()
+            self.detailsProperty.show()
 
         }, 100);
 
@@ -448,6 +455,17 @@ Account.prototype.refershAccountEvent = function () {
         //     }
         // })
     })
+}
+
+Account.prototype.accountCuurrencyEvent = function () {
+    var account = []
+    $('.account-chcekbox').click(function () {
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var account_id = tr.attr('data-id');
+        account.push(account_id)
+    })
+    return account
 }
 
 $(function () {
