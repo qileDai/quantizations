@@ -3,9 +3,10 @@ from rest_framework import serializers
 from .models import Role,UserInfo,Menu,Permission
 
 class RoleSerializer(serializers.ModelSerializer):
+    permission = Permission.title
     class Meta:
         model = Role
-        fields = ('id','Rolenmae','permission')
+        fields = ('id','rolename','permission')
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,9 +14,16 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id','title','accesskey','secretkey','users_id','platform')
 
 class PermissonSerializer(serializers.ModelSerializer):
+    menu = Menu.title
     class Meta:
         model = Permission
-        fields = ('id')
+        fields = ('id','title','url','menu')
+
+class MenuSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Menu
+        fields = ('id','title','url','parent')
 
 
 

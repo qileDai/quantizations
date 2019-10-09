@@ -60,7 +60,7 @@
                                     {{ role.rolename }}
                                 </td>
                                 <td>
-                                    {% for permission in role.permission.all %}
+                                    {% for permission in role.permissions.all %}
                                         {{ permission.title }} &nbsp;
                                     {% endfor %}
                                 </td>
