@@ -115,7 +115,7 @@ class Role(models.Model):
     """
     角色：绑定权限
     """
-    rolename = models.CharField(max_length=32, unique=True)
+    rolename = models.CharField(max_length=64, unique=True)
     permissions = models.ManyToManyField("Permission")
 
     # 定义角色和权限的多对多关系
@@ -127,13 +127,16 @@ class UserInfo(models.Model):
     """
     用户：划分角色
     """
+    User_Status = (
+        (0, '禁用'),
+        (1, '正常')
+    )
     username = models.CharField(max_length=32)
     phone_number = models.CharField(max_length=32)
     password = models.CharField(max_length=128)
     nickname = models.CharField(max_length=32)
     email = models.EmailField()
-    status = models.CharField(max_length=10)
-    type = models.SmallIntegerField(default=0)
+    status = models.SmallIntegerField(choices=User_Status, default=1)
     create_time = models.DateTimeField(auto_now_add=True)
 
     roles = models.ManyToManyField("Role")
