@@ -37,13 +37,11 @@ def login(request):
             return render(request, "cms/login.html", {'error': '用户名或密码错误！'})
         elif user_obj.status == 0:
             return render(request, "cms/login.html", {'error': '用户已被禁用，请联系管理员！'})
-        elif user_obj.type == 1:               # 管理员
+        else:                                   # 普通用户
             request.session.clear()
             request.session['is_login'] = True
             request.session['user_id'] = user_obj.id
             request.session.set_expiry(600)
-            return render(request, 'cms/index.html')
-        else:                                   # 普通用户
             init_permission(request, user_obj)  # 调用权限初始化
             return redirect('/rbac/index/')
 
