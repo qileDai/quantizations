@@ -114,39 +114,53 @@ class GridStrategy(Thread):
             max_buy1 = float(self.robot_obj.current_price)-self.grid_range
             min_sell1 = float(self.robot_obj.current_price)+self.grid_range
             max_sell1 = float(self.robot_obj.current_price)+self.grid_range*3/2
+            # 获取挂单数量，实时查询数据库
+            sql = "select min_num,max_num from deal_robot where id = %s"
+            ret = self.connect_db(sql, (self.robot_obj.id,))
+            amount = round(random.uniform(ret[0], ret[1]), 3)
 
             n = self.robot_obj.girding_num      # 批量挂原始单
-            if counts:
-                n = counts                      # 单笔更新挂单
-            for i in range(n):
-                # 挡位
-                grade = self.order_type + str(i+1)
 
+            if counts:
+                # 更新单笔挂单
+                a, b = item[1]["price_range"]
+                price = random.uniform(a, b)
+                res = self.server_api.order(str(amount), self.currency_type, str(price), item[1]["order_type"])
+                if res.get("id") is not None:
+                    # 下单成功
+                    self.lock.acquire()
+                    self.id_dict[res.get("id")] = {
+                        "grade": item[1]["grade"],
+                        "price_range": (a, b),
+                        "order_type": self.order_type,
+                        "price": price,
+                        "amount": amount,
+                        "trade_amount": 0,
+                        "reverse": False,
+                    }
+                    del self.id_dict[item[0]]
+                    # print('删除--------------------------------------------------------------')
+                    self.lock.release()
+                else:
+                    new_key = item[0] + "failed"
+                    self.lock.acquire()
+                    self.id_dict[new_key] = self.id_dict.pop(item[0])
+                    self.lock.release()
+
+            for i in range(n):
+                # 批量更新
+                grade = self.order_type + str(i+1)
                 # 计算原始挂单价格区间
-                if self.order_type == "buy" and counts is None:
+                if self.order_type == "buy":
                     a, b = min_buy1-self.grid_range*i, max_buy1-self.grid_range*i
                     # 获取挂卖单价的小数位
                     price = round(random.uniform(a, b), markets_data.get("priceScale", 2))
-                elif self.order_type == "sell" and counts is None:
+                elif self.order_type == "sell":
                     a, b = min_sell1+self.grid_range*i, max_sell1+self.grid_range*i
                     # 获取挂买单价的小数位
                     price = round(random.uniform(a, b), markets_data.get("amountScale", 2))
 
-                # 获取挂单数量，实时查询数据库
-                sql = "select min_num,max_num from deal_robot where id = %s"
-                ret = self.connect_db(sql, (self.robot_obj.id,))
-                amount = round(random.uniform(ret[0], ret[1]), 3)
                 try:
-                    if counts is not None:
-                        # 如果order_type不为空，更新挂单
-                        self.order_type = item[1]["order_type"]
-                        a, b = item[1]["price_range"]
-                        price = random.uniform(a, b)
-                        self.lock.acquire()
-                        del self.id_dict[item[0]]
-                        # print('删除--------------------------------------------------------------')
-                        self.lock.release()
-
                     res = self.server_api.order(str(amount), self.currency_type, str(price), self.order_type)
                     # 下单成功，添加下单id
                     if res.get("id") is not None:
@@ -161,12 +175,13 @@ class GridStrategy(Thread):
                             "reverse": False,
                         }
                         self.lock.release()
+
                 except Exception as e:
                     # self.log_info("api")
                     # logging.exception("PLACE ORDER ERROR...", e)
                     print('traceback.print_exc():', traceback.print_exc())
                     print("下单失败", e)
-        print(self.id_dict, '-'*10, len(self.id_dict))
+        print('-'*10, len(self.id_dict))
 
     def save_completedorder(self, order_info):
         """
@@ -370,7 +385,7 @@ class GridStrategy(Thread):
 
     def update_order_info(self):
         """
-        更新一段时间内
+        更新一段时间内未交易的挂单
         :return:
         """
         # 挂单，检测卖一和买一update_order_info
@@ -382,17 +397,23 @@ class GridStrategy(Thread):
                 sql = "select orders_frequency from deal_robot where id = %s"
                 orders_frequency = self.connect_db(sql, (self.robot_obj.id,))
                 print('刷单频率', orders_frequency[0])
+                # 未成功下单
+                li_range = self.id_dict.items()
+                for elem in li_range:
+                    if 'failed' in elem[0]:
+                        self.place_order(elem, 1)
+
                 self.lock.acquire()
-                if len(self.id_dict) < 20:
+                if len(self.id_dict) <= 10:
                     order_dicts = self.id_dict.items()
                 else:
                     # 对价格进行排序
                     if self.order_type == "sell":
                         temp_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"])
-                        order_dicts = random.sample(temp_dicts[0:20], 10)
+                        order_dicts = random.sample(temp_dicts[0:10], 8)
                     elif self.order_type == "buy":
                         temp_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"], reverse=True)
-                        order_dicts = random.sample(temp_dicts[0:20], 10)
+                        order_dicts = random.sample(temp_dicts[0:10], 8)
                 # print('*'*20, list(order_dicts))
                 self.lock.release()
                 # 循环挂单信息
@@ -407,7 +428,7 @@ class GridStrategy(Thread):
                             res = self.server_api.cancel_order(self.currency_type, b_id)
                             if res.get("code") in [100, 211, 212]:
                                 # 撤单成功再下单
-                                time.sleep(0.2)
+                                time.sleep(0.1)
                                 self.place_order(item, 1)
 
                     except Exception as e:

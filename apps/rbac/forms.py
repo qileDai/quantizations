@@ -62,10 +62,12 @@ class UserInfoAddModelForm(ModelForm):
 
     def clean_password(self):
         password = self.cleaned_data.get('password')  # 验证密码合法性
-        if password.isdecimal() or password.isalpha():  # 这里用isdecimal，建议别用isdigit，不准确
+        # 这里用isdecimal，建议别用isdigit，不准确
+        if password.isdecimal() or password.isalpha():
             raise ValidationError('密码为数字加字母')
         elif len(password) < 6:
-            raise ValidationError('密码长度小于6位')
+            print(password)
+            raise ValidationError('密码长度需大于6位')
         else:
             return password
 

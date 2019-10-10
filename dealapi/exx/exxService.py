@@ -240,6 +240,7 @@ class ExxService(object):
 
 # service_api = ExxService('c6b2ee35465dfddf535e8ddaeaaaf4ee8a90894e', '3b56369d-8072-461e-91f6-243b6277af01')
 # data = service_api.order('1', 'eth_usdt', '666', 'sell')
+# data = service_api.get_balance()
 # print(data)
 
 
