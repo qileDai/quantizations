@@ -504,6 +504,7 @@ Account.prototype.addAccountCurrencyEvent = function () {
 
     $('#add-currency-btn').click(function () {
         var currency = $('#add-new-currency').val()
+        
         console.log("scudf")
         $('.currency-check-content').append(" <div class=\"checkbox\">\n" +
             "                        <label><input type=\"checkbox\" class=\"currency-checkbox\" value=\"\">" + currency + "</label>\n" +

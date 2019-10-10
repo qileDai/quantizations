@@ -589,7 +589,7 @@ class RobotList(View):
             'robots': page_obj.object_list,
             'page_obj': page_obj,
             'paginator': paginator,
-            'properties': Property.objects.all(),
+            'properties': Property.objects.values('currency').distinct(),
             'markets': Market.objects.all(),
             'accounts': Account.objects.all(),
             'url_query': '&' + parse.urlencode({
