@@ -439,6 +439,25 @@
   top: 50%;
   transform: translate(-50%, -50%);
   border-radius: 5px;
+  .trding-information-details{
+    padding: 10px 30px;
+    .trding-information{
+      .strategy-time{
+        margin-left: 30px;
+      }
+      .account-btc{
+        margin-left: 30px;
+      }
+      .freeze-title{
+        margin-left: 30px;
+      }
+      .freeze-btc{
+        margin-left: 30px;
+      }
+
+
+    }
+  }
 
   .trading-content {
     height: 40px;
@@ -482,54 +501,9 @@
     }
   .trading-particulars {
     margin-top: 10px;
-
-
-
-
-    .trading-container {
+    .trading-list{
       margin-left: 20px;
-
-      .trding-information {
-
-        .trding-information-1 {
-          margin-left: 20px;
-
-          span {
-            display: inline-block;
-            margin: 4px 15px 3px 7px;
-          }
-        }
-
-        .trding-information-2 {
-          margin-left: 20px;
-
-          span {
-            display: inline-block;
-            margin: 4px 15px 3px 7px;
-          }
-        }
-
-        .trding-information-3 {
-          margin-left: 20px;
-
-          span {
-            display: inline-block;
-            margin: 4px 15px 3px 7px;
-          }
-        }
-
-      }
-
     }
-
-    .trding-information {
-      margin-bottom: 10px;
-
-      .strategy-time {
-        margin-left: 50px;
-      }
-    }
-
     .account-informaiton {
       overflow: hidden;
 
@@ -841,14 +815,5 @@ li {
   color: green;
 }
 
-.daiiqiekadfj {
-  display: none;
-  position: absolute;
-  left: 20%;
-  top: 10%;
 
-  span {
-    color: red;
-  }
-}
 

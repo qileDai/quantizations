@@ -277,10 +277,9 @@ class ConfigCurrency(View):
                 # 获取账户信息
                 #     user_id = request.session.get("user_id")
                 #     accounts = Account.objects.filter(id=user_id)
-
                 for currency in currency_list:
                     if currency:
-                    # 账户存在此币种则不添加
+                        # 账户存在此币种则不添加
                         property_obj = Property.objects.filter(Q(account_id=account) & Q(currency=currency))
                         if property_obj:
                             continue
