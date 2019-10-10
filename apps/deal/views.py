@@ -269,24 +269,22 @@ class ConfigCurrency(View):
 
     def post(self, request):
         currency_list = request.POST.getlist('currency[]')
-        account_list = request.POST.getlist('account_list[]')
-        print(currency_list)
-        for account in account_list:
-            if account:
-                for currency in currency_list:
-                    if currency:
-                        # 账户存在此币种则不添加
-                        property_obj = Property.objects.filter(Q(account_id=account) & Q(currency=currency))
-                        print('+'*30, list(property_obj))
-                        if not list(property_obj):
-                            # 保存币种信息
-                            LastdayAssets.objects.create(currency=currency, account_id=account)
-                            Property.objects.create(currency=currency, account_id=account)
+        user_id = request.session.get("user_id")
+        accounts = Account.objects.filter(users=user_id)
+        for account in accounts:
+            print(account.id, '-'*30)
+            for currency in currency_list:
+                if currency:
+                    # 账户存在此币种则不添加
+                    property_obj = Property.objects.filter(Q(account=account.id) & Q(currency=currency))
+                    print('+'*30, list(property_obj))
+                    if not list(property_obj):
+                        # 保存币种信息
+                        LastdayAssets.objects.create(currency=currency, account=account)
+                        Property.objects.create(currency=currency, account=account, currency_status=1)
+                else:
+                    return restful.params_error(message='请选择账户币种')
 
-                    else:
-                        return restful.params_error(message='请选择账户币种')
-            else:
-                return restful.params_error(message='账户不存在')
         return restful.ok(message='success')
 
 
