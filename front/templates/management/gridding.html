@@ -368,9 +368,9 @@
                         <div class="trding-information">
                             <span class="title">账户可用:</span>
                             <span class="account-usdt">{{ robots.currency_balance }}</span>
-                            <span class="account-btc">{{ robots.currency_freeze }}</span>
+                            <span class="account-btc">{{ robots.market_balance }}</span>
                             <span class="freeze-title">账户冻结:</span>
-                            <span class="freeze-usdt">{{ robots.market_balance }}</span>
+                            <span class="freeze-usdt">{{ robots.currency_freeze  }}</span>
                             <span class="freeze-btc">{{ robots.market_freeze }}</span>
                         </div>
                         <div class="trding-information">
@@ -482,9 +482,9 @@
                     <div class="trding-information">
                         <span class="title">账户可用:</span>
                         <span class="account-usdt">{{ robots.currency_balance }}</span>
-                        <span class="account-btc">{{ robots.currency_freeze }}</span>
+                        <span class="account-btc">{{ robots.market_balance  }}</span>
                         <span class="freeze-title">账户冻结:</span>
-                        <span class="freeze-usdt">{{ robots.market_balance }}</span>
+                        <span class="freeze-usdt">{{ robots.currency_freeze }}</span>
                         <span class="freeze-btc">{{ robots.market_freeze }}</span>
                     </div>
                     <div class="trding-information">
@@ -636,11 +636,13 @@
                         <td>2019/080722：42</td>
                         <td>+0.07654</td>
                     </tr>
+
                 </table>
+                {% endverbatim %}
                 {% include 'cms/box_footer.html' %}
             </div>
-            {% endverbatim %}
         </script>
+
 
     </div>
     <div class="parameter-configuration">

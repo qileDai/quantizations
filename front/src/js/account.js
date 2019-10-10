@@ -109,7 +109,8 @@ Account.prototype.listendenominationEvent = function () {
         $('.denomination-account-wrapper').show();
 
         var currency_list = []
-        $('.currency-checkbox').click(function () {
+        $('.currency-checkbox').on('click', function () {
+
             var currency = $(this).parent().text()
             console.log(currency)
             currency_list.push(currency)
@@ -491,11 +492,12 @@ Account.prototype.accountCuurrencyEvent = function () {
     $('.account-chcekbox').click(function () {
 
         $(this).prop('checked', true)
-        // var tr = currentbtn.parent().parent();
-        // var account_id = tr.attr('data-id');
-        // account.push(account_id)
+        var tr = currentbtn.parent().parent();
+        var account_id = tr.attr('data-id');
+        account.push(account_id)
     })
     return account
+
 }
 
 Account.prototype.addAccountCurrencyEvent = function () {
@@ -504,10 +506,10 @@ Account.prototype.addAccountCurrencyEvent = function () {
 
     $('#add-currency-btn').click(function () {
         var currency = $('#add-new-currency').val()
-        
+
         console.log("scudf")
         $('.currency-check-content').append(" <div class=\"checkbox\">\n" +
-            "                        <label><input type=\"checkbox\" class=\"currency-checkbox\" value=\"\">" + currency + "</label>\n" +
+            "                        <label class='sdfasd'><input type=\"checkbox\" class=\"currency-checkbox\" value=\"\">" + currency + "</label>\n" +
             "                    </div>")
 
     })
