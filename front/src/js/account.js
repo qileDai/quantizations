@@ -100,11 +100,13 @@ Account.prototype.listenShowHideAddAccount = function () {
 
 
 Account.prototype.listendenominationEvent = function () {
-     var self = this;
+    var self = this;
+    var account_list = self.accountCuurrencyEvent()
+    console.log(account_list)
     $('#account-curry-configuration').on('click', function () {
         $('.denomination-mask-account-wrapper').show();
         $('.denomination-account-wrapper').show();
-        var account_list = self.accountCuurrencyEvent()
+
         var currency_list = []
         $('.currency-checkbox').click(function () {
             var currency = $(this).parent().text()
@@ -114,11 +116,11 @@ Account.prototype.listendenominationEvent = function () {
             $('#currency-add-btn').click(function () {
                 xfzajax.post({
                     'url': '/deal/configcurrency/',
-                    'data':{
+                    'data': {
                         'currency': currency_list,
-                        'account_list':account_list,
+                        'account_list': account_list,
                     },
-                    'success':function (result) {
+                    'success': function (result) {
                         console.log(result)
                     }
                 })
@@ -266,7 +268,7 @@ Account.prototype.showCollectAsset = function () {
     $('#property-total').click(function () {
         xfzajax.post({
             'url': '/deal/showcollectasset/',
-            'data':{
+            'data': {
                 'account_list': account_list
             },
             'success': function (result) {
