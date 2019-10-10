@@ -41,7 +41,7 @@ def login(request):
             request.session.clear()
             request.session['is_login'] = True
             request.session['user_id'] = user_obj.id
-            request.session.set_expiry(600)
+            # request.session.set_expiry(600)
             init_permission(request, user_obj)  # 调用权限初始化
             return redirect('/rbac/index/')
 
