@@ -40,7 +40,7 @@ def exx_scheduled_job():
     print(info)
 
     # 遍历账户信息
-    for accountid,accesskey,secretkey in ret:
+    for accountid, accesskey, secretkey in ret:
         try:
             # 调用接口，获取账户信息
             service_api = ExxService('EXX', secretkey, accesskey)
