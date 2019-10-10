@@ -25,6 +25,7 @@ Account.prototype.run = function () {
     self.showDetailProperty();
     self.refershAccountEvent();
     self.accountCuurrencyEvent()
+    self.addAccountCurrencyEvent();
     // self.listenEditAccount();
 
 }
@@ -498,13 +499,17 @@ Account.prototype.accountCuurrencyEvent = function () {
 }
 
 Account.prototype.addAccountCurrencyEvent = function () {
+    console.log("asldfaljf")
 
-    var currency = $('#add-new-currency').val()
-    if (!currency == null) {
-        $('#add-currency-btn').click(function () {
 
-        })
-    }
+    $('#add-currency-btn').click(function () {
+        var currency = $('#add-new-currency').val()
+        console.log("scudf")
+        $('.currency-check-content').append(" <div class=\"checkbox\">\n" +
+            "                        <label><input type=\"checkbox\" class=\"currency-checkbox\" value=\"\">" + currency + "</label>\n" +
+            "                    </div>")
+
+    })
 
 
 }
