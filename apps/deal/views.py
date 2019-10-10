@@ -456,7 +456,7 @@ class ShowTradeDetail(View):
         hour = 60 * 60
         min = 60
         if allTime < 60:
-            return "%d sec" % math.ceil(allTime)
+            return "%d 秒" % math.ceil(allTime)
         elif allTime > day:
             days = divmod(allTime, day)
             return "%d 天, %s" % (int(days[0]), self.changeTime(days[1]))
@@ -492,7 +492,7 @@ class ShowTradeDetail(View):
                 if id == str(robot.id):
                     # 向字典中添加数据
                     order_info = dict(order_info, **item.id_dict)
-                running_time = item.start_time - time.time()
+                running_time = time.time() - item.start_time
             except:
                 print('对象没有属性robot_obj')
                 continue
