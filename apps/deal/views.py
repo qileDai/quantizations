@@ -270,28 +270,23 @@ class ConfigCurrency(View):
     def post(self, request):
         currency_list = request.POST.getlist('currency[]')
         account_list = request.POST.getlist('account_list[]')
-        print(account_list)
         print(currency_list)
         for account in account_list:
             if account:
-                # 获取账户信息
-                #     user_id = request.session.get("user_id")
-                #     accounts = Account.objects.filter(id=user_id)
-
                 for currency in currency_list:
                     if currency:
-                    # 账户存在此币种则不添加
+                        # 账户存在此币种则不添加
                         property_obj = Property.objects.filter(Q(account_id=account) & Q(currency=currency))
-                        if property_obj:
-                            continue
-                        # 保存币种信息
-                        LastdayAssets.objects.create(currency=currency, account_id=account)
-                        Property.objects.create(currency=currency, account_id=account)
+                        print('+'*30, list(property_obj))
+                        if not list(property_obj):
+                            # 保存币种信息
+                            LastdayAssets.objects.create(currency=currency, account_id=account)
+                            Property.objects.create(currency=currency, account_id=account)
+
                     else:
                         return restful.params_error(message='请选择账户币种')
             else:
                 return restful.params_error(message='账户不存在')
-            currency_info = LastdayAssets.objects.all()
         return restful.ok(message='success')
 
 
@@ -392,7 +387,6 @@ class RobotProtection(View):
         id = request.POST.get('robot_id')
         flag = request.POST.get('flag')
         protect = request.POST.get('protect')
-
         Robot.objects.filter(id=id).update(status=flag)
         Robot.objects.filter(id=id).update(protection=protect)
 
@@ -410,7 +404,7 @@ class StartRobot(View):
         ids = request.POST.get('robot_id')
         # Flag为1启动，为0停止
         Flag = int(request.POST.get('flag'))
-
+        print(ids, Flag, '-'*30)
         if ids:
             robots = Robot.objects.filter(id=ids)
         elif Flag == 1:

@@ -181,7 +181,7 @@ class GridStrategy(Thread):
                     # logging.exception("PLACE ORDER ERROR...", e)
                     print('traceback.print_exc():', traceback.print_exc())
                     print("下单失败", e)
-        print(self.id_dict, '-'*10, len(self.id_dict))
+        print('-'*10, len(self.id_dict))
 
     def save_completedorder(self, order_info):
         """
