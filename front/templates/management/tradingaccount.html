@@ -52,7 +52,8 @@
                     <table class="table table-bordered">
                         <thead>
                         <tr>
-                            <th><input type="checkbox" id="checkAll" name="checkAllex" style="width: 20px;height: 14px"/></th>
+                            <th><input type="checkbox" id="checkAll" name="checkAllex"
+                                       style="width: 20px;height: 14px"/></th>
                             <th>账户名称</th>
                             <th>所属平台</th>
                             <th>账户添加时间</th>
@@ -62,7 +63,8 @@
                         <tbody>
                         {% for account in accounts %}
                             <tr data-id="{{ account.pk }}">
-                                <td><input type="checkbox" id="check" name="check" class="account-chcekbox" style="width: 20px;height: 14px"/></td>
+                                <td><input type="checkbox" id="check" name="check" class="account-chcekbox"
+                                           style="width: 20px;height: 14px"/></td>
                                 <td>{{ account.title }}</td>
                                 <td>{{ account.platform.Platform_name }}</td>
                                 <td>{{ account.createtime }}</td>
@@ -96,44 +98,27 @@
                         <label class="platform-label" for="">账户币种配置</label>
                     </div>
                 </div>
-                <div class="checkbox">
-                    <label><input type="checkbox" class="currency-checkbox" value="">BTC</label>
-                </div>
-                <div class="checkbox">
-                    <label><input type="checkbox" class="currency-checkbox" value="">ETH</label>
-                </div>
-                <div class="checkbox">
-                    <label><input type="checkbox" class="currency-checkbox" value="">LTC</label>
-                </div>
-                <div class="checkbox">
-                    <label><input type="checkbox" class="currency-checkbox" value="">BCH</label>
-                </div>
-                <div class="checkbox">
-                    <label><input type="checkbox" class="currency-checkbox" value="">XRP</label>
-                </div>
-                <div class="checkbox">
-                    <label><input type="checkbox" class="currency-checkbox" value="">XRP</label>
-                </div>
-                <div class="checkbox">
-                    <label><input type="checkbox" class="currency-checkbox" value="">HC</label>
-                </div>
-                <div class="checkbox">
-                    <label><input type="checkbox" class="currency-checkbox" value="">LTC</label>
-                </div>
-                <div class="checkbox">
-                    <label><input type="checkbox" class="currency-checkbox" value="">HC</label>
-                </div>
-                <div class="checkbox">
-                    <label><input type="checkbox" class="currency-checkbox" value="">XRP</label>
+                <div class="currency-check-content">
+                    <div class="checkbox">
+                        <label><input type="checkbox" class="currency-checkbox" value="">BTC</label>
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox" class="currency-checkbox" value="">ETH</label>
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox" class="currency-checkbox" value="">LTC</label>
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox" class="currency-checkbox" value="">HC</label>
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox" class="currency-checkbox" value="">LTC</label>
+                    </div>
                 </div>
                 <div class="new-currency">
                     <span>新增币种</span>
-                    <select name="" id="">
-                        <option value="">BCH</option>
-                        <option value="">LTC</option>
-                        <option value="">ETH</option>
-                    </select>
-                    <buttom>确定</buttom>
+                    <input type="text" value="" id="add-new-currency">
+                    <a  href="#" id="add-currency-btn">确定</a>
                 </div>
                 <div class="denomination-account-modal-footer">
                     <div class="account-button">

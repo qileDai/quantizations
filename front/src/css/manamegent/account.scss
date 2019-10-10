@@ -274,6 +274,7 @@
 
 
 }
+
 .account-carry-curry-wrapper {
   position: fixed;
   left: 0;
@@ -575,16 +576,18 @@
     }
   }
 }
-.denomination-mask-account-wrapper{
+
+.denomination-mask-account-wrapper {
   position: fixed;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.2);
-  z-index:100;
-  display:none;
-  .denomination-account-wrapper{
+  z-index: 100;
+  display: none;
+
+  .denomination-account-wrapper {
     width: 450px;
     height: 500px;
     position: absolute;
@@ -592,30 +595,35 @@
     left: 35%;
     background: white;
     border-radius: 5px;
-    display:none;
+    display: none;
     padding: 15px;
-      .new-currency{
-      select{
+
+    .new-currency {
+
+
+      select {
         width: 100px;
       }
-      buttom{
+
+      a {
         display: inline-block;
-        width: 30px;
+        width: 40px;
         height: 20px;
         color: #fff;
-        background-color: #00c0ef;
-        cursor:pointer;
+        background-color: #169bd5;
+        cursor: pointer;
+        margin-left: 20px;
 
       }
     }
 
-    .denomination-account-modal-footer{
+    .denomination-account-modal-footer {
 
-      .account-button{
+      .account-button {
         position: absolute;
         bottom: 20px;
 
-        .cancel{
+        .cancel {
           width: 140px;
           height: 40px;
           background: #169bd5;
@@ -625,7 +633,8 @@
           margin-bottom: 20px;
           margin-top: 15px;
         }
-        .confirm{
+
+        .confirm {
           width: 140px;
           height: 40px;
           background: #169bd5;
@@ -637,21 +646,24 @@
         }
       }
     }
-    .denomination-account-body{
 
-      .form-group{
+    .denomination-account-body {
+
+      .form-group {
         border-bottom: 1px solid #0f0f0f;
-         .platform-label{
-           font-size: 20px;
-         }
+
+        .platform-label {
+          font-size: 20px;
+        }
       }
 
 
     }
-    .denomination-close-group{
+
+    .denomination-close-group {
 
 
-      .denomination-close-btn{
+      .denomination-close-btn {
         display: inline-block;
         float: right;
         cursor: pointer;

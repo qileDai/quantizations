@@ -25,6 +25,7 @@ Account.prototype.run = function () {
     self.showDetailProperty();
     self.refershAccountEvent();
     self.accountCuurrencyEvent()
+    self.addAccountCurrencyEvent();
     // self.listenEditAccount();
 
 }
@@ -121,7 +122,11 @@ Account.prototype.listendenominationEvent = function () {
                         'account_list': account_list,
                     },
                     'success': function (result) {
-                        console.log(result)
+                        if (result['code'] === 200) {
+                            xfzalert.alertSuccess('新增币种成功', function () {
+                                window.location.reload()
+                            })
+                        }
                     }
                 })
             })
@@ -484,12 +489,29 @@ Account.prototype.refershAccountEvent = function () {
 Account.prototype.accountCuurrencyEvent = function () {
     var account = []
     $('.account-chcekbox').click(function () {
-        var currentbtn = $(this);
-        var tr = currentbtn.parent().parent();
-        var account_id = tr.attr('data-id');
-        account.push(account_id)
+
+        $(this).prop('checked', true)
+        // var tr = currentbtn.parent().parent();
+        // var account_id = tr.attr('data-id');
+        // account.push(account_id)
     })
     return account
+}
+
+Account.prototype.addAccountCurrencyEvent = function () {
+    console.log("asldfaljf")
+
+
+    $('#add-currency-btn').click(function () {
+        var currency = $('#add-new-currency').val()
+        console.log("scudf")
+        $('.currency-check-content').append(" <div class=\"checkbox\">\n" +
+            "                        <label><input type=\"checkbox\" class=\"currency-checkbox\" value=\"\">" + currency + "</label>\n" +
+            "                    </div>")
+
+    })
+
+
 }
 
 $(function () {
