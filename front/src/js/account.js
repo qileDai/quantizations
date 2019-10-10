@@ -100,10 +100,32 @@ Account.prototype.listenShowHideAddAccount = function () {
 
 
 Account.prototype.listendenominationEvent = function () {
-
+     var self = this;
     $('#account-curry-configuration').on('click', function () {
         $('.denomination-mask-account-wrapper').show();
         $('.denomination-account-wrapper').show();
+        var account_list = self.accountCuurrencyEvent()
+        var currency_list = []
+        $('.currency-checkbox').click(function () {
+            var currency = $(this).parent().text()
+            console.log(currency)
+            currency_list.push(currency)
+
+            $('#currency-add-btn').click(function () {
+                xfzajax.post({
+                    'url': '/deal/configcurrency/',
+                    'data':{
+                        'currency': currency_list,
+                        'account_list':account_list,
+                    },
+                    'success':function (result) {
+                        console.log(result)
+                    }
+                })
+            })
+
+        })
+
     })
 
     $('.denomination-close-btn').on('click', function () {

@@ -267,26 +267,25 @@ class ConfigCurrency(View):
     """
 
     def post(self, request):
-        currency = request.POST.get('currency')
-        if currency:
+        currency_list = request.POST.getlist('currency')
+        account_list = request.POST.getlist('account_list')
+        for currency in currency_list:
+            if currency:
             # 获取账户信息
-            user_id = request.session.get("user_id")
-            accounts = Account.objects.filter(id=user_id)
+            #     user_id = request.session.get("user_id")
+            #     accounts = Account.objects.filter(id=user_id)
 
-            for obj in accounts:
-                # 账户存在此币种则不添加
-                property_obj = Property.objects.filter(Q(account_id=obj.id) & Q(currency=currency))
-                if property_obj:
-                    continue
-                # 保存币种信息
-                LastdayAssets.objects.create(currency=currency, account_id=obj.id)
-                Property.objects.create(currency=currency, account_id=obj.id)
-        currency_info = LastdayAssets.objects.all()
-        context = {
-            # 币种信息
-            'currency_info': currency_info,
-        }
-        return render(request, 'management/tradingaccount.html', context)
+                for obj in account_list:
+                    # 账户存在此币种则不添加
+                    property_obj = Property.objects.filter(Q(account_id=obj.id) & Q(currency=currency))
+                    if property_obj:
+                        continue
+                    # 保存币种信息
+                    LastdayAssets.objects.create(currency=currency, account_id=obj.id)
+                    Property.objects.create(currency=currency, account_id=obj.id)
+            currency_info = LastdayAssets.objects.all()
+
+        return restful.ok()
 
 
 # ----------------------------------------------------------------------------------------------------------------------
