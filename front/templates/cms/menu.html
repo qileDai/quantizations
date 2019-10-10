@@ -103,14 +103,14 @@
                     <div class="form-group level2-wrapper">
                         <div class="form-group level1-wrapper">
                             <p class="menu-model-title  menu-model-title2">一级菜单名称</p>
-                            <input type="text" class="form-control" placeholder="请输入一级菜单名称">
+                            <input type="text" class="form-control menu-title" value="" placeholder="请输入一级菜单名称">
                         </div>
                         <div class="form-group from-group1">
                             <p class="menu-model-title">父级菜单</p>
                             <select type="text" class="form-control parent-menu" placeholder="请输入一级菜单序号">
                                 <option selected="selected" disabled="disabled" style='display: none' value=''></option>
                                 {% for menu in menus %}
-                                    <option value="{{ menu.pk }}">{{ menu.caption }}</option>
+                                    <option value="{{ menu.pk }}">{{ menu.title }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -119,7 +119,7 @@
                 </div>
                 <div class="menu-modal-footer">
                     <div class="button-account">
-                        <button id="confirm" class="btn  pull-right confirm">确认</button>
+                        <a id="confirm" class="btn  pull-right menu-confirm">确认</a>
                         <button id="cacle" class="btn  pull-right cancle">取消</button>
                     </div>
                 </div>

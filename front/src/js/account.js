@@ -24,6 +24,7 @@ Account.prototype.run = function () {
     self.showCollectAsset();
     self.showDetailProperty();
     self.refershAccountEvent();
+    self.accountCuurrencyEvent()
     // self.listenEditAccount();
 
 }
@@ -99,10 +100,34 @@ Account.prototype.listenShowHideAddAccount = function () {
 
 
 Account.prototype.listendenominationEvent = function () {
-
+    var self = this;
+    var account_list = self.accountCuurrencyEvent()
+    console.log(account_list)
     $('#account-curry-configuration').on('click', function () {
         $('.denomination-mask-account-wrapper').show();
         $('.denomination-account-wrapper').show();
+
+        var currency_list = []
+        $('.currency-checkbox').click(function () {
+            var currency = $(this).parent().text()
+            console.log(currency)
+            currency_list.push(currency)
+
+            $('#currency-add-btn').click(function () {
+                xfzajax.post({
+                    'url': '/deal/configcurrency/',
+                    'data': {
+                        'currency': currency_list,
+                        'account_list': account_list,
+                    },
+                    'success': function (result) {
+                        console.log(result)
+                    }
+                })
+            })
+
+        })
+
     })
 
     $('.denomination-close-btn').on('click', function () {
@@ -237,9 +262,15 @@ Account.prototype.listenPropertyDetailsShowEvent = function () {
 
 
 Account.prototype.showCollectAsset = function () {
+    var self = this;
+    var account_list = self.accountCuurrencyEvent()
+    console.log(account_list)
     $('#property-total').click(function () {
         xfzajax.post({
             'url': '/deal/showcollectasset/',
+            'data': {
+                'account_list': account_list
+            },
             'success': function (result) {
                 console.log(result)
             }
@@ -426,7 +457,7 @@ Account.prototype.refershAccountEvent = function () {
         console.log("ssdfas")
         self.detailsProperty.hide();
         setTimeout(function () {
-           self.detailsProperty.show()
+            self.detailsProperty.show()
 
         }, 100);
 
@@ -448,6 +479,17 @@ Account.prototype.refershAccountEvent = function () {
         //     }
         // })
     })
+}
+
+Account.prototype.accountCuurrencyEvent = function () {
+    var account = []
+    $('.account-chcekbox').click(function () {
+        var currentbtn = $(this);
+        var tr = currentbtn.parent().parent();
+        var account_id = tr.attr('data-id');
+        account.push(account_id)
+    })
+    return account
 }
 
 $(function () {

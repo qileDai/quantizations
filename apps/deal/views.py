@@ -21,6 +21,7 @@ from django.contrib.sessions import serializers
 import json
 from apps.deal.serializers import AccountSerializer
 
+
 # Create your views here.r
 
 
@@ -161,10 +162,14 @@ class ShowCollectAsset(View):
     """
 
     def post(self, request):
-        user_id = request.session.get("user_id")
 
-        ids = serializers.Serializer('json', Account.objects.filter(users__id=user_id).values('id'))
-        print(ids)
+        account_list = request.POST.getlist('account_list[]')
+        print("dfl")
+        print(account_list)
+        # user_id = request.session.get("user_id")
+        #
+        # ids = serializers.Serializer('json', Account.objects.filter(users__id=user_id).values('id'))
+        # print(ids)
         # ids = Account.objects.filter(users__id=user_id).values('id')
         # ids = json.dumps(ids)
         # print(ids)
@@ -172,8 +177,8 @@ class ShowCollectAsset(View):
         # ids = request.POST.get("pk")
         flag = True
         context_list = list()
-        for id in ids:
-            print("*"*20, id)
+        for id in account_list:
+            print("*" * 20, id)
             # 获取账户信息
             account_obj = Account.objects.get(id=id)
             # 账户对应的平台
@@ -263,26 +268,31 @@ class ConfigCurrency(View):
     """
 
     def post(self, request):
-        currency = request.POST.get('currency')
-        if currency:
-            # 获取账户信息
-            user_id = request.session.get("user_id")
-            accounts = Account.objects.filter(id=user_id)
+        currency_list = request.POST.getlist('currency[]')
+        account_list = request.POST.getlist('account_list[]')
+        print(account_list)
+        print(currency_list)
+        for account in account_list:
+            if account:
+                # 获取账户信息
+                #     user_id = request.session.get("user_id")
+                #     accounts = Account.objects.filter(id=user_id)
 
-            for obj in accounts:
-                # 账户存在此币种则不添加
-                property_obj = Property.objects.filter(Q(account_id=obj.id) & Q(currency=currency))
-                if property_obj:
-                    continue
-                # 保存币种信息
-                LastdayAssets.objects.create(currency=currency, account_id=obj.id)
-                Property.objects.create(currency=currency, account_id=obj.id)
-        currency_info = LastdayAssets.objects.all()
-        context = {
-            # 币种信息
-            'currency_info': currency_info,
-        }
-        return render(request, 'management/tradingaccount.html', context)
+                for currency in currency_list:
+                    if currency:
+                    # 账户存在此币种则不添加
+                        property_obj = Property.objects.filter(Q(account_id=account) & Q(currency=currency))
+                        if property_obj:
+                            continue
+                        # 保存币种信息
+                        LastdayAssets.objects.create(currency=currency, account_id=account)
+                        Property.objects.create(currency=currency, account_id=account)
+                    else:
+                        return restful.params_error(message='请选择账户币种')
+            else:
+                return restful.params_error(message='账户不存在')
+            currency_info = LastdayAssets.objects.all()
+        return restful.ok(message='success')
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -512,6 +522,7 @@ class ShowConfigInfo(View):
     """
     展示机器人配置信息
     """
+
     def post(self, request):
         id = request.POST.get('robot_id')
         robot_obj = Robot.objects.filter(id=id)

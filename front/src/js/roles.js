@@ -7,6 +7,7 @@ Role.prototype.run = function () {
     var self = this;
     self.listenDeleteRolesEvent();
     self.listRoleSubmitEvent();
+    self.listEditRole();
 
 };
 
@@ -63,6 +64,13 @@ Role.prototype.listRoleSubmitEvent = function () {
         })
     })
 };
+
+Role.prototype.listEditRole = function(){
+    $('.role-edit').click(function () {
+        $('.role-wrapper').show()
+
+    })
+}
 
 $(function () {
     var role = new Role();

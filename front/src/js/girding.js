@@ -141,6 +141,7 @@ Robot.prototype.run = function () {
     self.setCurrentPrice();
     self.oneStepRun();
     self.editRobotEvent();
+    self.listaasdffsdf();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
@@ -430,7 +431,7 @@ Robot.prototype.listenCreatTradingEvent = function () {
         var currentbtn = $(this);
         var tr = currentbtn.parent().parent();
         var robot_id = tr.attr('data-id');
-        $('#btnNext1').attr('robot_id',robot_id)
+        $('#btnNext1').attr('robot_id', robot_id)
         xfzajax.post({
             'url': '/deal/showtradedetail/',
             'data': {
@@ -438,6 +439,10 @@ Robot.prototype.listenCreatTradingEvent = function () {
             },
             'success': function (result) {
                 var robot = result['data']
+                var close = robot['closed_num']
+                var opne = robot['open_num']
+                $('.deal-opening').text("(" + opne +")")
+                $('.deal-completed').text("(" + close + ")")
                 console.log(robot)
                 var tpl = template('robot-deal-details', {'robots': robot})
                 var details = $('.tradingParticulars')
@@ -454,24 +459,25 @@ Robot.prototype.listenTradingRobotEvent = function () {
     var tradingShade = $('.tradingShade')
     var tradingloading = $('.trading-loading')
     var tradingending = $('.trading-ending')
-    var tradingcontainer = $('.trading-container')
-    var tradingendingtable = $('.trading-ending-table')
+    // var tradingcontainer = $('.trading-particulars')
+    // var tradingendingtable = $('.trading-ending-table')
     tradingclosebtn.click(function () {
         tradingParticulars.hide();
         tradingShade.hide();
+        window.location.reload()
 
     })
     tradingending.click(function () {
 
-        tradingcontainer.hide();
-        tradingendingtable.show();
+        $('.trading-particulars').hide();
+        $('.trading-ending-table').show();
         tradingloading.toggleClass('green')
         tradingending.toggleClass('green')
 
     })
     tradingloading.click(function () {
-        tradingcontainer.show();
-        tradingendingtable.hide();
+        $('.trading-particulars').show();
+        $('.trading-ending-table').hide();
         tradingending.toggleClass('green')
         tradingloading.toggleClass('green')
     })
@@ -489,7 +495,7 @@ Robot.prototype.listenparameterEven = function () {
         var currentbtn = $(this);
         var tr = currentbtn.parent().parent();
         var robot_id = tr.attr('data-id');
-        $('#btnNext1').attr("robot_id",robot_id)
+        $('#btnNext1').attr("robot_id", robot_id)
         xfzajax.post({
             'url': '/deal/showconfiginfo/',
             'data': {
@@ -510,7 +516,12 @@ Robot.prototype.listenparameterEven = function () {
         parameterconfiguration.hide();
         tradingShade.hide();
         window.location.reload()
-    })
+    });
+    $('.prevent-btn').click(function () {
+        parameterconfiguration.hide();
+        tradingShade.hide();
+        window.location.reload()
+    });
 }
 
 /**
@@ -595,7 +606,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                             }
                         }
                     });
-                    $('')
+
                 }
             }
 
@@ -846,7 +857,7 @@ Robot.prototype.editRobotEvent = function () {
         console.log("配置")
 
         var robot_id = $(this).attr("robot_id")
-        console.log("robotid",robot_id)
+        console.log("robotid", robot_id)
         var mix_num = $('.edit-mix-num').val()
         var max_num = $('.edit-max-numx').val()
         var stoploss = $('.edit-stoploss').val()
@@ -856,20 +867,20 @@ Robot.prototype.editRobotEvent = function () {
         xfzajax.post({
             'url': '/deal/showconfig/',
             'data': {
-                'robot_id':robot_id,
-                'min_num':mix_num,
-                'max_num':max_num,
-                'stop_price':stoploss,
-                'warning_price':waring,
-                'orders_frequency':orders_frequency,
+                'robot_id': robot_id,
+                'min_num': mix_num,
+                'max_num': max_num,
+                'stop_price': stoploss,
+                'warning_price': waring,
+                'orders_frequency': orders_frequency,
             },
-            'success':function (result) {
+            'success': function (result) {
                 console.log(result)
-              if(result['code'] === 200){
-                  xfzalert.alertSuccess("机器人配置成功",function () {
-                      window.location.reload()
-                  })
-              }
+                if (result['code'] === 200) {
+                    xfzalert.alertSuccess("机器人配置成功", function () {
+                        window.location.reload()
+                    })
+                }
             }
         })
     })
@@ -914,6 +925,13 @@ Robot.prototype.oneStepRun = function () {
             }
 
         })
+    })
+}
+
+
+Robot.prototype.listaasdffsdf = function () {
+    $('.dafdafadfad').click(function () {
+        $('.daiiqiekadfj').show()
     })
 }
 

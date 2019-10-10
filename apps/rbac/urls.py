@@ -18,8 +18,11 @@ urlpatterns = [
     path('add_permission/', views.add_permission, name='add_permission'),
     path('user_list/', views.userListView.as_view(), name='user_list'),
     path('delete_menu/', views.delete_menu, name='delete_menu'),
-    path('edit_permission/', views.edit_permission.as_view(), name='edit_permission'),
     path('delete_permission/', views.delete_permission, name='delete_permission'),
     path('rolesList/', views.RolesListView.as_view(), name='rolesList'),
+    path('edit_permission/', views.edit_permission, name='edit_permission'),
+    path('edit_role/', views.edit_Role, name='edit_role'),
+    path('edit_menu/', views.edit_Menu, name='edit_menu'),
+    path('add_menu/', views.add_menu, name='add_menu'),
 
 ]

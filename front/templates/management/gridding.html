@@ -101,7 +101,8 @@
                                 <td>{{ robot.create_time }}</td>
                                 <td>{{ robot.get_status_display }}</td>
                                 <td>
-                                    <a class="run-stop" id="run-robot" run_status="{{ robot.run_status }}" href="#">{{ robot.get_run_status_display }}</a>
+                                    <a class="run-stop" id="run-robot" run_status="{{ robot.run_status }}"
+                                       href="#">{{ robot.get_run_status_display }}</a>
                                     <a class="robot-details" href="javascript:;">详情</a>
                                     <a class="allocation" href="javascript:;">配置</a>
                                     <a class="protect-relieve" href="#">{{ robot.get_protection_display }}</a>
@@ -349,394 +350,410 @@
                 <div class="robot-modal-header-inner ystep1">交易详情</div>
             </div>
         </div>
-        <script id="robot-deal-details" type="text/html">
-        {% verbatim %}
-         <div class="trading-particulars">
+        <div class="trading-top">
             <ul>
-                <li class="trading-loading green">待成交<span>{{ robots.open_num }}</span></li>
-                <li class="trading-ending">已完成<span>{{ robots.closed_num }}</span></li>
+                <li class="trading-loading green" style="display: inline-block">待成交<span class="deal-opening"> </span>
+                </li>
+                <li class="trading-ending" style="display: inline-block">已完成<span class="deal-completed"></span></li>
             </ul>
-            <div class="trading-container">
+        </div>
+        <script id="robot-deal-details" type="text/html">
+            {% verbatim %}
+            <div class="trading-particulars">
+                <div class="trading-container">
+                    <div class="trding-information">
+                        <div class="trding-information-1">
+                            <span class="account-total">总投入:</span>{{ robots.total_input }}
+                            <span class="strategy-time">策略已运行:</span>{{ robots.running_time }}
+                        </div>
+                        <div class="trding-information-2">
+                            <span class="title">账户可用:</span>
+                            <span class="account-usdt">{{ robots.currency_balance }}</span>
+                            <span class="account-btc">{{ robots.currency_freeze }}</span>
+                            <span class="freeze-title">账户冻结:</span>
+                            <span class="freeze-usdt">{{ robots.market_balance }}</span>
+                            <span class="freeze-btc">{{ robots.market_freeze }}</span>
+                        </div>
+                        <div class="trding-information-3">
+                            <span>现价(LTC/USDT):</span>{{ robots.last }}
+                        </div>
+                    </div>
+                    <div class="trading-list">
+                        <span>买入(8笔）</span>
+                        <span class="buy-num">数量</span>
+                        <span class="buy-price">价格</span>
+                        <ul>
+                            <li>
+                                <span>买1</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                            <li>
+                                <span>买2</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                            <li>
+                                <span>买3</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                            <li>
+                                <span>买4</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                            <li>
+                                <span>买5</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                            <li>
+                                <span>买6</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                            <li>
+                                <span>买7</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                            <li>
+                                <span>买8</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="trading-list-ending">
+                        <span>卖出(8笔）</span>
+                        <span class="sell-num">数量</span>
+                        <span class="sell-price">价格</span>
+                        <ul>
+                            <li>
+                                <span>买1</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                            <li>
+                                <span>买2</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                            <li>
+                                <span>买3</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                            <li>
+                                <span>买4</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                            <li>
+                                <span>买5</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                            <li>
+                                <span>买6</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                            <li>
+                                <span>买7</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                            <li>
+                                <span>买8</span>
+                                <span>7391 usdt</span>
+                                <span>7391 itc</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="trading-ending-table">
                 <div class="trding-information">
                     <div class="trding-information-1">
-                        <span class="account-total">总投入:</span>{{ robots.total_input }}
-                        <span class="strategy-time">策略已运行:</span>{{ robots.running_time }}
+                        <span style="">总投入</span>
+                        <span>4500000usdt</span>
+                        <span>策略已运行</span>
+                        <span>2天21小时34分15秒</span>
                     </div>
                     <div class="trding-information-2">
-                        <span class="title">账户可用:</span>
-                        <span class="account-usdt">2222usdt</span>
-                        <span class="account-btc">2222btc</span>
-                        <span class="freeze-title">账户冻结:</span>
-                        <span class="freeze-usdt">2222usdt</span>
-                        <span class="freeze-btc">2222btc</span>
+                        <span>账户可用38836usdt</span>
+                        <span>6488.34itc</span>
+                        <span>账户冻结：45488.34 usdt</span>
+                        <span>638834itc</span>
                     </div>
                     <div class="trding-information-3">
-                        <span>现价(LTC/USDT):</span>7459usdt
+                        <span>现价(LTC/USDT):</span>
+                        <span>7459usdt</span>
                     </div>
                 </div>
-                <div class="trading-list">
-                    <h5>买入(8笔）</h5>
-                    <ul>
-                        <li>
-                            <span>买1</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                        <li>
-                            <span>买2</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                        <li>
-                            <span>买3</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                        <li>
-                            <span>买4</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                        <li>
-                            <span>买5</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                        <li>
-                            <span>买6</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                        <li>
-                            <span>买7</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                        <li>
-                            <span>买8</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="trading-list-ending">
-                    <h5>买入(8笔）</h5>
-                    <ul>
-                        <li>
-                            <span>买1</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                        <li>
-                            <span>买2</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                        <li>
-                            <span>买3</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                        <li>
-                            <span>买4</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                        <li>
-                            <span>买5</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                        <li>
-                            <span>买6</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                        <li>
-                            <span>买7</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                        <li>
-                            <span>买8</span>
-                            <span>7391 usdt</span>
-                            <span>7391 itc</span>
-                        </li>
-                    </ul>
-                </div>
+                <table border="1px" class="trading-ending-list">
+                    <tr>
+                        <th>类型</th>
+                        <th>价格(USDT)</th>
+                        <th>总额(USDT)</th>
+                        <th>创建时间</th>
+                        <th>类型</th>
+                        <th>价格(USDT)</th>
+                        <th>总额(USDT)</th>
+                        <th>创建时间</th>
+                        <th>收益(USDT)</th>
+                    </tr>
+
+                    <tr>
+                        <td>买入</td>
+                        <td>74.78</td>
+                        <td>1.331084</td>
+                        <td>2019080721：33</td>
+                        <td>卖出</td>
+                        <td>75.21</td>
+                        <td>1.338737</td>
+                        <td>2019/080722：42</td>
+                        <td>+0.07654</td>
+                    </tr>
+                    <tr>
+                        <td>买入</td>
+                        <td>74.78</td>
+                        <td>1.331084</td>
+                        <td>2019080721：33</td>
+                        <td>卖出</td>
+                        <td>75.21</td>
+                        <td>1.338737</td>
+                        <td>2019/080722：42</td>
+                        <td>+0.07654</td>
+                    </tr>
+                    <tr>
+                        <td>买入</td>
+                        <td>74.78</td>
+                        <td>1.331084</td>
+                        <td>2019080721：33</td>
+                        <td>卖出</td>
+                        <td>75.21</td>
+                        <td>1.338737</td>
+                        <td>2019/080722：42</td>
+                        <td>+0.07654</td>
+                    </tr>
+                    <tr>
+                        <td>买入</td>
+                        <td>74.78</td>
+                        <td>1.331084</td>
+                        <td>2019080721：33</td>
+                        <td>卖出</td>
+                        <td>75.21</td>
+                        <td>1.338737</td>
+                        <td>2019/080722：42</td>
+                        <td>+0.07654</td>
+                    </tr>
+                    <tr>
+                        <td>买入</td>
+                        <td>74.78</td>
+                        <td>1.331084</td>
+                        <td>2019080721：33</td>
+                        <td>卖出</td>
+                        <td>75.21</td>
+                        <td>1.338737</td>
+                        <td>2019/080722：42</td>
+                        <td>+0.07654</td>
+                    </tr>
+                    <tr>
+                        <td>买入</td>
+                        <td>74.78</td>
+                        <td>1.331084</td>
+                        <td>2019080721：33</td>
+                        <td>卖出</td>
+                        <td>75.21</td>
+                        <td>1.338737</td>
+                        <td>2019/080722：42</td>
+                        <td>+0.07654</td>
+                    </tr>
+                    <tr>
+                        <td>买入</td>
+                        <td>74.78</td>
+                        <td>1.331084</td>
+                        <td>2019080721：33</td>
+                        <td>卖出</td>
+                        <td>75.21</td>
+                        <td>1.338737</td>
+                        <td>2019/080722：42</td>
+                        <td>+0.07654</td>
+                    </tr>
+                    <tr>
+                        <td>买入</td>
+                        <td>74.78</td>
+                        <td>1.331084</td>
+                        <td>2019080721：33</td>
+                        <td>卖出</td>
+                        <td>75.21</td>
+                        <td>1.338737</td>
+                        <td>2019/080722：42</td>
+                        <td>+0.07654</td>
+                    </tr>
+                    <tr>
+                        <td>买入</td>
+                        <td>74.78</td>
+                        <td>1.331084</td>
+                        <td>2019080721：33</td>
+                        <td>卖出</td>
+                        <td>75.21</td>
+                        <td>1.338737</td>
+                        <td>2019/080722：42</td>
+                        <td>+0.07654</td>
+                    </tr>
+                    <tr>
+                        <td>买入</td>
+                        <td>74.78</td>
+                        <td>1.331084</td>
+                        <td>2019080721：33</td>
+                        <td>卖出</td>
+                        <td>75.21</td>
+                        <td>1.338737</td>
+                        <td>2019/080722：42</td>
+                        <td>+0.07654</td>
+                    </tr>
+                    <tr>
+                        <td>买入</td>
+                        <td>74.78</td>
+                        <td>1.331084</td>
+                        <td>2019080721：33</td>
+                        <td>卖出</td>
+                        <td>75.21</td>
+                        <td>1.338737</td>
+                        <td>2019/080722：42</td>
+                        <td>+0.07654</td>
+                    </tr>
+                    <tr>
+                        <td>买入</td>
+                        <td>74.78</td>
+                        <td>1.331084</td>
+                        <td>2019080721：33</td>
+                        <td>卖出</td>
+                        <td>75.21</td>
+                        <td>1.338737</td>
+                        <td>2019/080722：42</td>
+                        <td>+0.07654</td>
+                    </tr>
+                </table>
+                {% include 'cms/box_footer.html' %}
             </div>
-
-        </div>
-        <div class="trading-ending-table">
-            <div class="trding-information">
-                <div class="trding-information-1">
-                    <span style="">总投入</span>
-                    <span>4500000usdt</span>
-                    <span>策略已运行</span>
-                    <span>2天21小时34分15秒</span>
-                </div>
-                <div class="trding-information-2">
-                    <span>账户可用38836usdt</span>
-                    <span>6488.34itc</span>
-                    <span>账户冻结：45488.34 usdt</span>
-                    <span>638834itc</span>
-                </div>
-                <div class="trding-information-3">
-                    <span>现价(LTC/USDT):</span>
-                    <span>7459usdt</span>
-                </div>
-            </div>
-            <table border="1px" class="trading-ending-list">
-                <tr>
-                    <th>类型</th>
-                    <th>价格(USDT)</th>
-                    <th>总额(USDT)</th>
-                    <th>创建时间</th>
-                    <th>类型</th>
-                    <th>价格(USDT)</th>
-                    <th>总额(USDT)</th>
-                    <th>创建时间</th>
-                    <th>收益(USDT)</th>
-                </tr>
-
-                <tr>
-                    <td>买入</td>
-                    <td>74.78</td>
-                    <td>1.331084</td>
-                    <td>2019080721：33</td>
-                    <td>卖出</td>
-                    <td>75.21</td>
-                    <td>1.338737</td>
-                    <td>2019/080722：42</td>
-                    <td>+0.07654</td>
-                </tr>
-                <tr>
-                    <td>买入</td>
-                    <td>74.78</td>
-                    <td>1.331084</td>
-                    <td>2019080721：33</td>
-                    <td>卖出</td>
-                    <td>75.21</td>
-                    <td>1.338737</td>
-                    <td>2019/080722：42</td>
-                    <td>+0.07654</td>
-                </tr>
-                <tr>
-                    <td>买入</td>
-                    <td>74.78</td>
-                    <td>1.331084</td>
-                    <td>2019080721：33</td>
-                    <td>卖出</td>
-                    <td>75.21</td>
-                    <td>1.338737</td>
-                    <td>2019/080722：42</td>
-                    <td>+0.07654</td>
-                </tr>
-                <tr>
-                    <td>买入</td>
-                    <td>74.78</td>
-                    <td>1.331084</td>
-                    <td>2019080721：33</td>
-                    <td>卖出</td>
-                    <td>75.21</td>
-                    <td>1.338737</td>
-                    <td>2019/080722：42</td>
-                    <td>+0.07654</td>
-                </tr>
-                <tr>
-                    <td>买入</td>
-                    <td>74.78</td>
-                    <td>1.331084</td>
-                    <td>2019080721：33</td>
-                    <td>卖出</td>
-                    <td>75.21</td>
-                    <td>1.338737</td>
-                    <td>2019/080722：42</td>
-                    <td>+0.07654</td>
-                </tr>
-                <tr>
-                    <td>买入</td>
-                    <td>74.78</td>
-                    <td>1.331084</td>
-                    <td>2019080721：33</td>
-                    <td>卖出</td>
-                    <td>75.21</td>
-                    <td>1.338737</td>
-                    <td>2019/080722：42</td>
-                    <td>+0.07654</td>
-                </tr>
-                <tr>
-                    <td>买入</td>
-                    <td>74.78</td>
-                    <td>1.331084</td>
-                    <td>2019080721：33</td>
-                    <td>卖出</td>
-                    <td>75.21</td>
-                    <td>1.338737</td>
-                    <td>2019/080722：42</td>
-                    <td>+0.07654</td>
-                </tr>
-                <tr>
-                    <td>买入</td>
-                    <td>74.78</td>
-                    <td>1.331084</td>
-                    <td>2019080721：33</td>
-                    <td>卖出</td>
-                    <td>75.21</td>
-                    <td>1.338737</td>
-                    <td>2019/080722：42</td>
-                    <td>+0.07654</td>
-                </tr>
-                <tr>
-                    <td>买入</td>
-                    <td>74.78</td>
-                    <td>1.331084</td>
-                    <td>2019080721：33</td>
-                    <td>卖出</td>
-                    <td>75.21</td>
-                    <td>1.338737</td>
-                    <td>2019/080722：42</td>
-                    <td>+0.07654</td>
-                </tr>
-                <tr>
-                    <td>买入</td>
-                    <td>74.78</td>
-                    <td>1.331084</td>
-                    <td>2019080721：33</td>
-                    <td>卖出</td>
-                    <td>75.21</td>
-                    <td>1.338737</td>
-                    <td>2019/080722：42</td>
-                    <td>+0.07654</td>
-                </tr>
-                <tr>
-                    <td>买入</td>
-                    <td>74.78</td>
-                    <td>1.331084</td>
-                    <td>2019080721：33</td>
-                    <td>卖出</td>
-                    <td>75.21</td>
-                    <td>1.338737</td>
-                    <td>2019/080722：42</td>
-                    <td>+0.07654</td>
-                </tr>
-                <tr>
-                    <td>买入</td>
-                    <td>74.78</td>
-                    <td>1.331084</td>
-                    <td>2019080721：33</td>
-                    <td>卖出</td>
-                    <td>75.21</td>
-                    <td>1.338737</td>
-                    <td>2019/080722：42</td>
-                    <td>+0.07654</td>
-                </tr>
-
-            </table>
-            {% include 'cms/box_footer.html' %}
-        </div>
-        {% endverbatim %}
+            {% endverbatim %}
         </script>
 
     </div>
     <div class="parameter-configuration">
-        <div class="parameter-content">
-            <div class="parameter-close-group">
-                <span class="parameter-close-btn close-btn icon-close iconfont"></span>
-            </div>
-            <div class="parameter-modal-header">
-                <div class="robot-modal-header-inner ystep1">参数配置</div>
-            </div>
-        </div>
-        <div class="parameter-list-content" id="parameter-list-content">
-            <script id="robots-details" type="text/html">
-                {% verbatim %}
-                <div class="parameter-strategy-parameters">
-                <div>策略参数</div>
-                <ul>
-                    <li><span>交易账户</span><input type="text" disabled="disabled" value="{{ robots.account_name
-                     }}"></li>
-                    <li style="text-align: center"><span>可用</span><span>{{  }} 6.000.0000itc</span></li>
-                    <li><span>当前价</span><input type="text" disabled="disabled" value="{{ robots.robot.fields.current_price }}"></li>
-                    <li><span>重新挂单频率</span><input type="text" class="edit-orders-frequency" disabled="disabled" value="{{ robots.robot.fields.orders_frequency }}"></li>
-                    <li><span>阻力值</span><input type="text" disabled="disabled " value="{{ robots.robot.fields.resistance }}"></li>
-                    <li><span>支撑位</span><input type="text" disabled="disabled" value="{{ robots.robot.fields.support_level }}"></li>
-                    <li><span>网格数量</span><input type="text" disabled="disabled" value="{{ robots.robot.fields.girding_num }}"></li>
-                    <li><span>单次交易手续费</span><input type="text" disabled="disabled" value="{{robots.robot.fields.procudere_fee }}%"></li>
-                    <li><span>单网格最小交易数量</span><input type="text" class="edit-mix-num" value="{{ robots.robot.fields.min_num }}"></li>
-                    <li><span>单网格最大交易数量</span><input type="text" class="edit-max-numx" value="{{ robots.robot.fields.max_num }}"></li>
-                    <li style="text-align: center"><span>单网格利润 </span><span>{{ robots.robot.fields.girding_profit }}</span></li>
-                </ul>
-            </div>
-            <div class="risk-strategy">
-                <div>风险策略</div>
-                <ul>
-                    <li><span>止损价</span><input type="text" class="edit-stoploss" value="{{ robots.robot.fields.stop_price }}"></li>
-                    <li><span>预警价</span><input type="text" class="edit-waring"  value="{{ robots.robot.fields.warning_price }}"></li>
-                </ul>
-            </div>
-            <div class="risk-strategy-warninguser">
-                <div>预警账户</div>
-                <div class="btn-group" data-toggle="buttons">
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 524135494218
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> @68451816548
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 66@454519684
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 318416518687
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 684651684654
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 546843216874
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 356468513544
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 546846516848
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 683548946848
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 684651684654
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 683548946848
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 684651684654
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 683548946848
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 684651684654
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 683548946848
-                    </label>
-                    <label class="btn btn-default">
-                        <input type="checkbox"> 684651684654
-                    </label>
-
+        <div class="configuration-content">
+            <div class="parameter-content">
+                <div class="parameter-close-group">
+                    <span class="parameter-close-btn close-btn icon-close iconfont"></span>
+                </div>
+                <div class="parameter-modal-header">
+                    <div class="robot-modal-header-inner ystep1">参数配置</div>
                 </div>
             </div>
-                {% endverbatim %}
-            </script>
-
-        </div>
-        <div class="risk-footer">
-            <div class="risk-button">
-                <button class="prevent-btn  " id="btnPre1">取消</button>
-                <button class="next-btn" id="btnNext1">完成</button>
+            <div class="parameter-list-content" id="parameter-list-content">
+                <script id="robots-details" type="text/html">
+                    {% verbatim %}
+                    <div class="parameter-strategy-parameters">
+                        <div>策略参数</div>
+                        <ul>
+                            <li><span>交易账户</span><input type="text" disabled="disabled" value="{{ robots.account_name
+                 }}"></li>
+                            <li class="account_details"><span>可用</span><span>{{  }} 6.000.0000itc</span></li>
+                            <li><span>当前价</span><input type="text" disabled="disabled"
+                                                       value="{{ robots.robot.fields.current_price }}"></li>
+                            <li><span>重新挂单频率</span><input type="text" class="edit-orders-frequency" disabled="disabled"
+                                                          value="{{ robots.robot.fields.orders_frequency }}"></li>
+                            <li><span>阻力值</span><input type="text" disabled="disabled "
+                                                       value="{{ robots.robot.fields.resistance }}"></li>
+                            <li><span>支撑位</span><input type="text" disabled="disabled"
+                                                       value="{{ robots.robot.fields.support_level }}"></li>
+                            <li><span>网格数量</span><input type="text" disabled="disabled"
+                                                        value="{{ robots.robot.fields.girding_num }}"></li>
+                            <li><span>单次交易手续费</span><input type="text" disabled="disabled"
+                                                           value="{{robots.robot.fields.procudere_fee }}%"></li>
+                            <li><span>单网格最小交易数量</span><input type="text" class="edit-mix-num"
+                                                             value="{{ robots.robot.fields.min_num }}"></li>
+                            <li><span>单网格最大交易数量</span><input type="text" class="edit-max-numx"
+                                                             value="{{ robots.robot.fields.max_num }}"></li>
+                            <li class="gird_profit"><span>单网格利润 </span><span class="grofit-value">{{ robots.robot.fields.girding_profit }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="risk-strategy">
+                        <div>风险策略</div>
+                        <ul>
+                            <li><span>止损价</span><input type="text" class="edit-stoploss"
+                                                       value="{{ robots.robot.fields.stop_price }}"></li>
+                            <li><span>预警价</span><input type="text" class="edit-waring"
+                                                       value="{{ robots.robot.fields.warning_price }}"></li>
+                        </ul>
+                    </div>
+                    <div class="risk-strategy-warninguser">
+                        <div>预警账户</div>
+                        <div class="btn-group" data-toggle="buttons">
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 524135494218
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> @68451816548
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 66@454519684
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 318416518687
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 684651684654
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 546843216874
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 356468513544
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 546846516848
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 683548946848
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 684651684654
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 683548946848
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 684651684654
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 683548946848
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 684651684654
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 683548946848
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="checkbox"> 684651684654
+                            </label>
+                        </div>
+                    </div>
+                    {% endverbatim %}
+                </script>
+            </div>
+            <div class="risk-footer">
+                <div class="risk-button">
+                    <button class="prevent-btn  " id="btnPre1">取消</button>
+                    <button class="next-btn" id="btnNext1">完成</button>
+                </div>
             </div>
         </div>
     </div>
@@ -744,6 +761,5 @@
     <script src="{% static 'ystep-master/js/jquery.min.js' %}"></script>
     <script src="{% static 'ystep-master/js/ystep.js' %}"></script>
     <script src="{% static 'js/girding.min.js' %}"></script>
-
 
 {% endblock %}

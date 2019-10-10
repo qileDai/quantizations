@@ -71,9 +71,14 @@ Permission.prototype.editPermission = function () {
         var tr = currentbtn.parent().parent();
         var pk = tr.attr('data-permission-id');
         console.log(pk);
-        $('#permission-confirm').attr('permission-id',pk)
         xfzajax.post({
-
+            'url': '/rbac/edit_permission/',
+            'data':{
+                'permission_id': pk,
+            },
+            'success':function (result) {
+                console.log(result)
+            }
         })
     })
 }
