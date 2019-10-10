@@ -93,12 +93,51 @@ class GridStrategy(Thread):
             conn.close()
             return cur.fetchone()
 
-    def place_order(self, item=None, counts=None):
+    def place_one_order(self, item=None):
         """
-        下单，根据counts判断批量or单笔
-        :param counts: 默认参数
+        单笔下单
         :param item: "买n": {""id": res.get("id"),price_range": (a, b),"order_type": self.order_type,
                             "price": price,"amount": amount}
+        :return:
+        """
+        try:
+            # 获取下单数量
+            sql = "select min_num,max_num from deal_robot where id = %s"
+            ret = self.connect_db(sql, (self.robot_obj.id,))
+            amount = round(random.uniform(ret[0], ret[1]), 3)
+        except Exception as e:
+            # self.log_info("api")
+            # logging.exception("GET MARKETS DATA FAILED...", e)
+            print("获取下单数量失败...", e)
+        else:
+            # 更新单笔挂单
+            a, b = item[1]["price_range"]
+            price = random.uniform(a, b)
+            res = self.server_api.order(str(amount), self.currency_type, str(price), item[1]["order_type"])
+            if res.get("id") is not None:
+                # 下单成功
+                self.lock.acquire()
+                self.id_dict[res.get("id")] = {
+                    "grade": item[1]["grade"],
+                    "price_range": (a, b),
+                    "order_type": self.order_type,
+                    "price": price,
+                    "amount": amount,
+                    "trade_amount": 0,
+                    "reverse": False,
+                }
+                del self.id_dict[item[0]]
+                # print('删除--------------------------------------------------------------')
+                self.lock.release()
+            else:
+                new_key = item[0] + "failed"
+                self.lock.acquire()
+                self.id_dict[new_key] = self.id_dict.pop(item[0])
+                self.lock.release()
+
+    def place_many_order(self):
+        """
+        批量下单
         :return:
         """
         try:
@@ -120,32 +159,6 @@ class GridStrategy(Thread):
             amount = round(random.uniform(ret[0], ret[1]), 3)
 
             n = self.robot_obj.girding_num      # 批量挂原始单
-
-            if counts:
-                # 更新单笔挂单
-                a, b = item[1]["price_range"]
-                price = random.uniform(a, b)
-                res = self.server_api.order(str(amount), self.currency_type, str(price), item[1]["order_type"])
-                if res.get("id") is not None:
-                    # 下单成功
-                    self.lock.acquire()
-                    self.id_dict[res.get("id")] = {
-                        "grade": item[1]["grade"],
-                        "price_range": (a, b),
-                        "order_type": self.order_type,
-                        "price": price,
-                        "amount": amount,
-                        "trade_amount": 0,
-                        "reverse": False,
-                    }
-                    del self.id_dict[item[0]]
-                    # print('删除--------------------------------------------------------------')
-                    self.lock.release()
-                else:
-                    new_key = item[0] + "failed"
-                    self.lock.acquire()
-                    self.id_dict[new_key] = self.id_dict.pop(item[0])
-                    self.lock.release()
 
             for i in range(n):
                 # 批量更新
@@ -399,9 +412,10 @@ class GridStrategy(Thread):
                 print('刷单频率', orders_frequency[0])
                 # 未成功下单
                 li_range = self.id_dict.items()
-                for elem in li_range:
+                for elem in list(li_range):
                     if 'failed' in elem[0]:
-                        self.place_order(elem, 1)
+                        print("未成功下单", elem[0])
+                        self.place_one_order(elem)
 
                 self.lock.acquire()
                 if len(self.id_dict) <= 10:
@@ -429,7 +443,7 @@ class GridStrategy(Thread):
                             if res.get("code") in [100, 211, 212]:
                                 # 撤单成功再下单
                                 time.sleep(0.1)
-                                self.place_order(item, 1)
+                                self.place_one_order(item)
 
                     except Exception as e:
                         # self.log_info("api")
@@ -458,7 +472,7 @@ class GridStrategy(Thread):
         thread2.join()
 
     def run(self):
-        self.place_order()
+        self.place_many_order()
         self.run_thread()
 
 
