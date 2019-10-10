@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'apps.exx',
     'apps.rbac',
     'apps.deal',
-    'django_crontab',
+    'django_crontab',       # 定时任务
     'rest_framework',
 
 ]
