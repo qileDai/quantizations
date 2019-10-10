@@ -1,7 +1,6 @@
 import random
 from pymysql import *
 import time
-import datetime
 import logging
 from threading import Thread
 from dealapi.exx.exxService import ExxService
@@ -22,7 +21,7 @@ class GridStrategy(Thread):
         self.id_dict = dict()                                                         # 挂单字典，保存挂单信息
         self.grid_range = float(self.robot_obj.resistance - self.robot_obj.support_level) / float(self.robot_obj.girding_num)
         self.Flag = True  # 停止标志位
-        self.start_time = datetime.datetime.now()       # 启动时间
+        self.start_time = time.time()       # 启动时间
         self.lock = threading.Lock()
 
         # 初始化平台接口对象
@@ -392,7 +391,7 @@ class GridStrategy(Thread):
                         time.sleep(0.1)
 
             if not self.Flag:
-                for i in range(2):
+                for i in range(5):
                     self.cancel_orders()
                     # cancel_thread = Thread(target=self.cancel_orders)
                     # cancel_thread.start()
@@ -455,7 +454,7 @@ class GridStrategy(Thread):
                 time.sleep(orders_frequency[0])
 
         if not self.Flag:
-            for i in range(2):
+            for i in range(5):
                 self.cancel_orders()
                 # cancel_thread = Thread(target=self.cancel_orders)
                 # cancel_thread.start()

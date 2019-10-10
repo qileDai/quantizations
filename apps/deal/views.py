@@ -13,7 +13,7 @@ from utils.mixin import LoginRequireMixin
 from utils import restful
 from apps.deal.Strategy.Grid import GridStrategy
 import threading
-import datetime
+import time, math
 from rest_framework import serializers
 from django.core import serializers
 from django.core.serializers import serialize
@@ -402,7 +402,6 @@ class StartRobot(View):
         ids = request.POST.get('robot_id')
         # Flag为1启动，为0停止
         Flag = int(request.POST.get('flag'))
-        print(ids, Flag, '-'*30)
         if ids:
             robots = Robot.objects.filter(id=ids)
         elif Flag == 1:
@@ -448,6 +447,25 @@ class ShowTradeDetail(View):
     """
     展示机器人交易详情
     """
+    def data_format(self, data):
+        data = str(round(float(data), 2))
+        return data
+
+    def changeTime(self, allTime):
+        day = 24 * 60 * 60
+        hour = 60 * 60
+        min = 60
+        if allTime < 60:
+            return "%d sec" % math.ceil(allTime)
+        elif allTime > day:
+            days = divmod(allTime, day)
+            return "%d 天, %s" % (int(days[0]), self.changeTime(days[1]))
+        elif allTime > hour:
+            hours = divmod(allTime, hour)
+            return '%d 时, %s' % (int(hours[0]), self.changeTime(hours[1]))
+        else:
+            mins = divmod(allTime, min)
+            return "%d 分, %d 秒" % (int(mins[0]), math.ceil(mins[1]))
 
     def post(self, request):
         # 获取机器人id
@@ -463,19 +481,18 @@ class ShowTradeDetail(View):
 
         property_obj = Property.objects.get(Q(account_id=robot_obj.trading_account_id) & Q(currency=currency))
         closed_order = OrderInfo.objects.filter(robot=id)
-        data = serialize("json", closed_order.order_by("-id"))[1:-1]
-        # data_dict = json.loads(data)
-        # print(data_dict)
         # 获取挂单信息
         order_info = dict()
-        running_time = 0
+        print('11111', StartRobot.order_list)
         for item in StartRobot.order_list:
             try:
                 # 获取机器人对应的线程对象
                 robot = item.robot_obj
+                print('222222', id, robot.id)
                 if id == str(robot.id):
-                    order_info = dict(order_info, **item)
-                running_time = item.start_time - datetime.datetime.now()
+                    # 向字典中添加数据
+                    order_info = dict(order_info, **item.id_dict)
+                running_time = item.start_time - time.time()
             except:
                 print('对象没有属性robot_obj')
                 continue
@@ -489,22 +506,23 @@ class ShowTradeDetail(View):
             # 未完成挂单信息
             'open_info': order_info,
             # 总投入
-            'total_input': str(property_obj.original_assets),
+            # 'total_input': str(property_obj.original_assets),
+            'total_input': self.data_format(property_obj.original_assets),
             # 运行时间
-            'running_time': running_time,
+            'running_time': self.changeTime(running_time),
             # 交易币种可用
-            'currency_balance': info[currency.upper()].get('balance'),
+            'currency_balance': self.data_format(info[currency.upper()].get('balance')) + ' ' + currency,
             # 交易市场可用
-            'market_balance': info[market.upper()].get('balance'),
+            'market_balance': self.data_format(info[market.upper()].get('balance')) + ' ' + market,
             # 交易币种冻结
-            'currency_freeze': info[currency.upper()].get('freeze'),
+            'currency_freeze': self.data_format(info[currency.upper()].get('freeze')) + ' ' + currency,
             # 交易市场冻结
-            'market_freeze': info[market.upper()].get('freeze'),
+            'market_freeze': self.data_format(info[market.upper()].get('freeze')) + ' ' + market,
             # 当前价
-            'last': info1['ticker'].get('last'),
+            'last': self.data_format(info1['ticker'].get('last')) + ' ' + market,
             # 总收益
-            'profit': (float(info[currency.upper()].get('total')) - float(property_obj.original_assets))
-                      * float(info1['ticker'].get('last')),
+            'profit': self.data_format((float(info[currency.upper()].get('total')) - float(property_obj.original_assets))
+                                       * float(info1['ticker'].get('last'))) + ' ' + market,
         }
         print(context)
         return restful.result(data=context)
