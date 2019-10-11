@@ -105,7 +105,7 @@ class Robot(models.Model):
     annual_yield = models.DecimalField(max_digits=5, decimal_places=2,null=True)          # 年化收益率
     create_time = models.DateTimeField(auto_now_add=True)                       # 创建时间
     status = models.SmallIntegerField(choices=Robot_Status, default=0)                     # 状态
-    protection = models.SmallIntegerField(choices=Robot_Protect, default=2)                # 机器人保护状态
+    protection = models.SmallIntegerField(choices=Robot_Protect, default=0)                # 机器人保护状态
 
     current_price = models.DecimalField(max_digits=10, decimal_places=2)        # 当前价
     orders_frequency = models.IntegerField()                                    # 挂单频率
@@ -119,7 +119,7 @@ class Robot(models.Model):
     stop_price = models.DecimalField(max_digits=19, decimal_places=2)           # 止损价
     warning_price = models.DecimalField(max_digits=19, decimal_places=2)        # 预警价
     warning_account = models.CharField(max_length=1024, null=True)                           # 预警账户
-    run_status = models.SmallIntegerField(choices=Run_Status, default=0)
+    run_status = models.SmallIntegerField(choices=Run_Status, default=1)
 
     class Meta:
         ordering = ['-create_time']

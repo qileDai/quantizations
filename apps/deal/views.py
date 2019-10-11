@@ -474,6 +474,13 @@ class ShowTradeDetail(View):
             mins = divmod(allTime, min)
             return "%d 分, %d 秒" % (int(mins[0]), math.ceil(mins[1]))
 
+    def sort_data(self, order_dict, order_type):
+        if order_type is "sell":
+            id_dicts = sorted(order_dict.items(), key=lambda x: x[1]["price"])
+        elif order_type is "buy":
+            id_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"], reverse=True)
+        return id_dicts
+
     def post(self, request):
         # 获取机器人id
         id = request.POST.get('robot_id')
@@ -481,25 +488,34 @@ class ShowTradeDetail(View):
         currency = robot_obj.currency
         market = robot_obj.market
         # 调用函数
-        user_obj, service_obj, market_obj = get_account_info(currency, market, robot_obj.trading_account_id)
-        info = service_obj.get_balance()
-        info = info.get('funds')
-        info1 = market_obj.get_ticker()
+        try:
+            user_obj, service_obj, market_obj = get_account_info(currency, market, robot_obj.trading_account_id)
+            info = service_obj.get_balance()
+            info = info.get('funds')
+            info1 = market_obj.get_ticker()
+            info1 = info1.get('ticker')
+        except:
+            return restful.params_error(message='币种错误，请核对！')
 
         property_obj = Property.objects.get(Q(account_id=robot_obj.trading_account_id) & Q(currency=currency))
         closed_order = OrderInfo.objects.filter(robot=id)
         # 获取挂单信息
         order_info = dict()
-        print('11111', StartRobot.order_list)
+        lens = 0
+        # print('11111', StartRobot.order_list)
         for item in StartRobot.order_list:
             try:
                 # 获取机器人对应的线程对象
                 robot = item.robot_obj
-                print('222222', id, robot.id)
                 if id == str(robot.id):
                     # 向字典中添加数据
-                    order_info = dict(order_info, **item.id_dict)
+                    order_dict = item.id_dict
+                    order_type = item.order_type
+                    res = self.sort_data(order_dict, order_type)
+                    order_info[order_type] = res
                 running_time = time.time() - item.start_time
+                for num in order_info:
+                    lens += len(num)
             except:
                 print('对象没有属性robot_obj')
                 continue
@@ -509,11 +525,11 @@ class ShowTradeDetail(View):
             # 已完成挂单信息
             'closed_info': serialize("json", closed_order.order_by("-id")),
             # 未完成笔数
-            'open_num': len(order_info),
+            # 'open_num': len(order_info),
+            'open_num': lens,
             # 未完成挂单信息
-            'open_info': order_info,
+            'open_sell_info': order_info,
             # 总投入
-            # 'total_input': str(property_obj.original_assets),
             'total_input': self.data_format(property_obj.original_assets),
             # 运行时间
             'running_time': self.changeTime(running_time),
@@ -526,10 +542,10 @@ class ShowTradeDetail(View):
             # 交易市场冻结
             'market_freeze': self.data_format(info[market.upper()].get('freeze')) + ' ' + market,
             # 当前价
-            'last': self.data_format(info1['ticker'].get('last')) + ' ' + market,
+            'last': self.data_format(info1.get('last')) + ' ' + market,
             # 总收益
             'profit': self.data_format((float(info[currency.upper()].get('total')) - float(property_obj.original_assets))
-                                       * float(info1['ticker'].get('last'))) + ' ' + market,
+                                       * float(info1.get('last'))) + ' ' + market,
         }
         print(context)
         return restful.result(data=context)
