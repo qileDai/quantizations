@@ -410,15 +410,16 @@ class StartRobot(View):
         ids = request.POST.get('robot_id')
         # Flag为1启动，为0停止
         Flag = int(request.POST.get('flag'))
-        if ids:
+        print(ids, Flag)
+        if ids and Flag == 1:
             robots = Robot.objects.filter(id=ids)
-        elif Flag == 1:
+        elif not ids and Flag == 1:
             robots = Robot.objects.filter(Q(status=0) & Q(protection=1))
-        elif Flag == 0:
+        elif not ids and Flag == 0:
             robots = Robot.objects.filter(Q(status=1) & Q(protection=1))
         # 调用对应策略
         for robot_obj in robots:
-            if robot_obj.trading_strategy == '网格策略V1.0' and Flag == 1:
+            if robot_obj.trading_strategy == '网格交易V1.0' and Flag == 1:
                 Robot.objects.filter(id=robot_obj.id).update(run_status=0)
                 Robot.objects.filter(id=robot_obj.id).update(status=Flag)
                 # 启动线程
@@ -504,6 +505,7 @@ class ShowTradeDetail(View):
         lens = 0
         # print('11111', StartRobot.order_list)
         for item in StartRobot.order_list:
+            print('*-'*30, item.id_dict)
             try:
                 # 获取机器人对应的线程对象
                 robot = item.robot_obj
