@@ -586,8 +586,9 @@ class RobotList(View):
     def get(self, request):
         page = int(request.GET.get('p', 1))
         curry = request.GET.get('deal-curry')  # 拿到下拉框交易币种值
-        currys = Property.objects.filter(pk=curry).only('currency')
+        # currys = Property.objects.filter(pk=curry).only('currency')
         market = request.GET.get('deal_market')  # 拿到下拉框交易市场值
+        print(market)
         # market = Market.objects.filter(pk=market_id).get('name')
         status = request.GET.get('deal_status')  # 拿到交易状态
         print(curry, market, status)
@@ -610,6 +611,7 @@ class RobotList(View):
             'properties': Property.objects.values('currency').distinct(),
             'markets': Market.objects.all(),
             'accounts': Account.objects.all(),
+            'robots': robots,
             'url_query': '&' + parse.urlencode({
                 'curry': curry or '',
                 'market': market or '',

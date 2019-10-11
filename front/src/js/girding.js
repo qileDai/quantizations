@@ -441,6 +441,8 @@ Robot.prototype.listenCreatTradingEvent = function () {
                 var robot = result['data']
                 var close = robot['closed_num']
                 var opne = robot['open_num']
+                var closed_info = robot['closed_info']
+                console.log(closed_info)
                 $('.deal-opening').text("(" + opne +")")
                 $('.deal-completed').text("(" + close + ")")
                 console.log(robot)
@@ -813,18 +815,15 @@ Robot.prototype.protectRelieve = function () {
         if (status == 1 && protect == 1) {
             status = 2
             protect = 0
-            var element = $(this).siblings()[0];
-            console.log(element)
-            $(element).attr('disabled', true)
         } else if (status == 2 && protect == 0) {
             status = 1
             protect = 1
         } else if (status == 0 && protect == 1) {
             status = 3
             protect = 0
-            var element = $(this).siblings()[0];
-            console.log(element)
-            $(element).attr('disabled', true)
+            // var element = $(this).siblings()[0];
+            // console.log(element)
+            // $(element).attr('disabled', true)
         } else if (status == 3 && protect == 0) {
             status = 0
             protect = 1
@@ -839,7 +838,7 @@ Robot.prototype.protectRelieve = function () {
             },
             'success': function (result) {
                 console.log(result)
-                window.location.reload()
+                // window.location.reload()
             }
         })
     })
