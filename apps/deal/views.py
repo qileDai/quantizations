@@ -13,7 +13,9 @@ from utils.mixin import LoginRequireMixin
 from utils import restful
 from apps.deal.Strategy.Grid import GridStrategy
 import threading
-import time, math
+import time
+import math
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from django.core import serializers
 from django.core.serializers import serialize
@@ -344,12 +346,15 @@ class GetAccountInfo(View):
         id = request.POST.get('account_id')
         # 调用get_account_info函数
         user_obj, service_obj, market_obj = get_account_info(currency, market, id)
-        info = service_obj.get_balance()
-        info = info.get('funds')
-        info1 = market_obj.get_ticker()
-        info2 = market_obj.get_klines('1day', '30')
-        print(info2)
-        info2 = info2.get('datas')
+        try:
+            info = service_obj.get_balance()
+            info = info.get('funds')
+            info1 = market_obj.get_ticker()
+            info1 = info1['ticker']
+            info2 = market_obj.get_klines('1day', '30')
+            info2 = info2.get('datas')
+        except:
+            return restful.params_error(message='币种错误，请核对！')
 
         # 计算阻力位/支撑位的默认值
         if int(info2.get('limit', 0)) <= 30:
@@ -364,7 +369,7 @@ class GetAccountInfo(View):
             # 交易市场可用
             'market': info[market.upper()].get('balance') + market,
             # 当前价
-            'last': info1['ticker'].get('last'),
+            'last': info1.get('last'),
             # 阻力位
             'resistance': round(float(max / int(info2['limit'])), 2),
             # 支撑位
@@ -408,7 +413,6 @@ class StartRobot(View):
             robots = Robot.objects.filter(Q(status=0) & Q(protection=1))
         elif Flag == 0:
             robots = Robot.objects.filter(Q(status=1) & Q(protection=1))
-
         # 调用对应策略
         for robot_obj in robots:
             if robot_obj.trading_strategy == '网格策略V1.0' and Flag == 1:

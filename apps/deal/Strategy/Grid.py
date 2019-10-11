@@ -117,7 +117,6 @@ class GridStrategy(Thread):
                 # 下单成功
                 self.lock.acquire()
                 self.id_dict[res.get("id")] = {
-                    "grade": item[1]["grade"],
                     "price_range": (a, b),
                     "order_type": self.order_type,
                     "price": price,
@@ -160,8 +159,6 @@ class GridStrategy(Thread):
             n = self.robot_obj.girding_num      # 批量挂原始单
 
             for i in range(n):
-                # 批量更新
-                grade = self.order_type + str(i+1)
                 # 计算原始挂单价格区间
                 if self.order_type == "buy":
                     a, b = min_buy1-self.grid_range*i, max_buy1-self.grid_range*i
@@ -178,7 +175,6 @@ class GridStrategy(Thread):
                     if res.get("id") is not None:
                         self.lock.acquire()
                         self.id_dict[res.get("id")] = {
-                            "grade": grade,
                             "price_range": (a, b),
                             "order_type": self.order_type,
                             "price": price,
@@ -270,7 +266,6 @@ class GridStrategy(Thread):
                     self.lock.acquire()
                     del self.id_dict[item[0]]
                     self.id_dict[res.get("id")] = {
-                        "grade": item[1]["grade"],
                         "price_range": item[1]["price_range"],
                         "order_type": order_type,
                         "price": price,
@@ -297,12 +292,10 @@ class GridStrategy(Thread):
                 if res.get("id") is not None:
                     self.lock.acquire()
                     self.id_dict[res.get("id")] = {
-                        "grade": item[1]["grade"],
                         "price_range": item[1]["price_range"],
                         "order_type": order_type,
                         "price": price,
                         "amount": str(nums),
-                        # "trade_amount": order_info["trade_amount"],
                         "trade_amount": 0,
                         "reverse": True,
                     }
@@ -340,7 +333,7 @@ class GridStrategy(Thread):
                         id_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"], reverse=True)
                         self.lock.release()
                     # 循环挂单信息
-                    for item in list(id_dicts[0:5]):
+                    for item in list(id_dicts):
                         # item格式[('123456',{"id": res.get("id"),price_range": (a, b),"order_type": self.order_type,
                         # "price": price,"amount": amount,"trade_amount": None}),...]
                         # 获取要更新挂单id
