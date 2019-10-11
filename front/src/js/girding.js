@@ -327,7 +327,6 @@ Robot.prototype.listenClickRobotEvent = function () {
         }
         $("#btnPre").unbind();
         btnPre.click(function () {
-            console.log('num')
             if (num <= 0) {
                 num = 0;
             } else {
@@ -337,7 +336,6 @@ Robot.prototype.listenClickRobotEvent = function () {
             }
             //跳转到上一个步骤
             $(".ystep").prevStep();
-            console.log('val', robotDataArray)
             for (var i = 0; i < robotDataArray.length; i++) {
 
                 if (num === i) {
@@ -553,7 +551,6 @@ Robot.prototype.getAccountInfoEvent = function () {
     var self = this;
     // var parantersGroup = $('.strategy-parameters')
     // id = parantersGroup.find("select['name='account']").val()
-    console.log("sfsfsfsdf")
     // console.log(id)
     $('#robot-account').change(function () {
         var parantersGroup = $('.set-strategy')
@@ -611,7 +608,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                             var free = $('#one-girding-free').val()
                             var girding = (resistance - support_level) / num     //单网格=（阻力位价格-支撑位价格）/网格数量
                             var mix_profit = (girding - (resistance * 2 + girding) * free) / resistance
-                            
+
                             var max_price = (girding - (support_level * 2 + girding) * free) / support_level
                             var profit = self.fomatFloat(mix_profit,2) + '%' + '-' + self.fomatFloat(max_price,2) + '%'
                             $('.profit-value').text(profit)
@@ -630,6 +627,12 @@ Robot.prototype.getAccountInfoEvent = function () {
                             }
                         }
                     });
+
+                    var users = JSON.parse(data['users'])
+                    var tpl = template('users',{"users":users})
+                    var usersGroup = $('#waring-users')
+                    usersGroup.append(tpl)
+
 
                 }
             }
@@ -653,6 +656,8 @@ Robot.prototype.listenClickStragerty = function () {
         })
     })
 }
+
+
 
 /**
  * 机器人提交
@@ -718,7 +723,7 @@ Robot.prototype.listenSubmitRobot = function () {
                 'annual_yield': 0,
                 'protection': 1,
                 'status': 0,
-                'run_status': 0,
+                'run_status': 1,
                 'current_price': curren_price,
                 'orders_frequency': millisecond,
                 'resistance': resistance,
