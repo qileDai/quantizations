@@ -69,6 +69,9 @@ class UserInfoAddModelForm(ModelForm):
             print(password)
             raise ValidationError('密码长度需大于6位')
         else:
+            hl = hashlib.md5()
+            hl.update(password.encode(encoding='utf-8'))
+            self.cleaned_data["password"] = hl.hexdigest()
             return password
 
     def clean_email(self):
@@ -89,14 +92,14 @@ class UserInfoAddModelForm(ModelForm):
             return confirm_password  # 验证完成一定要返回，才能添加到 cleaned_data 字典中. 其他地方才能通过cleaned_data获取到
 
     # 在类中定义 clean() 方法，就能够实现对字段进行全局校验，字段全部验证完，局部钩子也全部执行完之后，执行这个全局钩子校验。
-    def clean(self):
-        """密码加密"""
-        password = self.cleaned_data.get("password")
-        hl = hashlib.md5()
-        hl.update(password.encode(encoding='utf-8'))
-        self.cleaned_data["password"] = hl.hexdigest()
-        print(self.cleaned_data, self.cleaned_data["password"])
-        return self.cleaned_data    # 全局钩子要返回所有的数据
+    # def clean(self):
+    #     """密码加密"""
+    #     password = self.cleaned_data.get("password")
+    #     hl = hashlib.md5()
+    #     hl.update(password.encode(encoding='utf-8'))
+    #     self.cleaned_data["password"] = hl.hexdigest()
+    #     print(self.cleaned_data, self.cleaned_data["password"])
+    #     return self.cleaned_data    # 全局钩子要返回所有的数据
 
 
 class RoleModelForm(forms.ModelForm, FormMixin):
