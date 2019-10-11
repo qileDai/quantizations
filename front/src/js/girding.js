@@ -762,6 +762,7 @@ Robot.prototype.runRobotEvent = function () {
         var robot_id = tr.attr('data-id');
         var run_status = $(this).attr('run_status')
         var status = tr.attr('status')
+        console.log(robot_id,run_status,status)
         if (run_status == 0 && status == 1) {
             run_status = 1
             status = 0
@@ -955,11 +956,7 @@ Robot.prototype.oneStepRun = function () {
 }
 
 
-Robot.prototype.listaasdffsdf = function () {
-    $('.dafdafadfad').click(function () {
-        $('.daiiqiekadfj').show()
-    })
-}
+
 
 $(function () {
     var robot = new Robot();
