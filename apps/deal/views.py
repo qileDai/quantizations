@@ -411,11 +411,11 @@ class StartRobot(View):
         # Flag为1启动，为0停止
         Flag = int(request.POST.get('flag'))
         print(ids, Flag)
-        if ids and Flag == 1:
+        if ids:
             robots = Robot.objects.filter(id=ids)
-        elif not ids and Flag == 1:
+        elif Flag == 1:
             robots = Robot.objects.filter(Q(status=0) & Q(protection=1))
-        elif not ids and Flag == 0:
+        elif Flag == 0:
             robots = Robot.objects.filter(Q(status=1) & Q(protection=1))
         # 调用对应策略
         for robot_obj in robots:
@@ -428,7 +428,7 @@ class StartRobot(View):
                 thread1.start()
                 thread2.start()
                 print('-' * 30, '启动线程')
-            elif robot_obj.trading_strategy == '网格策略V1.0' and Flag == 0:
+            elif robot_obj.trading_strategy == '网格交易V1.0' and Flag == 0:
                 Robot.objects.filter(id=robot_obj.id).update(status=Flag)
                 Robot.objects.filter(id=robot_obj.id).update(run_status=1)
                 # 停止线程
@@ -475,12 +475,15 @@ class ShowTradeDetail(View):
             mins = divmod(allTime, min)
             return "%d 分, %d 秒" % (int(mins[0]), math.ceil(mins[1]))
 
-    def sort_data(self, order_dict, order_type):
-        if order_type is "sell":
-            id_dicts = sorted(order_dict.items(), key=lambda x: x[1]["price"])
-        elif order_type is "buy":
-            id_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"], reverse=True)
-        return id_dicts
+    def sort_data(self, order_info):
+        lens = 0
+        for k, v in order_info.items():
+            lens += len(v)
+            if k is "sell":
+                sell = sorted(v.items(), key=lambda x: x[1]["price"])
+            elif k is "buy":
+                buy = sorted(v.items(), key=lambda x: x[1]["price"], reverse=True)
+        return lens, sell, buy
 
     def post(self, request):
         # 获取机器人id
@@ -502,25 +505,21 @@ class ShowTradeDetail(View):
         closed_order = OrderInfo.objects.filter(robot=id)
         # 获取挂单信息
         order_info = dict()
-        lens = 0
         # print('11111', StartRobot.order_list)
         for item in StartRobot.order_list:
-            print('*-'*30, item.id_dict)
             try:
                 # 获取机器人对应的线程对象
                 robot = item.robot_obj
                 if id == str(robot.id):
                     # 向字典中添加数据
-                    order_dict = item.id_dict
                     order_type = item.order_type
-                    res = self.sort_data(order_dict, order_type)
-                    order_info[order_type] = res
+                    order_info[order_type] = item.id_dict
                 running_time = time.time() - item.start_time
-                for num in order_info:
-                    lens += len(num)
             except:
                 print('对象没有属性robot_obj')
                 continue
+        lens, sell, buy = self.sort_data(order_info)
+        print('*-' * 30, sell, buy)
         context = {
             # 已完成笔数
             'closed_num': len(closed_order),
@@ -529,8 +528,10 @@ class ShowTradeDetail(View):
             # 未完成笔数
             # 'open_num': len(order_info),
             'open_num': lens,
-            # 未完成挂单信息
-            'open_sell_info': order_info,
+            # 未完成卖单信息
+            'sell': sell,
+            # 未完成买单信息
+            'buy': buy,
             # 总投入
             'total_input': self.data_format(property_obj.original_assets),
             # 运行时间
