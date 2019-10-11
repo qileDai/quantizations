@@ -522,7 +522,7 @@ class ShowTradeDetail(View):
         print('*-' * 30, sell, buy)
         context = {
             # 交易币种和交易市场
-            'currency_market': [currency, market],
+            'currency_market': {"currency": currency, "market": market},
             # 已完成笔数
             'closed_num': len(closed_order),
             # 已完成挂单信息
