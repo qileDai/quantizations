@@ -338,6 +338,9 @@ class GetAccountInfo(View):
     """
     展示交易对可用额度/当前价,计算默认值
     """
+    def data_format(self, data):
+        data = str(round(float(data), 2))
+        return data
 
     def post(self, request):
         currency = request.POST.get('curry-title')
@@ -365,11 +368,11 @@ class GetAccountInfo(View):
                 min += float(i[3])
         context = {
             # 交易币种可用
-            'currency': info[currency.upper()].get('balance') + currency,
+            'currency': self.data_format(info[currency.upper()].get('balance')) + ' ' + currency,
             # 交易市场可用
-            'market': info[market.upper()].get('balance') + market,
+            'market': self.data_format(info[market.upper()].get('balance')) + ' ' + market,
             # 当前价
-            'last': info1.get('last'),
+            'last': self.data_format(info1.get('last')),
             # 阻力位
             'resistance': round(float(max / int(info2['limit'])), 2),
             # 支撑位
