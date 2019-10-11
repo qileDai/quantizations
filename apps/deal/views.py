@@ -199,7 +199,7 @@ class ShowCollectAsset(View):
         # 汇总资产变化/初始总资产/历史盈亏/
         print('资产汇总', '-' * 20)
         print(context_list[0])
-        return restful.result(context_list[0])
+        return restful.result(data=context_list[0])
 
 
 class ChargeAccount(View):

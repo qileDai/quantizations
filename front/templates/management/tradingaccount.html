@@ -99,20 +99,21 @@
                     </div>
                 </div>
                 <div class="currency-check-content">
-                    <div class="checkbox" >
-                        <label><input type="checkbox"  name="currency-checkbox" class="currency-checkbox" value="BTC">BTC</label>
+                    <div class="checkbox">
+                        <label><input type="checkbox" name="currency-checkbox" class="currency-checkbox" value="BTC">BTC</label>
                     </div>
                     <div class="checkbox">
-                        <label><input type="checkbox" name="currency-checkbox" class="currency-checkbox"  value="USDT">USDT</label>
+                        <label><input type="checkbox" name="currency-checkbox" class="currency-checkbox" value="USDT">USDT</label>
                     </div>
                     <div class="checkbox">
-                        <label><input type="checkbox" name="currency-checkbox"  class="currency-checkbox" value="ETH">ETH</label>
+                        <label><input type="checkbox" name="currency-checkbox" class="currency-checkbox" value="ETH">ETH</label>
                     </div>
                     <div class="checkbox">
                         <label><input type="checkbox" name="currency-checkbox" class="currency-checkbox" value="LTC">LTC</label>
                     </div>
                     <div class="checkbox">
-                        <label><input type="checkbox" name="currency-checkbox" class="currency-checkbox" value="HC">HC</label>
+                        <label><input type="checkbox" name="currency-checkbox" class="currency-checkbox"
+                                      value="HC">HC</label>
                     </div>
                     <div class="checkbox">
                         <label><input type="checkbox" name="currency-checkbox" class="currency-checkbox" value="LTC">LTC</label>
@@ -121,7 +122,7 @@
                 <div class="new-currency">
                     <span>新增币种</span>
                     <input type="text" value="" id="add-new-currency">
-                    <a  href="#" id="add-currency-btn">确定</a>
+                    <a href="#" id="add-currency-btn">确定</a>
                 </div>
                 <div class="denomination-account-modal-footer">
                     <div class="account-button">
@@ -252,206 +253,109 @@
                 <div class="property-modal-header">
                     <div class="property-modal-header-inner">资产汇总</div>
                 </div>
-                <div class="property-body">
+                <div class="property-body" id="property-total-details">
                     <div class="property-right">
                         <span class="property-account">账户</span>
-                        <spann class="property-total">所有8个账户</spann>
+                        <span class="property-total" id="total-account">所有8个账户</span>
                         <button class="refersh">刷新账户</button>
                     </div>
-                    <div class="property-profit">
-                        <div class="assets-change">
-                            <span class="change">24小时资产变化</span>
-                            <span class="number" id="today-change">+657.29 USDT</span>
-                            <span class="percentage">+1.88%</span>
+                    <script id="total-properties" type="text/html">
+                        {% verbatim %}
+                        <div class="property-profit">
+                            <div class="assets-change">
+                                <span class="change">24小时资产变化</span>
+                                <span class="number" id="today-change">{{ properties.asset_change.number}}</span>
+                                <span class="percentage">{{ properties.asset_change.lastday_assets }}</span>
+                            </div>
+                            <div class="initial-asset">
+                                <span class="init-total">初始总资产（折合)</span>
+                                <sapn class="number">{{ properties.original_assets}}</sapn>
+                            </div>
+                            <div class="history-profit ">
+                                <span class="frofit">历史盈亏</span>
+                                <span class="number">{{ properties.history_profit.number}}</span>
+                                <span class="percentage">{{ properties.history_profit.original_total}}</span>
+                            </div>
                         </div>
-                        <div class="initial-asset">
-                            <span class="init-total">初始总资产（折合)</span>
-                            <sapn class="number">1,679,657.29 USDT</sapn>
+                        <div class="curry-total">
+                            <div class="curry-account-total">
+                                <span class="total-curry-number">总计提币</span>
+                                <span>{{ properties.withdraw_record }}</span>
+                            </div>
                         </div>
-                        <div class="history-profit ">
-                            <span class="frofit">历史盈亏</span>
-                            <span class="number">+9,657.29 usdt</span>
-                            <span class="percentage">+43.8%</span>
+                        <div class="account-property-table">
+                            <span class="title">账户资产表</span>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="table-box">
+                                        <div class="box-body">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                <tr>
+                                                    <th>账户币种</th>
+                                                    <th>可用</th>
+                                                    <th>冻结</th>
+                                                    <th>当前资产</th>
+                                                    <th>初始资产</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {{ each properties.assets_dict assets index }}
+                                                <tr>
+                                                    <td class="currency">{{ index }}</td>
+                                                    <td class="last">{{ assets.last }}</td>
+                                                    <td class="balance">{{ assets.balance }}</td>
+                                                    <td class="freeze">{{ assets.freeze }}</td>
+                                                    <td class="current_assets">{{ assets.current_assets }}</td>
+                                                    <td class="original_assets">{{ assets.original_assets }}</td>
+                                                </tr>
+                                                {{ /each }}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="curry-total">
-                        <div class="curry-account-total">
-                            <span class="total-curry-number">总计提币</span>
-                            <span>-60000usdt</span>
-                        </div>
-                    </div>
-                    <div class="account-property-table">
-                        <span class="title">账户资产表</span>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="table-box">
-                                    <div class="box-body">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                            <tr>
-                                                <th>账户币种</th>
-                                                <th>可用</th>
-                                                <th>冻结</th>
-                                                <th>当前资产</th>
-                                                <th>初始资产</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
+                        <div class="property-profit-table">
+                            <span class="title">资产损益表</span>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="table-box">
+                                        <div class="box-body">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                <tr>
+                                                    <th>账户币种</th>
+                                                    <th>初始资产</th>
+                                                    <th>当前资产</th>
+                                                    <th>差额</th>
+                                                    <th>火币币种(USDT)</th>
+                                                    <th>折合差额(USDT)</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {{ each properties.profit_loss_dict profit index }}
+                                                <tr>
+                                                    <td class="currency">{{ index }}</td>
+                                                    <td class="original_assets">{{ profit.original_assets }}</td>
+                                                    <td class="current_assets">{{ profit.current_assets }}</td>
+                                                    <td class="gap">{{ profit.gap }}</td>
+                                                    <td class="last">{{ profit.last }}</td>
+                                                    <td class="convert">{{ profit.convert }}</td>
+                                                </tr>
+                                                {{ /each }}
 
-                                            </tbody>
-                                        </table>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="property-profit-table">
-                        <span class="title">资产损益表</span>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="table-box">
-                                    <div class="box-body">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                            <tr>
-                                                <th>账户币种</th>
-                                                <th>初始资产</th>
-                                                <th>当前资产</th>
-                                                <th>差额</th>
-                                                <th>火币币种(USDT)</th>
-                                                <th>折合差额(USDT)</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            <tr>
-                                                <td>USDT</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                                <td>1546.12</td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        {% endverbatim %}
+                    </script>
+
                 </div>
                 <div class="property-footer">
                     <div class="property-button">
@@ -485,7 +389,7 @@
                             </div>
                             <div class="initial-asset">
                                 <span class="init-total">初始总资产（折合)</span>
-                                <sapn class="number">{{ properties.original_assets}}USDT</sapn>
+                                <sapn class="number">{{ properties.original_assets}}</sapn>
                             </div>
                             <div class="history-profit ">
                                 <span class="frofit">历史盈亏</span>
