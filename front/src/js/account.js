@@ -101,8 +101,8 @@ Account.prototype.listenShowHideAddAccount = function () {
 
 Account.prototype.listendenominationEvent = function () {
     var self = this;
-    var account_list = self.accountCuurrencyEvent()
-    console.log(account_list)
+    // var account_list = self.accountCuurrencyEvent()
+    // console.log(account_list)
     $('#account-curry-configuration').on('click', function () {
         $('.denomination-mask-account-wrapper').show();
         $('.denomination-account-wrapper').show();
@@ -283,7 +283,6 @@ Account.prototype.showCollectAsset = function () {
 
             }
         })
-        console.log(account)
         xfzajax.post({
             'url': '/deal/showcollectasset/',
             'data': {
@@ -291,6 +290,16 @@ Account.prototype.showCollectAsset = function () {
             },
             'success': function (result) {
                 console.log(result)
+                if (result['code'] === 200) {
+                    var account_num = account.length
+                    console.log(account_num)
+                    $('#total-account').text("所有" + account_num + "个账户")
+                    var properties = result['data']
+                    var tpl = template('total-properties', {'properties': properties})
+                    var accountProperty = $('#property-total-details')
+                    accountProperty.append(tpl)
+
+                }
             }
         })
     })

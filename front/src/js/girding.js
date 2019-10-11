@@ -441,12 +441,13 @@ Robot.prototype.listenCreatTradingEvent = function () {
                 var robot = result['data']
                 var close = robot['closed_num']
                 var opne = robot['open_num']
-                var closed_info = robot['closed_info']
+                var closed_info = JSON.parse(robot['closed_info'])
+
                 console.log(closed_info)
-                $('.deal-opening').text("(" + opne +")")
+                $('.deal-opening').text("(" + opne + ")")
                 $('.deal-completed').text("(" + close + ")")
                 console.log(robot)
-                var tpl = template('robot-deal-details', {'robots': robot})
+                var tpl = template('robot-deal-details', {'robots': robot}, {'closed_info': closed_info})
                 var details = $('.tradingParticulars')
                 details.append(tpl)
             }
@@ -526,10 +527,30 @@ Robot.prototype.listenparameterEven = function () {
     });
 }
 
+Robot.prototype.fomatFloat = function (num, n) {
+    var f = parseFloat(num);
+    if (isNaN(f)) {
+        return false;
+    }
+    f = Math.round(num * Math.pow(10, n)) / Math.pow(10, n); // n 幂
+    var s = f.toString();
+    var rs = s.indexOf('.');
+    //判定如果是整数，增加小数点再补0
+    if (rs < 0) {
+        rs = s.length;
+        s += '.';
+    }
+    while (s.length <= rs + n) {
+        s += '0';
+    }
+    return s;
+}
+
 /**
  * 获取账户信息
  */
 Robot.prototype.getAccountInfoEvent = function () {
+    var self = this;
     // var parantersGroup = $('.strategy-parameters')
     // id = parantersGroup.find("select['name='account']").val()
     console.log("sfsfsfsdf")
@@ -568,7 +589,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                     var girding = (resistance - support_level) / num
                     var mix_profit = (girding - (resistance * 2 + girding) * free) / resistance
                     var max_price = (girding - (support_level * 2 + girding) * free) / support_level
-                    var profit = mix_profit + '%' + '-' + max_price + '%'
+                    var profit = self.fomatFloat(mix_profit,2) + '%' + '-' + self.fomatFloat(max_price,2) + '%'
                     $('.resistance-value').val(resistance)
                     $('.support-value').val(support_level)
                     $('.profit-value').text(profit)
@@ -579,7 +600,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                             var girding = (resistance - support_level) / num     //单网格=（阻力位价格-支撑位价格）/网格数量
                             var mix_profit = (girding - (resistance * 2 + girding) * free) / resistance
                             var max_price = (girding - (support_level * 2 + girding) * free) / support_level
-                            var profit = mix_profit + '%' + '-' + max_price + '%'
+                            var profit = self.fomatFloat(mix_profit,2) + '%' + '-' + self.fomatFloat(max_price,2) + '%'
                             $('.profit-value').text(profit)
                         }
                     })
@@ -590,8 +611,9 @@ Robot.prototype.getAccountInfoEvent = function () {
                             var free = $('#one-girding-free').val()
                             var girding = (resistance - support_level) / num     //单网格=（阻力位价格-支撑位价格）/网格数量
                             var mix_profit = (girding - (resistance * 2 + girding) * free) / resistance
+                            
                             var max_price = (girding - (support_level * 2 + girding) * free) / support_level
-                            var profit = mix_profit + '%' + '-' + max_price + '%'
+                            var profit = self.fomatFloat(mix_profit,2) + '%' + '-' + self.fomatFloat(max_price,2) + '%'
                             $('.profit-value').text(profit)
                         }
                     });
