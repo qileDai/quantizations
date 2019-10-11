@@ -24,7 +24,6 @@ Account.prototype.run = function () {
     self.showCollectAsset();
     self.showDetailProperty();
     self.refershAccountEvent();
-    self.accountCuurrencyEvent()
     self.addAccountCurrencyEvent();
     // self.listenEditAccount();
 
@@ -109,28 +108,30 @@ Account.prototype.listendenominationEvent = function () {
         $('.denomination-account-wrapper').show();
 
         var currency_list = []
-        $('.currency-checkbox').on('click', function () {
+        $('#currency-add-btn').click(function () {
 
-            var currency = $(this).parent().text()
-            console.log(currency)
-            currency_list.push(currency)
+            $("input[class='currency-checkbox']:checkbox").each(function () {
+                if ($(this).prop('checked') == true) {
+                    console.log($(this).val())
+                    currency_list.push($(this).val())
+                }
 
-            $('#currency-add-btn').click(function () {
-                xfzajax.post({
-                    'url': '/deal/configcurrency/',
-                    'data': {
-                        'currency': currency_list,
-                        'account_list': account_list,
-                    },
-                    'success': function (result) {
-                        if (result['code'] === 200) {
-                            xfzalert.alertSuccess('新增币种成功', function () {
-                                window.location.reload()
-                            })
-                        }
-                    }
-                })
             })
+            console.log(currency_list)
+            xfzajax.post({
+                'url': '/deal/configcurrency/',
+                'data': {
+                    'currency': currency_list,
+                },
+                'success': function (result) {
+                    if (result['code'] === 200) {
+                        xfzalert.alertSuccess('新增币种成功', function () {
+                            window.location.reload()
+                        })
+                    }
+                }
+            })
+
 
         })
 
@@ -268,14 +269,25 @@ Account.prototype.listenPropertyDetailsShowEvent = function () {
 
 
 Account.prototype.showCollectAsset = function () {
-    var self = this;
-    var account_list = self.accountCuurrencyEvent()
-    console.log(account_list)
+    // var self = this;
+    // var account_list = self.accountCuurrencyEvent()
+    // console.log(account_list)
     $('#property-total').click(function () {
+        var account = []
+        $("input[class='account-chcekbox']:checkbox").each(function () {
+            if ($(this).prop('checked') == true) {
+                var currentbtn = $(this);
+                var tr = currentbtn.parent().parent();
+                var account_id = tr.attr('data-id');
+                account.push(account_id)
+
+            }
+        })
+        console.log(account)
         xfzajax.post({
             'url': '/deal/showcollectasset/',
             'data': {
-                'account_list': account_list
+                'account_list': account
             },
             'success': function (result) {
                 console.log(result)
@@ -489,27 +501,25 @@ Account.prototype.refershAccountEvent = function () {
 
 Account.prototype.accountCuurrencyEvent = function () {
     var account = []
-    $('.account-chcekbox').click(function () {
+    $("input[class='account-chcekbox']:checkbox").each(function () {
+        if ($(this).prop('checked') == true) {
+            var currentbtn = $(this);
+            var tr = currentbtn.parent().parent();
+            var account_id = tr.attr('data-id');
+            account.push(account_id)
 
-        $(this).prop('checked', true)
-        var tr = currentbtn.parent().parent();
-        var account_id = tr.attr('data-id');
-        account.push(account_id)
+        }
     })
+
     return account
 
 }
 
 Account.prototype.addAccountCurrencyEvent = function () {
-    console.log("asldfaljf")
-
-
     $('#add-currency-btn').click(function () {
         var currency = $('#add-new-currency').val()
-
-        console.log("scudf")
         $('.currency-check-content').append(" <div class=\"checkbox\">\n" +
-            "                        <label class='sdfasd'><input type=\"checkbox\" class=\"currency-checkbox\" value=\"\">" + currency + "</label>\n" +
+            "                        <label class='sdfasd'><input type=\"checkbox\" class=\"currency-checkbox\" value=" + currency + ">" + currency + "</label>\n" +
             "                    </div>")
 
     })
