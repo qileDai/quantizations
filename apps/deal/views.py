@@ -531,9 +531,9 @@ class ShowTradeDetail(View):
             # 'open_num': len(order_info),
             'open_num': lens,
             # 未完成卖单信息
-            '卖': sell,
+            'SELL': sell,
             # 未完成买单信息
-            '买': buy,
+            'BUY': buy,
             # 总投入
             'total_input': self.data_format(property_obj.original_assets),
             # 运行时间
