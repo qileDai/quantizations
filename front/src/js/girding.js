@@ -141,7 +141,6 @@ Robot.prototype.run = function () {
     self.setCurrentPrice();
     self.oneStepRun();
     self.editRobotEvent();
-    self.listaasdffsdf();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 

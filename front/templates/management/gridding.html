@@ -298,9 +298,9 @@
                             <div>预警账户</div>
                             <div class="btn-group" id="waring-users" data-toggle="buttons">
 
-                                    <label class="btn btn-default">
-                                        <input type="checkbox" class="user">32423423
-                                    </label>
+                                <label class="btn btn-default">
+                                    <input type="checkbox" class="user">32423423
+                                </label>
 
                             </div>
                         </div>
@@ -363,12 +363,13 @@
                         <span class="buy-num">数量</span>
                         <span class="buy-price">价格</span>
                         <ul>
-
+                            {{ each robots.BUY buys index }}
                             <li>
-                                <span>买1</span>
-                                <span>7391 usdt</span>
-                                <span>7391 itc</span>
+                                <span>{{ buys.order_type }}</span>
+                                <span>{{ buys.amount }}</span>
+                                <span>{{ buys.price }}</span>
                             </li>
+                            {{ /each }}
 
                         </ul>
                     </div>
@@ -377,11 +378,13 @@
                         <span class="sell-num">数量</span>
                         <span class="sell-price">价格</span>
                         <ul>
+                           {{ each robots.SELL sells index }}
                             <li>
-                                <span>买1</span>
-                                <span>7391 usdt</span>
-                                <span>7391 itc</span>
+                                <span>{{ sells.order_type }}</span>
+                                <span>{{ sells.amount }}</span>
+                                <span>{{ sells.price }}</span>
                             </li>
+                            {{ /each }}
 
                         </ul>
                     </div>
