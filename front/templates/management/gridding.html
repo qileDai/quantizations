@@ -16,7 +16,7 @@
         <div class="col-md-12">
             <div class="box">
                 <div class="box-header deal-management">
-                    <form method="get"  action="" class="form-inline">
+                    <form method="get" action="" class="form-inline">
                         {#                        第一个界面#}
                         <div class="deal-left-group">
                             <div class="form-group left-group">
@@ -296,33 +296,17 @@
                         {#                        需要获取账户列表#}
                         <div class="warninguser">
                             <div>预警账户</div>
-                            <div class="btn-group" data-toggle="buttons">
-                                <label class="btn btn-default">
-                                    <input type="checkbox" class="user"> 524135494218
-                                </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox" class="user"> 524135494218
-                                </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox" class="user"> 524135494218
-                                </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox" class="user"> 524135494218
-                                </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox" class="user"> 524135494218
-                                </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox" class="user"> 524135494218
-                                </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox" class="user"> 524135494218
-                                </label>
-                                <label class="btn btn-default">
-                                    <input type="checkbox" class="user"> 524135494218
-                                </label>
+                            <div class="btn-group" id="waring-users" data-toggle="buttons">
+                                <script id="users" type="text/html">
+                                    {% verbatim %}
+                                    {{ each users.fields user index }}
+                                    <label class="btn btn-default">
+                                        <input type="checkbox" class="user"> {{ user.username }}
+                                    </label>
+                                    {{ /each }}
+                                    {% endverbatim %}
+                                </script>
                             </div>
-
                         </div>
                     </div>
                 </li>
