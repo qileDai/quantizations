@@ -141,6 +141,7 @@ Robot.prototype.run = function () {
     self.setCurrentPrice();
     self.oneStepRun();
     self.editRobotEvent();
+    self.listenRightFlagEvent();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
@@ -172,136 +173,6 @@ Robot.prototype.loadstepEvent = function () {
     });
 }
 
-Robot.prototype.listenClickRobotEaaavent = function () {
-
-    var self = this;
-
-    var btnPre = $("#btnPre")
-    var btnNext = $("#btnNext")
-    var robotDataArray = new Array(self.tradingOnWrapper, self.tradingStrategyWrapper, self.setStrategyWrapper, self.setRiskWrapper)
-    var arrayLength = robotDataArray.length
-    var num = 0;
-    var creatrobotclick = 0
-    // console.log(arrayLength)
-    // if (arrayLength <= 1)
-    //     return;
-    $('#create-robot').on('click', function () {
-        if (creatrobotclick == 0) {
-            self.robotWrapper.show();
-            robotDataArray[num].show()
-            creatrobotclick++
-        } else {
-            console.log(creatrobotclick)
-            self.robotWrapper.show()
-        }
-
-        $("#btnPre").unbind();
-        btnPre.click(function () {
-            console.log('num')
-            if (num <= 0) {
-                num = 0;
-                // li[num].show().sibling().hide();
-            } else {
-                num--;
-                $('#btnNext').text('下一步')
-                // li[num].show().sibling().hide();
-
-            }
-            //跳转到上一个步骤
-            $(".ystep").prevStep();
-
-            console.log('val', robotDataArray)
-            for (var i = 0; i < robotDataArray.length; i++) {
-
-                if (num === i) {
-                    robotDataArray[i].show()
-                } else {
-                    robotDataArray[i].hide()
-                }
-            }
-        });
-        $("#btnNext").unbind();
-        btnNext.click(function () {
-
-
-            var transactionCurrency = $('#curry').find(" option:selected").text();//交易币种
-            var markettitle = $('#market').find(" option:selected").text();//交易市场
-            var parameterscontrol = $('.parameters-control').find(" option:selected").text()//交易账户
-            var resistancevalue = $('.strategy-parameters .trading-parameters .resistance-value').val()//阻力值
-            var support = $('.strategy-parameters .trading-parameters .support').val()//支撑位
-            var gridnumber = $('.strategy-parameters .trading-parameters .grid-number').val()//网格数量
-
-
-            // alert('请选择交易币种/交易市场')
-
-
-            var text = transactionCurrency + '/' + markettitle
-            $('.trading-strategy .strategy-curry .curry').text(text);
-            $('.set-strategy .strategy-curry .curry').text(text);
-            $('.set-risk-strategy .strategy-curry .curry').text(text);
-
-
-            $('.set-strategy-title .strategy-parameters-top .user').text(parameterscontrol)
-
-            $('.set-risk-strategy .set-strategy-title .resistance').text(resistancevalue)
-            $('.set-risk-strategy .set-strategy-title .support-level').text(support)
-            $('.set-risk-strategy .set-strategy-title .girding-num').text(gridnumber)
-
-            // $('.trading-strategy .strategy-curry .curry1').text(markettitle)
-
-            var strategytitle = '网格交易v1.0'
-            $('.strategy-name .strategy-button button').unbind();
-            $('.strategy-name .strategy-button button').on('click', function () {
-                $(this).addClass('active').siblings().removeClass('active');
-                var strategytitle = $(this).text();//交易策略
-                console.log(strategytitle);
-                $('.set-strategy .strategy-title .strategy').text(strategytitle)
-                $('.set-risk-strategy .strategy-title .curry').text(strategytitle)
-            })
-
-            // $('.set-strategy .strategy-curry .curry').text(transactionCurrency)
-            // $('.set-strategy .strategy-curry .curry1').text(markettitle)
-            console.log('next')
-            if (num >= 2) {
-                $('#btnNext').hide();
-                $('#btnComplete').show();
-                num = 3;
-            } else {
-                num++;
-                $('#btnNext').text('下一步')
-            }
-            //跳转到下一个步骤
-
-            // var stepNum = $(".ystep").getStep();
-            // robotDataArray[stepNum+1].show()
-            // console.log(stepNum)
-
-            //  if (transactionCurrency=='---请选择---' ) {
-            //     console.log(transactionCurrency)
-            //         alert('请选择交易币种/交易市场')
-            //          num=0;
-            // }else{
-            $(".ystep").nextStep();
-            //  }
-
-
-            $.each(robotDataArray, function (key, value) {
-                if (num === key) {
-                    value.show()
-                } else {
-                    value.hide()
-                }
-            })
-
-        });
-        $('.warninguser label').on('click', function () {
-            $(this).toggleClass('btn-success')
-        })
-
-    })
-
-
-}
 
 /**
  * 机器人信息填写
@@ -347,6 +218,7 @@ Robot.prototype.listenClickRobotEvent = function () {
 
         $("#btnNext").unbind();
         btnNext.click(function () {
+
 
 
             var transactionCurrency = $('#curry').find(" option:selected").text();//交易币种
@@ -587,6 +459,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                     var max_price = (girding - (support_level * 2 + girding) * free) / support_level
                     var profit = self.fomatFloat(mix_profit,2) + '%' + '-' + self.fomatFloat(max_price,2) + '%'
                     $('.resistance-value').val(resistance)
+
                     $('.support-value').val(support_level)
                     $('.profit-value').text(profit)
                     $('#stratery-girding-num').on('blur', function () {
@@ -800,9 +673,13 @@ Robot.prototype.runRobotEvent = function () {
  */
 Robot.prototype.setCurrentPrice = function () {
     $('#set-currenPrice').click(function () {
-        var price1 = $('.set-price').val()
-        console.log(price1)
-        $('.current-price .price').text(price1)
+        var price = $('.set-price').val()
+        if(!price ==""){
+            $('.current-price .price').text(price)
+        }else {
+            xfzalert.alertError("请输入当前价")
+        }
+
     })
 }
 
@@ -955,6 +832,21 @@ Robot.prototype.oneStepRun = function () {
 }
 
 
+Robot.prototype.aaa = function(){
+    var i = 1
+    console.log(i++)
+}
+
+
+Robot.prototype.listenRightFlagEvent = function(){
+    $('#btnNext').click(function () {
+        console.log("right")
+        var currency = $('.strategy-curry .currency')
+        if(!currency ==""){
+            $('.strategy-curry').append("<img src=\"{% static 'images/1-1.png' %}\" alt=\"\">")
+        }
+    })
+}
 
 
 $(function () {

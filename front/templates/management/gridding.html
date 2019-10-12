@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{% static 'ystep-master/css/ystep.css' %}">
     <link rel="stylesheet" href="{% static 'css/manamegent/girding.min.css' %}">
     <script src="{% static 'arttemplate/template-web.js' %}"></script>
+
 {% endblock %}
 {% block header %}
     <p>网格交易</p>
@@ -188,6 +189,7 @@
                     <div class="strategy-title">
                         <span class="title">选择交易策略:</span>
                         <span class="strategy">网格交易V1.0</span>
+                         <img src="{% static 'images/1-1.png' %}" alt="">
                     </div>
                     <div class="title">
                         <span>设置策略参数</span>
@@ -265,6 +267,7 @@
                     <div class="strategy-title">
                         <span class="title">选择交易策略:</span>
                         <span class="curry">网格交易V1.0</span>
+                         <img src="{% static 'images/1-1.png' %}" alt="">
                     </div>
                     <div class="set-strategy-title">
                         <div class="strategy-parameters-top">
@@ -359,16 +362,18 @@
                         </div>
                     </div>
                     <div class="trading-list">
-                        <span>买入(8笔）</span>
+                        <span>买入(8  笔）</span>
                         <span class="buy-num">数量</span>
                         <span class="buy-price">价格</span>
                         <ul>
-                            {{ each robots.BUY buys index }}
+                            {{ each robots.买 buys }}
+
                             <li>
-                                <span>{{ buys.order_type }}</span>
-                                <span>{{ buys.amount }}</span>
-                                <span>{{ buys.price }}</span>
+                                <span>买{{ i }}</span>
+                                <span>{{ buys.amount.toFixed(2) }}</span>
+                                <span>{{ buys.price.toFixed(2) }}{{ robots.currency_market.currency }}</span>
                             </li>
+
                             {{ /each }}
 
                         </ul>
@@ -378,11 +383,11 @@
                         <span class="sell-num">数量</span>
                         <span class="sell-price">价格</span>
                         <ul>
-                           {{ each robots.SELL sells index }}
+                            {{ each robots.卖 sells index }}
                             <li>
-                                <span>{{ sells.order_type }}</span>
-                                <span>{{ sells.amount }}</span>
-                                <span>{{ sells.price }}</span>
+                                <span>卖</span>
+                                <span>{{ sells.amount.toFixed(2) }}</span>
+                                <span>{{ sells.price.toFixed(2) }}{{ robots.currency_market.market }}</span>
                             </li>
                             {{ /each }}
 
@@ -421,6 +426,7 @@
                         <th>收益(USDT)</th>
                     </tr>
                     <tr>
+
                         <td></td>
                         <td>74.78</td>
                         <td>1.331084</td>
