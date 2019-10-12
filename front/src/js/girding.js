@@ -227,8 +227,10 @@ Robot.prototype.listenClickRobotEvent = function () {
             var markettitle = $('#market').find(" option:selected").text();//交易市场
             var parameterscontrol = $('.parameters-control').find(" option:selected").text()//交易账户
             var resistancevalue = $('.strategy-parameters .trading-parameters .resistance-value').val()//阻力值
-            var support = $('.strategy-parameters .trading-parameters .support').val()//支撑位
+            var support = $('.support-value').val()//支撑位
             var gridnumber = $('.strategy-parameters .trading-parameters .grid-number').val()//网格数量
+            var free = $('#one-girding-free').val()
+            var profit_value = $('.profit-value').text()
 
             // alert('请选择交易币种/交易市场')
             var text = transactionCurrency + '/' + markettitle
@@ -241,6 +243,8 @@ Robot.prototype.listenClickRobotEvent = function () {
             $('.set-risk-strategy .set-strategy-title .resistance').text(resistancevalue)
             $('.set-risk-strategy .set-strategy-title .support-level').text(support)
             $('.set-risk-strategy .set-strategy-title .girding-num').text(gridnumber)
+            $('.strategy-parameters-below .deal-account').text(free + '%')
+            $('.strategy-parameters-below .resistance').text(profit_value)
 
             // $('.trading-strategy .strategy-curry .curry1').text(markettitle)
 

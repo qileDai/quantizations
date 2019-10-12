@@ -140,11 +140,13 @@ Account.prototype.listendenominationEvent = function () {
     $('.denomination-close-btn').on('click', function () {
         $('.denomination-mask-account-wrapper').hide();
         $('.denomination-account-wrapper').hide();
+        window.location.reload()
 
     });
     $('.cancel').click(function () {
         $('.denomination-mask-account-wrapper').hide();
         $('.denomination-account-wrapper').hide();
+        window.location.reload()
     })
 
 }

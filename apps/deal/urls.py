@@ -24,6 +24,7 @@ urlpatterns = [
     path('robot_protection/', views.RobotProtection.as_view(), name='robot_protection'),
     path('showconfig/', views.ShowConfig.as_view(), name='showconfig'),
     path('showconfiginfo/', views.ShowConfigInfo.as_view(), name='showconfiginfo'),
+    path('waring_usrs/', views.waring_usrs, name='waring_usrs'),
 
 
 ]

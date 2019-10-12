@@ -285,7 +285,7 @@
                             <span class="procudere-fee">单次交易手续费:</span>
                             <span class="deal-account">0.1%</span>
                             <span class="girding-profit">单网格利润:</span>
-                            <span class="resistance">0.21%-0.46%</span>
+                            <span class="resistance"></span>
                         </div>
 
                         <div class="riskstrategy">
@@ -463,7 +463,7 @@
                         <ul>
                             <li><span>交易账户</span><input type="text" disabled="disabled" value="{{ robots.account_name
                  }}"></li>
-                            <li class="account_details"><span>可用</span><span>{{  }} 6.000.0000itc</span></li>
+                            <li class="account_details"><span>可用</span><input disabled></li>
                             <li><span>当前价</span><input type="text" disabled="disabled"
                                                        value="{{ robots.robot.fields.current_price }}"></li>
                             <li><span>重新挂单频率</span><input type="text" class="edit-orders-frequency" disabled="disabled"
@@ -475,12 +475,12 @@
                             <li><span>网格数量</span><input type="text" disabled="disabled"
                                                         value="{{ robots.robot.fields.girding_num }}"></li>
                             <li><span>单次交易手续费</span><input type="text" disabled="disabled"
-                                                           value="{{robots.robot.fields.procudere_fee }}%"></li>
+                                                           value="{{robots.robot.fields.procudere_fee }}"></li>
                             <li><span>单网格最小交易数量</span><input type="text" class="edit-mix-num"
                                                              value="{{ robots.robot.fields.min_num }}"></li>
                             <li><span>单网格最大交易数量</span><input type="text" class="edit-max-numx"
                                                              value="{{ robots.robot.fields.max_num }}"></li>
-                            <li class="gird_profit"><span>单网格利润 </span><span class="grofit-value">{{ robots.robot.fields.girding_profit }}</span>
+                            <li class="gird_profit"><span>单网格利润 </span><input class="grofit-value" disabled="disabled" value="{{ robots.robot.fields.girding_profit }}">
                             </li>
                         </ul>
                     </div>

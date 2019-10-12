@@ -10,6 +10,7 @@ from dealapi.exx.exxService import ExxService
 from .forms import AccountModelForm, RobotFrom, EditAccountFrom
 from django.db.models import Q
 from utils.mixin import LoginRequireMixin
+
 from utils import restful
 from apps.deal.Strategy.Grid import GridStrategy
 import threading
@@ -22,6 +23,7 @@ from django.core.serializers import serialize
 from django.contrib.sessions import serializers
 import json
 from apps.deal.serializers import AccountSerializer
+from apps.rbac.serializers import UserSerializer
 
 
 # Create your views here.r
@@ -604,7 +606,13 @@ class ShowConfig(View):
         )
         return restful.ok()
 
+def waring_usrs(request):
 
+    users = UserInfo.objects.filter(status=1)
+    print("&&&&&&&&&&&&&&&&&&&")
+    print(users)
+    serialize = UserSerializer(users)
+    return restful.result(data=serialize.data)
 # ----------------------------------------------------------------------------------------------------------------------
 class RobotList(View):
     """
