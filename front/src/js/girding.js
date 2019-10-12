@@ -142,6 +142,7 @@ Robot.prototype.run = function () {
     self.oneStepRun();
     self.editRobotEvent();
     self.listenRightFlagEvent();
+    self.getUser();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
@@ -218,10 +219,10 @@ Robot.prototype.listenClickRobotEvent = function () {
 
         $("#btnNext").unbind();
         btnNext.click(function () {
-           // if(num == 1){
-           //     console.log(num,"执行函数")
-           //     self.listenCurrencySelecctedEvent();
-           // }
+            // if(num == 1){
+            //     console.log(num,"执行函数")
+            //     self.listenCurrencySelecctedEvent();
+            // }
 
             var transactionCurrency = $('#curry').find(" option:selected").text();//交易币种
             var markettitle = $('#market').find(" option:selected").text();//交易市场
@@ -231,6 +232,9 @@ Robot.prototype.listenClickRobotEvent = function () {
             var gridnumber = $('.strategy-parameters .trading-parameters .grid-number').val()//网格数量
             var free = $('#one-girding-free').val()
             var profit_value = $('.profit-value').text()
+            var Theyareoften = $('.strategy-parameters .trading-parameters .millisecond-value').val()//挂单频率
+            var mixnumber = $('.strategy-parameters .mix-number .mix-number-value  ').val()//单网格最小交易量
+            var maxnumber = $('.strategy-parameters  .max-number .max-number-value ').val()//单网格最大交易量
 
             // alert('请选择交易币种/交易市场')
             var text = transactionCurrency + '/' + markettitle
@@ -245,7 +249,12 @@ Robot.prototype.listenClickRobotEvent = function () {
             $('.set-risk-strategy .set-strategy-title .girding-num').text(gridnumber)
             $('.strategy-parameters-below .deal-account').text(free + '%')
             $('.strategy-parameters-below .resistance').text(profit_value)
-
+            var patt1 = /[\u4e00-\u9fa5]/;
+            if (patt1.test(text)) {
+                xfzalert.alertError("请选择交易币种/交易名称")
+                return
+            }
+            ;
             // $('.trading-strategy .strategy-curry .curry1').text(markettitle)
 
             var strategytitle = '网格交易v1.0'
@@ -259,6 +268,29 @@ Robot.prototype.listenClickRobotEvent = function () {
             })
 
             if (num >= 2) {
+                if (parameterscontrol == '---请选择---') {
+                    xfzalert.alertError("请选择交易账户")
+                    return
+                }
+                ;
+                if (Theyareoften.trim() == '') {
+                    xfzalert.alertError("请输入挂单频率")
+                    return
+                }
+                ;
+
+                if (mixnumber.trim() == '') {
+                    xfzalert.alertError("请输入单网格最小交易数量")
+                    return
+                }
+                ;
+                if (maxnumber.trim() == '') {
+                    xfzalert.alertError("请输入单网格最大交易数量")
+                    return
+                }
+                ;
+
+
                 $('#btnNext').hide();
                 $('#btnComplete').show();
                 num = 3;
@@ -381,8 +413,11 @@ Robot.prototype.listenparameterEven = function () {
             },
             'success': function (result) {
                 var robot = result['data']
+                var users = result['data']['robot']['fields']['warning_account']
                 console.log(robot)
-                var tpl = template('robots-details', {'robots': robot})
+                var user = users.split('&')
+                console.log(user)
+                var tpl = template('robots-details', {'robots': robot}, {"users": user})
 
                 var robotGroup = $('#parameter-list-content')
                 robotGroup.append(tpl)
@@ -571,15 +606,17 @@ Robot.prototype.listenSubmitRobot = function () {
 
         var userList = $('.warninguser .active')
         console.log(userList)
-        var users = ""
+        var users = []
         for (var i = 0; i < userList.length; i++) {
             var element = userList[i]
             console.log(element)
             var user = $(element).text()
+            console.log($.trim(user))
             // console.log(user)
             // users.push(user)
-            users += user + ''
+            users += $.trim(user) + "&"
         }
+
         console.log(users)
 
 
@@ -837,11 +874,6 @@ Robot.prototype.oneStepRun = function () {
 }
 
 
-Robot.prototype.aaa = function () {
-    var i = 1
-    console.log(i++)
-}
-
 /**
  * 图标填写
  */
@@ -853,6 +885,25 @@ Robot.prototype.listenRightFlagEvent = function () {
             $('.strategy-curry').append("<img src=\"{% static 'images/1-1.png' %}\" alt=\"\">")
         }
     })
+}
+
+Robot.prototype.getUser = function () {
+    $('#create-robot').click(function () {
+        xfzajax.get({
+            'url': '/deal/waring_usrs/',
+            'success': function (result) {
+                if (result['code'] === 200) {
+                    console.log(result)
+                    var users = result['data']
+                    console.log(users)
+                    var tpl = template('users-item', {'users': users})
+                    var usersGroup = $('#waring-users')
+                    usersGroup.append(tpl)
+                }
+            }
+        })
+    })
+
 }
 
 Robot.prototype.listenCurrencySelecctedEvent = function () {

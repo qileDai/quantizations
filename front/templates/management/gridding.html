@@ -189,7 +189,7 @@
                     <div class="strategy-title">
                         <span class="title">选择交易策略:</span>
                         <span class="strategy">网格交易V1.0</span>
-                         <img src="{% static 'images/1-1.png' %}" alt="">
+                        <img src="{% static 'images/1-1.png' %}" alt="">
                     </div>
                     <div class="title">
                         <span>设置策略参数</span>
@@ -246,11 +246,11 @@
                         </div>
                         <div class="trading-parameters mix-number ">
                             <span class="title">单网格最小交易数量</span>
-                            <input class="parameters-control value" type="text">
+                            <input class="parameters-control value mix-number-value" type="text">
                         </div>
                         <div class="trading-parameters max-number ">
                             <span class="title">单网格最大交易数量</span>
-                            <input class="parameters-control value" type="text">
+                            <input class="parameters-control value  max-number-value" type="text">
                         </div>
                         <div class="trading-parameters profit ">
                             <span class="title">单网格利润</span>
@@ -267,7 +267,7 @@
                     <div class="strategy-title">
                         <span class="title">选择交易策略:</span>
                         <span class="curry">网格交易V1.0</span>
-                         <img src="{% static 'images/1-1.png' %}" alt="">
+                        <img src="{% static 'images/1-1.png' %}" alt="">
                     </div>
                     <div class="set-strategy-title">
                         <div class="strategy-parameters-top">
@@ -300,11 +300,15 @@
                         <div class="warninguser">
                             <div>预警账户</div>
                             <div class="btn-group" id="waring-users" data-toggle="buttons">
-
-                                <label class="btn btn-default">
-                                    <input type="checkbox" class="user">32423423
-                                </label>
-
+                                <script id="users-item" type="text/html">
+                                    {% verbatim %}
+                                    {{ each users.users user index }}
+                                    <label class="btn btn-default">
+                                        <input type="checkbox" class="user">{{ user.fields.username }}
+                                    </label>
+                                    {{ /each }}
+                                    {% endverbatim %}
+                                </script>
                             </div>
                         </div>
                     </div>
@@ -480,7 +484,8 @@
                                                              value="{{ robots.robot.fields.min_num }}"></li>
                             <li><span>单网格最大交易数量</span><input type="text" class="edit-max-numx"
                                                              value="{{ robots.robot.fields.max_num }}"></li>
-                            <li class="gird_profit"><span>单网格利润 </span><input class="grofit-value" disabled="disabled" value="{{ robots.robot.fields.girding_profit }}">
+                            <li class="gird_profit"><span>单网格利润 </span><input class="grofit-value" disabled="disabled"
+                                                                              value="{{ robots.robot.fields.girding_profit }}">
                             </li>
                         </ul>
                     </div>
@@ -496,54 +501,13 @@
                     <div class="risk-strategy-warninguser">
                         <div>预警账户</div>
                         <div class="btn-group" data-toggle="buttons">
+
                             <label class="btn btn-default">
-                                <input type="checkbox"> 524135494218
+                                <input type="checkbox"  >
+                                {{ robots.robot.fields.warning_account}}
                             </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> @68451816548
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 66@454519684
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 318416518687
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 684651684654
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 546843216874
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 356468513544
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 546846516848
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 683548946848
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 684651684654
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 683548946848
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 684651684654
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 683548946848
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 684651684654
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 683548946848
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 684651684654
-                            </label>
+
+
                         </div>
                     </div>
                     {% endverbatim %}

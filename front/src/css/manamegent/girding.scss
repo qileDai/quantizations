@@ -358,10 +358,14 @@
 
         .warninguser {
           margin-top: 40px;
+          .user{
+            background: #F2F2F2;
+          }
 
           label {
             width: 120px;
             margin: 10px 10px
+
           }
         }
       }

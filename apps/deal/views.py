@@ -609,10 +609,12 @@ class ShowConfig(View):
 def waring_usrs(request):
 
     users = UserInfo.objects.filter(status=1)
-    print("&&&&&&&&&&&&&&&&&&&")
     print(users)
-    serialize = UserSerializer(users)
-    return restful.result(data=serialize.data)
+    data = serialize('json',users)
+    context = {
+        'users': json.loads(data)
+    }
+    return restful.result(data=context)
 # ----------------------------------------------------------------------------------------------------------------------
 class RobotList(View):
     """
