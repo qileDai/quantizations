@@ -605,16 +605,20 @@ class ShowConfig(View):
         )
         return restful.ok()
 
+
 def waring_usrs(request):
 
     users = UserInfo.objects.filter(status=1)
     print(users)
-    data = serialize('json',users)
+    data = serialize('json', users)
     context = {
         'users': json.loads(data)
     }
     return restful.result(data=context)
+
 # ----------------------------------------------------------------------------------------------------------------------
+
+
 class RobotList(View):
     """
     机器人管理列表页面
