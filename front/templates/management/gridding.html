@@ -370,7 +370,7 @@
                         <span class="buy-num">数量</span>
                         <span class="buy-price">价格</span>
                         <ul>
-                            {{ each robots.买 buys }}
+                            {{ each robots.BUY buys }}
 
                             <li>
                                 <span>买{{ i }}</span>
@@ -387,7 +387,7 @@
                         <span class="sell-num">数量</span>
                         <span class="sell-price">价格</span>
                         <ul>
-                            {{ each robots.卖 sells index }}
+                            {{ each robots.SELL sells index }}
                             <li>
                                 <span>卖</span>
                                 <span>{{ sells.amount.toFixed(2) }}</span>
