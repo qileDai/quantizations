@@ -219,6 +219,12 @@ class GridStrategy(Thread):
                     order_info.get("id"), float(order_info.get("price")),
                     float(order_info.get("trade_amount"))*float(order_info.get("price")),
                     str(closing_time), self.robot_obj.id)
+            print(
+                self.currency_type, order_info.get("type"),
+                order_info.get("id"), float(order_info.get("price")),
+                float(order_info.get("trade_amount")) * float(order_info.get("price")),
+                str(closing_time), self.robot_obj.id
+            )
             self.connect_db(sql)
 
     def cancel_orders(self):
@@ -239,10 +245,11 @@ class GridStrategy(Thread):
             except Exception as e:
                 print("%s单撤单完成:" % self.order_type, e)
 
-    def completed_order_info(self, price, item, order_info, order_type):
+    def completed_order_info(self, price, item, order_info, order_type, numb=None):
         """
         已完成订单进行反向挂单
         :param price: 反向挂单的价格
+        :param numb: 反向挂单的数量
         :param item: "id": {"grade": grade,price_range": (a, b),"order_type": self.order_type,
                             "price": price,"amount": amount,"trade_amount": None}
         :param order_info: 委托单信息
@@ -252,7 +259,10 @@ class GridStrategy(Thread):
         try:
             if order_info.get("status") in [2]:
                 print(order_info["trade_amount"], item[1]["trade_amount"])
-                amount = float(order_info["trade_amount"])-float(item[1]["trade_amount"])
+                if numb:
+                    amount = numb
+                else:
+                    amount = float(order_info["trade_amount"])-float(item[1]["trade_amount"])
 
                 # 反向挂单
                 res = self.server_api.order(str(amount), self.currency_type, str(price), order_type)
@@ -271,11 +281,13 @@ class GridStrategy(Thread):
                         "price": price,
                         "amount": amount,
                         "trade_amount": 0,
-                        "reverse": mark
+                        "reverse": mark,
+                        "id": item[0],
                     }
                     self.lock.release()
-            elif order_info.get("status") in [3] and (item[1]["reverse"] is False):
 
+            elif order_info.get("status") in [3] and (item[1]["reverse"] is False):
+                # 计算部分成交订单中下单数量
                 if item[1].get("trade_amount") == 0:
                     nums = order_info["trade_amount"]
                 else:
@@ -298,13 +310,40 @@ class GridStrategy(Thread):
                         "amount": str(nums),
                         "trade_amount": 0,
                         "reverse": True,
+                        "id": item[0],
                     }
                     self.lock.release()
+            print(self.id_dict)
         except Exception as e:
             # self.log_info("api")
             # logging.exception("UPDATE ORDER FAILED...", e)
             print('traceback.print_exc():', traceback.print_exc())
             print("反向挂单失败", e)
+
+    def merge_reverse_order(self, item):
+        iD = item[1].get("id")
+        status_list = list()
+        trade_amount = 0
+        id_list = list()
+        for k, v in self.id_dict.items():
+            if v.get("id") == iD:
+                try:
+                    order_info = self.server_api.get_order(self.currency_type, k)
+                    status_list.append(order_info.get("status"))
+                    id_list.append(k)
+                    trade_amount += order_info.get("trade_amount")
+                except Exception as e:
+                    print("获取委托单失败...", e)
+        print('/-'*30, status_list, id_list)
+        if len(set(status_list)) == 1:
+            for elem in id_list[1:]:
+                self.lock.acquire()
+                # 删除id相同的挂单
+                del self.id_dict[elem]
+                self.lock.release()
+            return True, trade_amount
+        else:
+            return False, None
 
     def reverse_order(self):
         """
@@ -318,11 +357,12 @@ class GridStrategy(Thread):
             # logging.exception("GET_ORDER_INFO...", e)
             print("获取挂单信息失败...", e)
         else:
-            # 循环控制，读取数据库数据
+
             while True:
                 if not self.Flag:
                     break
                 else:
+
                     # 根据价格排序
                     if self.order_type == "sell":
                         self.lock.acquire()
@@ -332,12 +372,12 @@ class GridStrategy(Thread):
                         self.lock.acquire()
                         id_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"], reverse=True)
                         self.lock.release()
+
                     # 循环挂单信息
                     for item in list(id_dicts):
-                        # item格式[('123456',{"id": res.get("id"),price_range": (a, b),"order_type": self.order_type,
-                        # "price": price,"amount": amount,"trade_amount": None}),...]
                         # 获取要更新挂单id
                         b_id = item[0]
+                        trade_amount = None
                         try:
                             # 调用接口，获取委托单信息，如status,type,price等----------------------------API
                             order_info = self.server_api.get_order(self.currency_type, b_id)
@@ -345,6 +385,12 @@ class GridStrategy(Thread):
                             # 已完成挂单交易，撤单并反向挂单
                             if order_info.get("status") in [2]:
                                 print('已完成反向挂单', order_info.get("status"))
+                                # 对已完成的反向挂单进行判断，若多笔id相同需要合并成一笔下单
+                                if item[1].get("id"):
+                                    ret, trade_amount = self.merge_reverse_order(item)
+                                    if not ret:
+                                        continue
+
                                 # 保存已完成的挂单信息
                                 self.save_completedorder(order_info)
                                 if order_info.get("type") == "buy":
@@ -352,15 +398,17 @@ class GridStrategy(Thread):
                                     price = order_info.get("price")+self.grid_range
                                     price = round(price, markets_data.get("priceScale"))
                                     # 启动反向挂单
-                                    self.completed_order_info(price, item, order_info, "sell")
+                                    self.completed_order_info(price, item, order_info, "sell", trade_amount)
 
                                 elif order_info.get("type") == "sell":
                                     price = order_info.get("price")-self.grid_range
                                     price = round(price, markets_data.get("amountScale"))
-                                    self.completed_order_info(price, item, order_info, "buy")
+                                    self.completed_order_info(price, item, order_info, "buy", trade_amount)
 
                             # 部分成交挂单
-                            elif order_info.get("status") == 3 and (item[1].get("trade_amount") != order_info.get("trade_amount")):
+                            elif order_info.get("status") == 3 and \
+                                    (item[1].get("trade_amount") != order_info.get("trade_amount")) and \
+                                    (item[1].get("id") is None):
                                 print('部分成交反向挂单', item[1].get("trade_amount"), order_info.get("trade_amount"))
                                 # 保存已完成的挂单信息
                                 self.save_completedorder(order_info)
@@ -386,8 +434,6 @@ class GridStrategy(Thread):
             if not self.Flag:
                 for i in range(5):
                     self.cancel_orders()
-                    # cancel_thread = Thread(target=self.cancel_orders)
-                    # cancel_thread.start()
 
     def update_order_info(self):
         """

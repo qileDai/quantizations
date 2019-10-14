@@ -500,8 +500,7 @@ class ShowTradeDetail(View):
             info1 = info1.get('ticker')
         except:
             return restful.params_error(message='币种错误，请核对！')
-
-        property_obj = Property.objects.get(Q(account_id=robot_obj.trading_account_id) & Q(currency=currency))
+        property_obj = Property.objects.get(Q(account_id=robot_obj.trading_account) & Q(currency=currency))
         closed_order = OrderInfo.objects.filter(robot=id)
         # 获取挂单信息
         order_info = dict()
