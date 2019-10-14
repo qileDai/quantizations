@@ -141,7 +141,8 @@ Robot.prototype.run = function () {
     self.setCurrentPrice();
     self.oneStepRun();
     self.editRobotEvent();
-    self.listaasdffsdf();
+    self.listenRightFlagEvent();
+    self.getUser();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
@@ -173,136 +174,6 @@ Robot.prototype.loadstepEvent = function () {
     });
 }
 
-Robot.prototype.listenClickRobotEaaavent = function () {
-
-    var self = this;
-
-    var btnPre = $("#btnPre")
-    var btnNext = $("#btnNext")
-    var robotDataArray = new Array(self.tradingOnWrapper, self.tradingStrategyWrapper, self.setStrategyWrapper, self.setRiskWrapper)
-    var arrayLength = robotDataArray.length
-    var num = 0;
-    var creatrobotclick = 0
-    // console.log(arrayLength)
-    // if (arrayLength <= 1)
-    //     return;
-    $('#create-robot').on('click', function () {
-        if (creatrobotclick == 0) {
-            self.robotWrapper.show();
-            robotDataArray[num].show()
-            creatrobotclick++
-        } else {
-            console.log(creatrobotclick)
-            self.robotWrapper.show()
-        }
-
-        $("#btnPre").unbind();
-        btnPre.click(function () {
-            console.log('num')
-            if (num <= 0) {
-                num = 0;
-                // li[num].show().sibling().hide();
-            } else {
-                num--;
-                $('#btnNext').text('下一步')
-                // li[num].show().sibling().hide();
-
-            }
-            //跳转到上一个步骤
-            $(".ystep").prevStep();
-
-            console.log('val', robotDataArray)
-            for (var i = 0; i < robotDataArray.length; i++) {
-
-                if (num === i) {
-                    robotDataArray[i].show()
-                } else {
-                    robotDataArray[i].hide()
-                }
-            }
-        });
-        $("#btnNext").unbind();
-        btnNext.click(function () {
-
-
-            var transactionCurrency = $('#curry').find(" option:selected").text();//交易币种
-            var markettitle = $('#market').find(" option:selected").text();//交易市场
-            var parameterscontrol = $('.parameters-control').find(" option:selected").text()//交易账户
-            var resistancevalue = $('.strategy-parameters .trading-parameters .resistance-value').val()//阻力值
-            var support = $('.strategy-parameters .trading-parameters .support').val()//支撑位
-            var gridnumber = $('.strategy-parameters .trading-parameters .grid-number').val()//网格数量
-
-
-            // alert('请选择交易币种/交易市场')
-
-
-            var text = transactionCurrency + '/' + markettitle
-            $('.trading-strategy .strategy-curry .curry').text(text);
-            $('.set-strategy .strategy-curry .curry').text(text);
-            $('.set-risk-strategy .strategy-curry .curry').text(text);
-
-
-            $('.set-strategy-title .strategy-parameters-top .user').text(parameterscontrol)
-
-            $('.set-risk-strategy .set-strategy-title .resistance').text(resistancevalue)
-            $('.set-risk-strategy .set-strategy-title .support-level').text(support)
-            $('.set-risk-strategy .set-strategy-title .girding-num').text(gridnumber)
-
-            // $('.trading-strategy .strategy-curry .curry1').text(markettitle)
-
-            var strategytitle = '网格交易v1.0'
-            $('.strategy-name .strategy-button button').unbind();
-            $('.strategy-name .strategy-button button').on('click', function () {
-                $(this).addClass('active').siblings().removeClass('active');
-                var strategytitle = $(this).text();//交易策略
-                console.log(strategytitle);
-                $('.set-strategy .strategy-title .strategy').text(strategytitle)
-                $('.set-risk-strategy .strategy-title .curry').text(strategytitle)
-            })
-
-            // $('.set-strategy .strategy-curry .curry').text(transactionCurrency)
-            // $('.set-strategy .strategy-curry .curry1').text(markettitle)
-            console.log('next')
-            if (num >= 2) {
-                $('#btnNext').hide();
-                $('#btnComplete').show();
-                num = 3;
-            } else {
-                num++;
-                $('#btnNext').text('下一步')
-            }
-            //跳转到下一个步骤
-
-            // var stepNum = $(".ystep").getStep();
-            // robotDataArray[stepNum+1].show()
-            // console.log(stepNum)
-
-            //  if (transactionCurrency=='---请选择---' ) {
-            //     console.log(transactionCurrency)
-            //         alert('请选择交易币种/交易市场')
-            //          num=0;
-            // }else{
-            $(".ystep").nextStep();
-            //  }
-
-
-            $.each(robotDataArray, function (key, value) {
-                if (num === key) {
-                    value.show()
-                } else {
-                    value.hide()
-                }
-            })
-
-        });
-        $('.warninguser label').on('click', function () {
-            $(this).toggleClass('btn-success')
-        })
-
-    })
-
-
-}
 
 /**
  * 机器人信息填写
@@ -348,14 +219,22 @@ Robot.prototype.listenClickRobotEvent = function () {
 
         $("#btnNext").unbind();
         btnNext.click(function () {
-
+            // if(num == 1){
+            //     console.log(num,"执行函数")
+            //     self.listenCurrencySelecctedEvent();
+            // }
 
             var transactionCurrency = $('#curry').find(" option:selected").text();//交易币种
             var markettitle = $('#market').find(" option:selected").text();//交易市场
             var parameterscontrol = $('.parameters-control').find(" option:selected").text()//交易账户
             var resistancevalue = $('.strategy-parameters .trading-parameters .resistance-value').val()//阻力值
-            var support = $('.strategy-parameters .trading-parameters .support').val()//支撑位
+            var support = $('.support-value').val()//支撑位
             var gridnumber = $('.strategy-parameters .trading-parameters .grid-number').val()//网格数量
+            var free = $('#one-girding-free').val()
+            var profit_value = $('.profit-value').text()
+            var Theyareoften = $('.strategy-parameters .trading-parameters .millisecond-value').val()//挂单频率
+            var mixnumber = $('.strategy-parameters .mix-number .mix-number-value  ').val()//单网格最小交易量
+            var maxnumber = $('.strategy-parameters  .max-number .max-number-value ').val()//单网格最大交易量
 
             // alert('请选择交易币种/交易市场')
             var text = transactionCurrency + '/' + markettitle
@@ -368,7 +247,14 @@ Robot.prototype.listenClickRobotEvent = function () {
             $('.set-risk-strategy .set-strategy-title .resistance').text(resistancevalue)
             $('.set-risk-strategy .set-strategy-title .support-level').text(support)
             $('.set-risk-strategy .set-strategy-title .girding-num').text(gridnumber)
-
+            $('.strategy-parameters-below .deal-account').text(free + '%')
+            $('.strategy-parameters-below .resistance').text(profit_value)
+            var patt1 = /[\u4e00-\u9fa5]/;
+            if (patt1.test(text)) {
+                xfzalert.alertError("请选择交易币种/交易名称")
+                return
+            }
+            ;
             // $('.trading-strategy .strategy-curry .curry1').text(markettitle)
 
             var strategytitle = '网格交易v1.0'
@@ -382,6 +268,29 @@ Robot.prototype.listenClickRobotEvent = function () {
             })
 
             if (num >= 2) {
+                if (parameterscontrol == '---请选择---') {
+                    xfzalert.alertError("请选择交易账户")
+                    return
+                }
+                ;
+                if (Theyareoften.trim() == '') {
+                    xfzalert.alertError("请输入挂单频率")
+                    return
+                }
+                ;
+
+                if (mixnumber.trim() == '') {
+                    xfzalert.alertError("请输入单网格最小交易数量")
+                    return
+                }
+                ;
+                if (maxnumber.trim() == '') {
+                    xfzalert.alertError("请输入单网格最大交易数量")
+                    return
+                }
+                ;
+
+
                 $('#btnNext').hide();
                 $('#btnComplete').show();
                 num = 3;
@@ -504,8 +413,11 @@ Robot.prototype.listenparameterEven = function () {
             },
             'success': function (result) {
                 var robot = result['data']
+                var users = result['data']['robot']['fields']['warning_account']
                 console.log(robot)
-                var tpl = template('robots-details', {'robots': robot})
+                var user = users.split('&')
+                console.log(user)
+                var tpl = template('robots-details', {'robots': robot}, {"users": user})
 
                 var robotGroup = $('#parameter-list-content')
                 robotGroup.append(tpl)
@@ -586,8 +498,9 @@ Robot.prototype.getAccountInfoEvent = function () {
                     var girding = (resistance - support_level) / num
                     var mix_profit = (girding - (resistance * 2 + girding) * free) / resistance
                     var max_price = (girding - (support_level * 2 + girding) * free) / support_level
-                    var profit = self.fomatFloat(mix_profit,2) + '%' + '-' + self.fomatFloat(max_price,2) + '%'
+                    var profit = self.fomatFloat(mix_profit, 2) + '%' + '-' + self.fomatFloat(max_price, 2) + '%'
                     $('.resistance-value').val(resistance)
+
                     $('.support-value').val(support_level)
                     $('.profit-value').text(profit)
                     $('#stratery-girding-num').on('blur', function () {
@@ -597,7 +510,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                             var girding = (resistance - support_level) / num     //单网格=（阻力位价格-支撑位价格）/网格数量
                             var mix_profit = (girding - (resistance * 2 + girding) * free) / resistance
                             var max_price = (girding - (support_level * 2 + girding) * free) / support_level
-                            var profit = self.fomatFloat(mix_profit,2) + '%' + '-' + self.fomatFloat(max_price,2) + '%'
+                            var profit = self.fomatFloat(mix_profit, 2) + '%' + '-' + self.fomatFloat(max_price, 2) + '%'
                             $('.profit-value').text(profit)
                         }
                     })
@@ -610,7 +523,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                             var mix_profit = (girding - (resistance * 2 + girding) * free) / resistance
 
                             var max_price = (girding - (support_level * 2 + girding) * free) / support_level
-                            var profit = self.fomatFloat(mix_profit,2) + '%' + '-' + self.fomatFloat(max_price,2) + '%'
+                            var profit = self.fomatFloat(mix_profit, 2) + '%' + '-' + self.fomatFloat(max_price, 2) + '%'
                             $('.profit-value').text(profit)
                         }
                     });
@@ -620,7 +533,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                         if (!resistance == '') {
                             if (resistance <= price) {
                                 console.log("sf")
-                                $('.resistance-error-message .error').text("阻力位不得低于等于当前价")
+                                xfzalert.alertError("阻力位不得低于等于当前价")
                                 // $('.resistance-value').after("<span class='error-account'>阻力位不得低于等于当前价</span>")
                             } else {
                                 $('.resistance-error-message .error').text("")
@@ -629,7 +542,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                     });
 
                     var users = JSON.parse(data['users'])
-                    var tpl = template('users',{"users":users})
+                    var tpl = template('users', {"users": users})
                     var usersGroup = $('#waring-users')
                     usersGroup.append(tpl)
 
@@ -656,7 +569,6 @@ Robot.prototype.listenClickStragerty = function () {
         })
     })
 }
-
 
 
 /**
@@ -694,15 +606,17 @@ Robot.prototype.listenSubmitRobot = function () {
 
         var userList = $('.warninguser .active')
         console.log(userList)
-        var users = ""
+        var users = []
         for (var i = 0; i < userList.length; i++) {
             var element = userList[i]
             console.log(element)
             var user = $(element).text()
+            console.log($.trim(user))
             // console.log(user)
             // users.push(user)
-            users += user + ''
+            users += $.trim(user) + "&"
         }
+
         console.log(users)
 
 
@@ -762,7 +676,7 @@ Robot.prototype.runRobotEvent = function () {
         var robot_id = tr.attr('data-id');
         var run_status = $(this).attr('run_status')
         var status = tr.attr('status')
-        console.log(robot_id,run_status,status)
+        console.log(robot_id, run_status, status)
         if (run_status == 0 && status == 1) {
             run_status = 1
             status = 0
@@ -801,9 +715,13 @@ Robot.prototype.runRobotEvent = function () {
  */
 Robot.prototype.setCurrentPrice = function () {
     $('#set-currenPrice').click(function () {
-        var price1 = $('.set-price').val()
-        console.log(price1)
-        $('.current-price .price').text(price1)
+        var price = $('.set-price').val()
+        if (!price == "") {
+            $('.current-price .price').text(price)
+        } else {
+            xfzalert.alertError("请输入当前价")
+        }
+
     })
 }
 
@@ -956,8 +874,83 @@ Robot.prototype.oneStepRun = function () {
 }
 
 
+/**
+ * 图标填写
+ */
+Robot.prototype.listenRightFlagEvent = function () {
+    $('#btnNext').click(function () {
+        console.log("right")
+        var currency = $('.strategy-curry .currency').text()
+        if (!currency == "") {
+            $('.strategy-curry').append("<img src=\"{% static 'images/1-1.png' %}\" alt=\"\">")
+        }
+    })
+}
+
+Robot.prototype.getUser = function () {
+    $('#create-robot').click(function () {
+        xfzajax.get({
+            'url': '/deal/waring_usrs/',
+            'success': function (result) {
+                if (result['code'] === 200) {
+                    console.log(result)
+                    var users = result['data']
+                    console.log(users)
+                    var tpl = template('users-item', {'users': users})
+                    var usersGroup = $('#waring-users')
+                    usersGroup.append(tpl)
+                }
+            }
+        })
+    })
+
+}
+
+Robot.prototype.listenCurrencySelecctedEvent = function () {
+    var parantersGroup = $('.set-strategy')
+    var currency = parantersGroup.find('.strategy-curry .curry').text()
+    var strr = currency.split('/')
+    var curry = strr[0]
+    var market = strr[1]
+    var id = $('#robot-account').find("option:selected").val()
+    xfzajax.post({
+        'url': '/deal/getaccountinfo/',
+        'data': {
+            'curry-title': curry,
+            'market-title': market,
+            'account_id': id,
+        },
+        'success': function (result) {
+            if (result['code'] === 200) {
+                var data = result['data']
+                console.log(data)
+                var resistance = data['resistance']  //阻力位
+                var support_level = data['support_level'] //支撑位
+                var currency = data['currency']  //可用
+                var last = data['last']    //当前价
+                var market = data['market']  //市场价
+                //往设置策略中插入请求到的账户信息
+                $('.current-price .price').text(last)
+                $('.account-details .currency').text(currency)
+                $('.account-details .market').text(market)
 
 
+                var num = $('#stratery-girding-num ').val()
+                var free = $('#one-girding-free').val()
+                var girding = (resistance - support_level) / num
+                var mix_profit = (girding - (resistance * 2 + girding) * free) / resistance
+                var max_price = (girding - (support_level * 2 + girding) * free) / support_level
+                var profit = self.fomatFloat(mix_profit, 2) + '%' + '-' + self.fomatFloat(max_price, 2) + '%'
+                $('.resistance-value').val(resistance)
+
+                $('.support-value').val(support_level)
+                $('.profit-value').text(profit)
+
+            }
+        }
+
+    })
+}
 $(function () {
     var robot = new Robot();
     robot.run();

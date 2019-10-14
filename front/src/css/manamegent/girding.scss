@@ -358,10 +358,14 @@
 
         .warninguser {
           margin-top: 40px;
+          .user{
+            background: #F2F2F2;
+          }
 
           label {
             width: 120px;
             margin: 10px 10px
+
           }
         }
       }
@@ -736,18 +740,6 @@
         }
 
 
-      }
-
-      .account_details {
-        margin-right: 360px;
-      }
-
-      .gird_profit {
-        margin-right: 400px;
-
-        .grofit-value {
-          margin-left: 30px;
-        }
       }
 
     }

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{% static 'ystep-master/css/ystep.css' %}">
     <link rel="stylesheet" href="{% static 'css/manamegent/girding.min.css' %}">
     <script src="{% static 'arttemplate/template-web.js' %}"></script>
+
 {% endblock %}
 {% block header %}
     <p>网格交易</p>
@@ -188,6 +189,7 @@
                     <div class="strategy-title">
                         <span class="title">选择交易策略:</span>
                         <span class="strategy">网格交易V1.0</span>
+                        <img src="{% static 'images/1-1.png' %}" alt="">
                     </div>
                     <div class="title">
                         <span>设置策略参数</span>
@@ -244,11 +246,11 @@
                         </div>
                         <div class="trading-parameters mix-number ">
                             <span class="title">单网格最小交易数量</span>
-                            <input class="parameters-control value" type="text">
+                            <input class="parameters-control value mix-number-value" type="text">
                         </div>
                         <div class="trading-parameters max-number ">
                             <span class="title">单网格最大交易数量</span>
-                            <input class="parameters-control value" type="text">
+                            <input class="parameters-control value  max-number-value" type="text">
                         </div>
                         <div class="trading-parameters profit ">
                             <span class="title">单网格利润</span>
@@ -265,6 +267,7 @@
                     <div class="strategy-title">
                         <span class="title">选择交易策略:</span>
                         <span class="curry">网格交易V1.0</span>
+                        <img src="{% static 'images/1-1.png' %}" alt="">
                     </div>
                     <div class="set-strategy-title">
                         <div class="strategy-parameters-top">
@@ -282,7 +285,7 @@
                             <span class="procudere-fee">单次交易手续费:</span>
                             <span class="deal-account">0.1%</span>
                             <span class="girding-profit">单网格利润:</span>
-                            <span class="resistance">0.21%-0.46%</span>
+                            <span class="resistance"></span>
                         </div>
 
                         <div class="riskstrategy">
@@ -297,11 +300,15 @@
                         <div class="warninguser">
                             <div>预警账户</div>
                             <div class="btn-group" id="waring-users" data-toggle="buttons">
-
+                                <script id="users-item" type="text/html">
+                                    {% verbatim %}
+                                    {{ each users.users user index }}
                                     <label class="btn btn-default">
-                                        <input type="checkbox" class="user">32423423
+                                        <input type="checkbox" class="user">{{ user.fields.username }}
                                     </label>
-
+                                    {{ /each }}
+                                    {% endverbatim %}
+                                </script>
                             </div>
                         </div>
                     </div>
@@ -359,16 +366,19 @@
                         </div>
                     </div>
                     <div class="trading-list">
-                        <span>买入(8笔）</span>
+                        <span>买入(8  笔）</span>
                         <span class="buy-num">数量</span>
                         <span class="buy-price">价格</span>
                         <ul>
+                            {{ each robots.买 buys }}
 
                             <li>
-                                <span>买1</span>
-                                <span>7391 usdt</span>
-                                <span>7391 itc</span>
+                                <span>买{{ i }}</span>
+                                <span>{{ buys.amount.toFixed(2) }}</span>
+                                <span>{{ buys.price.toFixed(2) }}{{ robots.currency_market.currency }}</span>
                             </li>
+
+                            {{ /each }}
 
                         </ul>
                     </div>
@@ -377,11 +387,13 @@
                         <span class="sell-num">数量</span>
                         <span class="sell-price">价格</span>
                         <ul>
+                            {{ each robots.卖 sells index }}
                             <li>
-                                <span>买1</span>
-                                <span>7391 usdt</span>
-                                <span>7391 itc</span>
+                                <span>卖</span>
+                                <span>{{ sells.amount.toFixed(2) }}</span>
+                                <span>{{ sells.price.toFixed(2) }}{{ robots.currency_market.market }}</span>
                             </li>
+                            {{ /each }}
 
                         </ul>
                     </div>
@@ -418,6 +430,7 @@
                         <th>收益(USDT)</th>
                     </tr>
                     <tr>
+
                         <td></td>
                         <td>74.78</td>
                         <td>1.331084</td>
@@ -454,7 +467,7 @@
                         <ul>
                             <li><span>交易账户</span><input type="text" disabled="disabled" value="{{ robots.account_name
                  }}"></li>
-                            <li class="account_details"><span>可用</span><span>{{  }} 6.000.0000itc</span></li>
+                            <li class="account_details"><span>可用</span><input disabled></li>
                             <li><span>当前价</span><input type="text" disabled="disabled"
                                                        value="{{ robots.robot.fields.current_price }}"></li>
                             <li><span>重新挂单频率</span><input type="text" class="edit-orders-frequency" disabled="disabled"
@@ -466,12 +479,13 @@
                             <li><span>网格数量</span><input type="text" disabled="disabled"
                                                         value="{{ robots.robot.fields.girding_num }}"></li>
                             <li><span>单次交易手续费</span><input type="text" disabled="disabled"
-                                                           value="{{robots.robot.fields.procudere_fee }}%"></li>
+                                                           value="{{robots.robot.fields.procudere_fee }}"></li>
                             <li><span>单网格最小交易数量</span><input type="text" class="edit-mix-num"
                                                              value="{{ robots.robot.fields.min_num }}"></li>
                             <li><span>单网格最大交易数量</span><input type="text" class="edit-max-numx"
                                                              value="{{ robots.robot.fields.max_num }}"></li>
-                            <li class="gird_profit"><span>单网格利润 </span><span class="grofit-value">{{ robots.robot.fields.girding_profit }}</span>
+                            <li class="gird_profit"><span>单网格利润 </span><input class="grofit-value" disabled="disabled"
+                                                                              value="{{ robots.robot.fields.girding_profit }}">
                             </li>
                         </ul>
                     </div>
@@ -487,54 +501,13 @@
                     <div class="risk-strategy-warninguser">
                         <div>预警账户</div>
                         <div class="btn-group" data-toggle="buttons">
+
                             <label class="btn btn-default">
-                                <input type="checkbox"> 524135494218
+                                <input type="checkbox"  >
+                                {{ robots.robot.fields.warning_account}}
                             </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> @68451816548
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 66@454519684
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 318416518687
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 684651684654
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 546843216874
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 356468513544
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 546846516848
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 683548946848
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 684651684654
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 683548946848
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 684651684654
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 683548946848
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 684651684654
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 683548946848
-                            </label>
-                            <label class="btn btn-default">
-                                <input type="checkbox"> 684651684654
-                            </label>
+
+
                         </div>
                     </div>
                     {% endverbatim %}
