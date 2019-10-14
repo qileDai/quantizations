@@ -25,6 +25,7 @@ Account.prototype.run = function () {
     self.showDetailProperty();
     self.refershAccountEvent();
     self.addAccountCurrencyEvent();
+    self.checkAllEvent();
     // self.listenEditAccount();
 
 }
@@ -536,6 +537,18 @@ Account.prototype.addAccountCurrencyEvent = function () {
     })
 
 
+}
+
+Account.prototype.checkAllEvent = function () {
+    $('#checkAll').click(function () {
+        if ($(this).prop('checked') == true) {
+            console.log("checkall")
+            $("input[class='account-chcekbox']").prop("checked", true);
+        }else {
+            $("input[class='account-chcekbox']").prop("checked", false);
+        }
+
+    })
 }
 
 $(function () {
