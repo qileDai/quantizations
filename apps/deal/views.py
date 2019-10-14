@@ -168,8 +168,11 @@ class ShowCollectAsset(View):
     def post(self, request):
 
         account_list = request.POST.getlist('account_list[]')
-        print("dfl")
-        print(account_list)
+        if account_list:
+            accounts = account_list
+        else:
+            pass
+
         # user_id = request.session.get("user_id")
         #
         # ids = serializers.Serializer('json', Account.objects.filter(users__id=user_id).values('id'))
@@ -181,7 +184,7 @@ class ShowCollectAsset(View):
         # ids = request.POST.get("pk")
         flag = True
         context_list = list()
-        for id in account_list:
+        for id in accounts:
             print("*" * 20, id)
             # 获取账户信息
             account_obj = Account.objects.get(id=id)

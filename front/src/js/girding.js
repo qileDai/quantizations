@@ -504,7 +504,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                     console.log("最小",mix_profit)
                     var max_price = (girding - (support_level * 2 + girding) * free) / support_level
                     console.log("最da",max_price )
-                    var profit = self.fomatFloat(mix_profit, 2) + '%' + '-' + self.fomatFloat(max_price, 2) + '%'
+                    var profit = self.fomatFloat(mix_profit, 4) + '%' + '-' + self.fomatFloat(max_price, 4) + '%'
                     $('.resistance-value').val(resistance)
 
                     $('.support-value').val(support_level)
@@ -516,7 +516,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                             var girding = (resistance - support_level) / num     //单网格=（阻力位价格-支撑位价格）/网格数量
                             var mix_profit = (girding - (resistance * 2 + girding) * free) / resistance
                             var max_price = (girding - (support_level * 2 + girding) * free) / support_level
-                            var profit = self.fomatFloat(mix_profit, 2) + '%' + '-' + self.fomatFloat(max_price, 2) + '%'
+                            var profit = self.fomatFloat(mix_profit, 4) + '%' + '-' + self.fomatFloat(max_price, 4) + '%'
                             $('.profit-value').text(profit)
                         }
                     })
@@ -529,7 +529,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                             var mix_profit = (girding - (resistance * 2 + girding) * free) / resistance
 
                             var max_price = (girding - (support_level * 2 + girding) * free) / support_level
-                            var profit = self.fomatFloat(mix_profit, 2) + '%' + '-' + self.fomatFloat(max_price, 2) + '%'
+                            var profit = self.fomatFloat(mix_profit, 4) + '%' + '-' + self.fomatFloat(max_price, 4) + '%'
                             $('.profit-value').text(profit)
                         }
                     });
@@ -954,6 +954,11 @@ Robot.prototype.listenCurrencySelecctedEvent = function () {
     })
 }
 
+/**
+ * 机器人提交 数据校验提示方法
+ * 包括止损价提示
+ * 单网格不能超过交易币种，市场币种价格提示
+ */
 Robot.prototype.submitTipsEvent = function(){
     //止损价提示
     $('.stopLoss .loss').on('blur',function () {
@@ -962,18 +967,31 @@ Robot.prototype.submitTipsEvent = function(){
         if( loss > support){
             xfzalert.alertError("止损价必须低于支撑位")
         }
-
-    })
+    });
     //单网格最大提示
     $('.max-number-value').on('blur',function () {
         var max_num = $('.max-number-value').val()
-        var currency = $('.account-details .currency').text().match(/^[0-9]+(.[0-9]{2})?$/g)
-        var market = $('.account-details .market').text().match(/^[0-9]+(.[0-9]{2})?$/g);
+        var currency = $('.account-details .currency').text().replace(/[^\d.]/g,"")
+        var market = $('.account-details .market').text().replace(/[^\d.]/g,"")
         console.log(currency,market)
         var support = $('.support-value').val()
         var resistance = $('.resistance-value').val()
+        console.log(support,resistance)
         var num = $('#stratery-girding-num').val()
         // var current_matket = max_num *
+        var market_price = (resistance + support)/2 * max_num * num  //账户市场
+        console.log(market_price)
+        var currency_price = max_num * num
+        if( market < market_price){
+            xfzalert.alertError("账户市场币种余额不足")
+        }
+        if(currency < currency_price){
+            xfzalert.alertError("账户交易币种余额不足")
+        }
+        if( market<market_price && currency<currency_price){
+            xfzalert.alertError("账户市场币种和交易币种余额不足")
+        }
+
     })
 
 }
