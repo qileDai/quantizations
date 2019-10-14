@@ -133,7 +133,7 @@ class OrderInfo(models.Model):
     closing_price = models.DecimalField(max_digits=18, decimal_places=8)    # 成交价
     total_price = models.DecimalField(max_digits=18, decimal_places=8)      # 成交总价
     closing_time = models.DateTimeField()                                   # 订单完成时间
-    robot = models.ForeignKey("Account", on_delete=models.CASCADE, null=True, blank=True)
+    robot = models.ForeignKey("Robot", on_delete=models.CASCADE, null=True, blank=True)
     currency_pair = models.CharField(max_length=32)
-    order_id = models.CharField(max_length=32)
+    order_id = models.IntegerField()
 
