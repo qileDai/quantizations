@@ -551,6 +551,7 @@ Account.prototype.checkAllEvent = function () {
     })
 }
 
+
 $(function () {
     var account = new Account();
     account.run();
