@@ -967,6 +967,13 @@ Robot.prototype.submitTipsEvent = function(){
     //单网格最大提示
     $('.max-number-value').on('blur',function () {
         var max_num = $('.max-number-value').val()
+        var currency = $('.account-details .currency').text().match(/^[0-9]+(.[0-9]{2})?$/g)
+        var market = $('.account-details .market').text().match(/^[0-9]+(.[0-9]{2})?$/g);
+        console.log(currency,market)
+        var support = $('.support-value').val()
+        var resistance = $('.resistance-value').val()
+        var num = $('#stratery-girding-num').val()
+        // var current_matket = max_num *
     })
 
 }
