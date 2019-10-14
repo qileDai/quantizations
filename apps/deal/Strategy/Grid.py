@@ -385,14 +385,15 @@ class GridStrategy(Thread):
                             # 已完成挂单交易，撤单并反向挂单
                             if order_info.get("status") in [2]:
                                 print('已完成反向挂单', order_info.get("status"))
+
+                                # 保存已完成的挂单信息
+                                self.save_completedorder(order_info)
                                 # 对已完成的反向挂单进行判断，若多笔id相同需要合并成一笔下单
                                 if item[1].get("id"):
                                     ret, trade_amount = self.merge_reverse_order(item)
                                     if not ret:
                                         continue
 
-                                # 保存已完成的挂单信息
-                                self.save_completedorder(order_info)
                                 if order_info.get("type") == "buy":
                                     # 反向挂单价，不做更新
                                     price = order_info.get("price")+self.grid_range
