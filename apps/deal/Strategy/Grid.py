@@ -164,11 +164,14 @@ class GridStrategy(Thread):
                     a, b = min_buy1-self.grid_range*i, max_buy1-self.grid_range*i
                     # 获取挂卖单价的小数位
                     price = round(random.uniform(a, b), markets_data.get("priceScale", 2))
+                    if price <= self.robot_obj.support_level:
+                        price = self.robot_obj.support_level
                 elif self.order_type == "sell":
                     a, b = min_sell1+self.grid_range*i, max_sell1+self.grid_range*i
                     # 获取挂买单价的小数位
                     price = round(random.uniform(a, b), markets_data.get("amountScale", 2))
-
+                    if price >= self.robot_obj.resistance:
+                        price = self.robot_obj.resistance
                 try:
                     res = self.server_api.order(str(amount), self.currency_type, str(price), self.order_type)
                     # 下单成功，添加下单id
