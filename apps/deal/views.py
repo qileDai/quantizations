@@ -481,14 +481,16 @@ class ShowTradeDetail(View):
             return "%d 分, %d 秒" % (int(mins[0]), math.ceil(mins[1]))
 
     def sort_data(self, order_info):
-        lens = 0
+        sell = dict()
+        buy = dict()
         for k, v in order_info.items():
-            lens += len(v)
-            if k is "sell":
-                sell = sorted(v.items(), key=lambda x: x[1]["price"])
-            elif k is "buy":
-                buy = sorted(v.items(), key=lambda x: x[1]["price"], reverse=True)
-        return lens, dict(sell), dict(buy)
+            if v["order_type"] is "sell":
+                sell[k] = v
+            elif v["order_type"] is "buy":
+                buy[k] = v
+        buys = sorted(buy.items(), key=lambda x: x[1]["price"], reverse=True)
+        sells = sorted(sell.items(), key=lambda x: x[1]["price"])
+        return sells, buys
 
     def post(self, request):
         # 获取机器人id
@@ -516,14 +518,12 @@ class ShowTradeDetail(View):
                 robot = item.robot_obj
                 if id == str(robot.id):
                     # 向字典中添加数据
-                    order_type = item.order_type
-                    order_info[order_type] = item.id_dict
+                    order_info = {**order_info, **item.id_dict}
                 running_time = time.time() - item.start_time
             except:
                 print('对象没有属性robot_obj')
                 continue
-        lens, sell, buy = self.sort_data(order_info)
-        print('*-' * 30, sell, buy)
+        sell, buy = self.sort_data(order_info)
         context = {
             # 交易币种和交易市场
             'currency_market': {"currency": currency, "market": market},
@@ -532,8 +532,7 @@ class ShowTradeDetail(View):
             # 已完成挂单信息
             'closed_info': serialize("json", closed_order.order_by("-id")),
             # 未完成笔数
-            # 'open_num': len(order_info),
-            'open_num': lens,
+            'open_num': len(order_info),
             # 未完成卖单信息
             'SELL': sell,
             # 未完成买单信息
@@ -570,9 +569,22 @@ class ShowConfigInfo(View):
         robot_obj = Robot.objects.filter(id=id)
         account_obj = Account.objects.get(id=robot_obj.first().trading_account_id)
         data = serialize("json", robot_obj)[1:-1]
+
+        user_obj, service_obj, market_obj = get_account_info(robot_obj.currency, robot_obj.market, id)
+        try:
+            info = service_obj.get_balance()
+            info = info.get('funds')
+        except:
+            return restful.params_error(message='币种错误，请核对！')
         # print(json.loads(data)['pk'], type(json.loads(data)))
         context = {
+            # 交易币种可用
+            'currency': self.data_format(info[robot_obj.currency.upper()].get('balance')) + ' ' + robot_obj.currency,
+            # 交易市场可用
+            'market': self.data_format(info[robot_obj.market.upper()].get('balance')) + ' ' + robot_obj.market,
+            # 账户信息
             'account_name': str(account_obj.title),
+            # 机器人信息
             'robot': json.loads(data),
         }
         print(context)
@@ -581,7 +593,7 @@ class ShowConfigInfo(View):
 
 class ShowConfig(View):
     """
-    展示机器人配置信息
+    修改机器人配置信息
     """
 
     def post(self, request):
