@@ -168,6 +168,7 @@ class ShowCollectAsset(View):
     def post(self, request):
 
         account_list = request.POST.getlist('account_list[]')
+        print(account_list)
         if account_list:
             accounts = account_list
         else:
