@@ -482,16 +482,16 @@ class ShowTradeDetail(View):
             return "%d 分, %d 秒" % (int(mins[0]), math.ceil(mins[1]))
 
     def sort_data(self, order_info):
-        sell = dict()
-        buy = dict()
+        sells = dict()
+        buys = dict()
         for k, v in order_info.items():
             if v["order_type"] is "sell":
-                sell[k] = v
+                sells[k] = v
             elif v["order_type"] is "buy":
-                buy[k] = v
-        buys = sorted(buy.items(), key=lambda x: x[1]["price"], reverse=True)
-        sells = sorted(sell.items(), key=lambda x: x[1]["price"])
-        return sells, buys
+                buys[k] = v
+        buys = sorted(buys.items(), key=lambda x: x[1]["price"], reverse=True)
+        sells = sorted(sells.items(), key=lambda x: x[1]["price"])
+        return dict(sells), dict(buys)
 
     def post(self, request):
         # 获取机器人id
@@ -557,6 +557,7 @@ class ShowTradeDetail(View):
                                        * float(info1.get('last'))) + ' ' + market,
         }
         print(context)
+        print('/-'*30, len(sell), len(buy))
         return restful.result(data=context)
 
 
@@ -564,14 +565,16 @@ class ShowConfigInfo(View):
     """
     展示机器人配置信息
     """
+    def data_format(self, data):
+        data = str(round(float(data), 2))
+        return data
 
     def post(self, request):
         id = request.POST.get('robot_id')
-        robot_obj = Robot.objects.filter(id=id)
-        account_obj = Account.objects.get(id=robot_obj.first().trading_account_id)
-        data = serialize("json", robot_obj)[1:-1]
-
-        user_obj, service_obj, market_obj = get_account_info(robot_obj.currency, robot_obj.market, id)
+        robot_obj = Robot.objects.get(id=id)
+        account_obj = Account.objects.filter(id=robot_obj.trading_account.id).first()
+        data = serialize("json", Robot.objects.filter(id=id))
+        user_obj, service_obj, market_obj = get_account_info(robot_obj.currency, robot_obj.market, robot_obj.trading_account.id)
         try:
             info = service_obj.get_balance()
             info = info.get('funds')
