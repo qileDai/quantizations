@@ -365,18 +365,18 @@ class GridStrategy(Thread):
                     break
                 else:
 
-                    # 根据价格排序
-                    if self.order_type == "sell":
-                        self.lock.acquire()
-                        id_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"])
-                        self.lock.release()
-                    elif self.order_type == "buy":
-                        self.lock.acquire()
-                        id_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"], reverse=True)
-                        self.lock.release()
+                    # if self.order_type == "sell":
+                    #     self.lock.acquire()
+                    #     # 针对sell类型的挂单进行排序
+                    #     id_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"])
+                    #     self.lock.release()
+                    # elif self.order_type == "buy":
+                    #     self.lock.acquire()
+                    #     id_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"])
+                    #     self.lock.release()
 
                     # 循环挂单信息
-                    for item in list(id_dicts):
+                    for item in self.id_dict.items():
                         # 获取要更新挂单id
                         b_id = item[0]
                         trade_amount = None
@@ -399,13 +399,13 @@ class GridStrategy(Thread):
                                 if order_info.get("type") == "buy":
                                     # 反向挂单价，不做更新
                                     price = order_info.get("price")+self.grid_range
-                                    price = round(price, markets_data.get("priceScale"))
+                                    # price = round(price, markets_data.get("priceScale"))
                                     # 启动反向挂单
                                     self.completed_order_info(price, item, order_info, "sell", trade_amount)
 
                                 elif order_info.get("type") == "sell":
                                     price = order_info.get("price")-self.grid_range
-                                    price = round(price, markets_data.get("amountScale"))
+                                    # price = round(price, markets_data.get("amountScale"))
                                     self.completed_order_info(price, item, order_info, "buy", trade_amount)
 
                             # 部分成交挂单
@@ -418,13 +418,15 @@ class GridStrategy(Thread):
                                 if order_info.get("type") == "buy":
                                     # 反向挂单价，不做更新
                                     price = order_info.get("price")+self.grid_range
-                                    price = round(price, markets_data.get("priceScale"))
+                                    # price = round(price, markets_data.get("priceScale"))
+                                    price = round(price, 2)
                                     # 启动反向挂单
                                     self.completed_order_info(price, item, order_info, "sell")
 
                                 elif order_info.get("type") == "sell":
                                     price = order_info.get("price")-self.grid_range
-                                    price = round(price, markets_data.get("amountScale"))
+                                    # price = round(price, markets_data.get("amountScale"))
+                                    price = round(price, 2)
                                     self.completed_order_info(price, item, order_info, "buy")
 
                         except Exception as e:
@@ -463,13 +465,23 @@ class GridStrategy(Thread):
                 if len(self.id_dict) <= 10:
                     order_dicts = self.id_dict.items()
                 else:
-                    # 对价格进行排序
                     if self.order_type == "sell":
-                        temp_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"])
+                        # 针对sell类型的挂单进行排序
+                        # temp_dicts = sorted(self.id_dict.items(), key=lambda x: (x[1]["order_type"], x[1]["price"]))
+                        temp_dicts = dict()
+                        for k, v in self.id_dict.items():
+                            if v["order_type"] == "sell":
+                                temp_dicts[k] = v
                         order_dicts = random.sample(temp_dicts[0:10], 8)
+
                     elif self.order_type == "buy":
-                        temp_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"], reverse=True)
+                        # temp_dicts = sorted(self.id_dict.items(), key=lambda x: (x[1]["order_type"], x[1]["price"]))
+                        temp_dicts = dict()
+                        for k, v in self.id_dict.items():
+                            if v["order_type"] == "buy":
+                                temp_dicts[k] = v
                         order_dicts = random.sample(temp_dicts[0:10], 8)
+
                 # print('*'*20, list(order_dicts))
                 self.lock.release()
                 # 循环挂单信息
