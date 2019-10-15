@@ -564,14 +564,16 @@ class ShowConfigInfo(View):
     """
     展示机器人配置信息
     """
+    def data_format(self, data):
+        data = str(round(float(data), 2))
+        return data
 
     def post(self, request):
         id = request.POST.get('robot_id')
-        robot_obj = Robot.objects.filter(id=id)
-        account_obj = Account.objects.get(id=robot_obj.first().trading_account_id)
-        data = serialize("json", robot_obj)[1:-1]
-
-        user_obj, service_obj, market_obj = get_account_info(robot_obj.currency, robot_obj.market, id)
+        robot_obj = Robot.objects.get(id=id)
+        account_obj = Account.objects.filter(id=robot_obj.trading_account.id).first()
+        data = serialize("json", Robot.objects.filter(id=id))
+        user_obj, service_obj, market_obj = get_account_info(robot_obj.currency, robot_obj.market, robot_obj.trading_account.id)
         try:
             info = service_obj.get_balance()
             info = info.get('funds')
