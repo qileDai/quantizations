@@ -481,16 +481,16 @@ class ShowTradeDetail(View):
             return "%d 分, %d 秒" % (int(mins[0]), math.ceil(mins[1]))
 
     def sort_data(self, order_info):
-        sell = dict()
-        buy = dict()
+        sells = dict()
+        buys = dict()
         for k, v in order_info.items():
             if v["order_type"] is "sell":
-                sell[k] = v
+                sells[k] = v
             elif v["order_type"] is "buy":
-                buy[k] = v
-        buys = sorted(buy.items(), key=lambda x: x[1]["price"], reverse=True)
-        sells = sorted(sell.items(), key=lambda x: x[1]["price"])
-        return sells, buys
+                buys[k] = v
+        buys = sorted(buys.items(), key=lambda x: x[1]["price"], reverse=True)
+        sells = sorted(sells.items(), key=lambda x: x[1]["price"])
+        return dict(sells), dict(buys)
 
     def post(self, request):
         # 获取机器人id
