@@ -22,7 +22,7 @@ from django.core import serializers
 from django.core.serializers import serialize
 from django.contrib.sessions import serializers
 import json
-from apps.deal.serializers import AccountSerializer
+from apps.deal.serializers import AccountSerializer,RobotSerializer
 from apps.rbac.serializers import UserSerializer
 
 
@@ -168,6 +168,7 @@ class ShowCollectAsset(View):
     def post(self, request):
 
         account_list = request.POST.getlist('account_list[]')
+        print(account_list)
         if account_list:
             accounts = account_list
         else:
@@ -572,7 +573,10 @@ class ShowConfigInfo(View):
         id = request.POST.get('robot_id')
         robot_obj = Robot.objects.get(id=id)
         account_obj = Account.objects.filter(id=robot_obj.trading_account.id).first()
-        data = serialize("json", Robot.objects.filter(id=id))
+        # data = serialize("json", Robot.objects.filter(id=id))
+        account  = Robot.objects.get(id=id)
+        serialize = RobotSerializer(account)
+        print(serialize.data)
         user_obj, service_obj, market_obj = get_account_info(robot_obj.currency, robot_obj.market, robot_obj.trading_account.id)
         try:
             info = service_obj.get_balance()
@@ -588,7 +592,7 @@ class ShowConfigInfo(View):
             # 账户信息
             'account_name': str(account_obj.title),
             # 机器人信息
-            'robot': json.loads(data),
+            'robot': serialize.data,
         }
         print(context)
         return restful.result(data=context)

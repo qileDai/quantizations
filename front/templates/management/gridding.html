@@ -370,10 +370,10 @@
                         <span class="buy-num">数量</span>
                         <span class="buy-price">价格</span>
                         <ul>
-                            {{ each robots.BUY buys }}
+                            {{ each robots.BUY buys index }}
 
                             <li>
-                                <span>买{{ i }}</span>
+                                <span>买</span>
                                 <span>{{ buys.amount.toFixed(2) }}</span>
                                 <span>{{ buys.price.toFixed(2) }}{{ robots.currency_market.currency }}</span>
                             </li>
@@ -429,18 +429,21 @@
                         <th>创建时间</th>
                         <th>收益(USDT)</th>
                     </tr>
+                    {{ each closed_info closeds index }}
                     <tr>
-
-                        <td></td>
-                        <td>74.78</td>
-                        <td>1.331084</td>
+                        {{ if closeds.fields.order_type == 'sell' }}
+                        <td>买入</td>
+                        <td>{{ closeds.closing_price }}</td>
+                        <td>{{ closeds.total_price }}</td>
                         <td>2019080721：33</td>
+                        {{ /if }}
                         <td>卖出</td>
                         <td>75.21</td>
                         <td>1.338737</td>
                         <td>2019/080722：42</td>
                         <td>+0.07654</td>
                     </tr>
+                    {{ /each }}
                 </table>
                 {% endverbatim %}
                 {% include 'cms/box_footer.html' %}
@@ -467,25 +470,25 @@
                         <ul>
                             <li><span>交易账户</span><input type="text" disabled="disabled" value="{{ robots.account_name
                  }}"></li>
-                            <li class="account_details"><span>可用</span><input disabled></li>
+                            <li class="account_details"><span>可用</span><input disabled value="{{ robots.currency }}&nbsp;&nbsp;{{ robots.market }}"></li>
                             <li><span>当前价</span><input type="text" disabled="disabled"
-                                                       value="{{ robots.robot.fields.current_price }}"></li>
+                                                       value="{{ robots.robot.current_price }}"></li>
                             <li><span>重新挂单频率</span><input type="text" class="edit-orders-frequency" disabled="disabled"
-                                                          value="{{ robots.robot.fields.orders_frequency }}"></li>
+                                                          value="{{ robots.robot.orders_frequency }}"></li>
                             <li><span>阻力值</span><input type="text" disabled="disabled "
-                                                       value="{{ robots.robot.fields.resistance }}"></li>
+                                                       value="{{ robots.robot.resistance }}"></li>
                             <li><span>支撑位</span><input type="text" disabled="disabled"
-                                                       value="{{ robots.robot.fields.support_level }}"></li>
+                                                       value="{{ robots.robot.support_level }}"></li>
                             <li><span>网格数量</span><input type="text" disabled="disabled"
-                                                        value="{{ robots.robot.fields.girding_num }}"></li>
+                                                        value="{{ robots.robot.girding_num }}"></li>
                             <li><span>单次交易手续费</span><input type="text" disabled="disabled"
-                                                           value="{{robots.robot.fields.procudere_fee }}"></li>
+                                                           value="{{robots.robot.procudere_fee }}"></li>
                             <li><span>单网格最小交易数量</span><input type="text" class="edit-mix-num"
-                                                             value="{{ robots.robot.fields.min_num }}"></li>
+                                                             value="{{ robots.robot.min_num }}"></li>
                             <li><span>单网格最大交易数量</span><input type="text" class="edit-max-numx"
-                                                             value="{{ robots.robot.fields.max_num }}"></li>
+                                                             value="{{ robots.robot.max_num }}"></li>
                             <li class="gird_profit"><span>单网格利润 </span><input class="grofit-value" disabled="disabled"
-                                                                              value="{{ robots.robot.fields.girding_profit }}">
+                                                                              value="{{ robots.robot.girding_profit }}">
                             </li>
                         </ul>
                     </div>
@@ -493,9 +496,9 @@
                         <div>风险策略</div>
                         <ul>
                             <li><span>止损价</span><input type="text" class="edit-stoploss"
-                                                       value="{{ robots.robot.fields.stop_price }}"></li>
+                                                       value="{{ robots.robot.stop_price }}"></li>
                             <li><span>预警价</span><input type="text" class="edit-waring"
-                                                       value="{{ robots.robot.fields.warning_price }}"></li>
+                                                       value="{{ robots.robot.warning_price }}"></li>
                         </ul>
                     </div>
                     <div class="risk-strategy-warninguser">
@@ -503,8 +506,8 @@
                         <div class="btn-group" data-toggle="buttons">
 
                             <label class="btn btn-default">
-                                <input type="checkbox"  >
-                                {{ robots.robot.fields.warning_account}}
+                                <input type="checkbox">
+                                {{ robots.robot.warning_account}}
                             </label>
 
 
