@@ -556,6 +556,7 @@ class ShowTradeDetail(View):
                                        * float(info1.get('last'))) + ' ' + market,
         }
         print(context)
+        print('/-'*30, len(sell), len(buy))
         return restful.result(data=context)
 
 
