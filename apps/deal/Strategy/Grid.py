@@ -111,7 +111,13 @@ class GridStrategy(Thread):
         else:
             # 更新单笔挂单
             a, b = item[1]["price_range"]
+            # 限制价格
             price = random.uniform(a, b)
+            if price <= self.robot_obj.support_level:
+                price = self.robot_obj.support_level
+            elif price >= self.robot_obj.resistance:
+                price = self.robot_obj.resistance
+
             res = self.server_api.order(str(amount), self.currency_type, str(price), item[1]["order_type"])
             if res.get("id") is not None:
                 # 下单成功
@@ -154,12 +160,11 @@ class GridStrategy(Thread):
             # 获取挂单数量，实时查询数据库
             sql = "select min_num,max_num from deal_robot where id = %s"
             ret = self.connect_db(sql, (self.robot_obj.id,))
-            amount = round(random.uniform(ret[0], ret[1]), 3)
-
             n = self.robot_obj.girding_num      # 批量挂原始单
 
             for i in range(n):
                 # 计算原始挂单价格区间
+                amount = round(random.uniform(ret[0], ret[1]), 3)
                 if self.order_type == "buy":
                     a, b = min_buy1-self.grid_range*i, max_buy1-self.grid_range*i
                     # 获取挂卖单价的小数位
@@ -173,6 +178,7 @@ class GridStrategy(Thread):
                     if b >= self.robot_obj.resistance:
                         price = self.robot_obj.resistance
                 try:
+                    print(amount)
                     res = self.server_api.order(str(amount), self.currency_type, str(price), self.order_type)
                     # 下单成功，添加下单id
                     if res.get("id") is not None:
@@ -197,7 +203,7 @@ class GridStrategy(Thread):
                     break
                 time.sleep(0.1)
 
-        print('-'*10, len(self.id_dict))
+        # print('-'*10, self.id_dict)
 
     def save_completedorder(self, item, order_info):
         """
@@ -334,7 +340,8 @@ class GridStrategy(Thread):
         status_list = list()        # 同笔挂单反向多笔订单，将状态码放入同一列表中，判断是否需要再次反向挂单
         trade_amount = 0
         id_list = list()
-        for k, v in self.id_dict.items():
+        temp_dict = self.id_dict.items()
+        for k, v in temp_dict:
             if v.get("id") == iD:
                 try:
                     order_info = self.server_api.get_order(self.currency_type, k)
@@ -426,14 +433,12 @@ class GridStrategy(Thread):
                                 if order_info.get("type") == "buy":
                                     # 反向挂单价，不做更新
                                     price = order_info.get("price")+self.grid_range
-                                    price = round(price, 2)
                                     # 启动反向挂单
                                     self.completed_order_info(price, item, order_info, "sell")
 
                                 elif order_info.get("type") == "sell":
                                     price = order_info.get("price")-self.grid_range
                                     # price = round(price, markets_data.get("amountScale"))
-                                    price = round(price, 2)
                                     self.completed_order_info(price, item, order_info, "buy")
                         except Exception as e:
                             # self.log_info("api")
@@ -477,6 +482,7 @@ class GridStrategy(Thread):
                         for k, v in self.id_dict.items():
                             if v["order_type"] == "sell":
                                 temp_dicts[k] = v
+                        temp_dicts = sorted(temp_dicts.items(), key=lambda x: x[1]["price"])
                         order_dicts = random.sample(temp_dicts[0:10], 8)
 
                     elif self.order_type == "buy":
@@ -485,6 +491,7 @@ class GridStrategy(Thread):
                         for k, v in self.id_dict.items():
                             if v["order_type"] == "buy":
                                 temp_dicts[k] = v
+                        temp_dicts = sorted(temp_dicts.items(), key=lambda x: x[1]["price"], reverse=True)
                         order_dicts = random.sample(temp_dicts[0:10], 8)
 
                 # print('*'*20, list(order_dicts))
