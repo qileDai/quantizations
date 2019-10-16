@@ -23,7 +23,6 @@ class GridStrategy(Thread):
         self.Flag = True  # 停止标志位
         self.start_time = time.time()       # 启动时间
         self.lock = threading.Lock()
-
         # 初始化平台接口对象
         account_obj = Account.objects.get(id=self.robot_obj.trading_account_id)  # 获取账户信息
         platform = account_obj.platform                                          # 账户对应的平台
@@ -178,7 +177,6 @@ class GridStrategy(Thread):
                     if b >= self.robot_obj.resistance:
                         price = self.robot_obj.resistance
                 try:
-                    print(amount)
                     res = self.server_api.order(str(amount), self.currency_type, str(price), self.order_type)
                     # 下单成功，添加下单id
                     if res.get("id") is not None:
@@ -203,7 +201,7 @@ class GridStrategy(Thread):
                     break
                 time.sleep(0.1)
 
-        # print('-'*10, self.id_dict)
+        print('-'*10, self.id_dict)
 
     def save_completedorder(self, item, order_info):
         """
@@ -243,7 +241,6 @@ class GridStrategy(Thread):
         :return:
         """
         for i in range(1, 10):
-            # time.sleep(1)
             results = self.server_api.get_openorders(self.currency_type, i, self.order_type)
             try:
                 if results:
@@ -332,7 +329,7 @@ class GridStrategy(Thread):
 
     def merge_reverse_order(self, item):
         """
-        合并反向挂单
+        同笔挂单反向多笔订单,再次反向挂单需合并
         :param item:
         :return:
         """
@@ -446,10 +443,8 @@ class GridStrategy(Thread):
                             print('traceback.print_exc():', traceback.print_exc())
                             print("获取委托单失败...", e)
                         time.sleep(0.1)
-
-            if not self.Flag:
-                for i in range(5):
-                    self.cancel_orders()
+            # if not self.Flag:
+            #     self.cancel_orders()
 
     def update_order_info(self):
         """
@@ -483,7 +478,10 @@ class GridStrategy(Thread):
                             if v["order_type"] == "sell":
                                 temp_dicts[k] = v
                         temp_dicts = sorted(temp_dicts.items(), key=lambda x: x[1]["price"])
-                        order_dicts = random.sample(temp_dicts[0:10], 8)
+                        if len(temp_dicts) > 8:
+                            order_dicts = random.sample(temp_dicts[0:10], 8)
+                        else:
+                            order_dicts = random.sample(temp_dicts, len(temp_dicts))
 
                     elif self.order_type == "buy":
                         # temp_dicts = sorted(self.id_dict.items(), key=lambda x: (x[1]["order_type"], x[1]["price"]))
@@ -492,7 +490,10 @@ class GridStrategy(Thread):
                             if v["order_type"] == "buy":
                                 temp_dicts[k] = v
                         temp_dicts = sorted(temp_dicts.items(), key=lambda x: x[1]["price"], reverse=True)
-                        order_dicts = random.sample(temp_dicts[0:10], 8)
+                        if len(temp_dicts) > 8:
+                            order_dicts = random.sample(temp_dicts[0:10], 8)
+                        else:
+                            order_dicts = random.sample(temp_dicts, len(temp_dicts))
 
                 # print('*'*20, list(order_dicts))
                 self.lock.release()
@@ -520,17 +521,27 @@ class GridStrategy(Thread):
                 time.sleep(orders_frequency[0]/1000)
 
         if not self.Flag:
-            for i in range(5):
+            for i in range(3):
                 self.cancel_orders()
-                # cancel_thread = Thread(target=self.cancel_orders)
-                # cancel_thread.start()
+
+# ----------------------------------------------------------------------------------------------------------------------
 
     def set_risk_strategy(self):
+        """
+        设置风险策略
+        :return:
+        """
         # 实时获取交易对当前价
         while True:
             markets_data = self.market_api.get_ticker()
-        pass
+            depth_data = self.market_api.get_depth()
+            current_price = markets_data.get("ticker")["last"]
+            sell_1_price, sell_1_amount = depth_data.get("asks")[-1]
+            if current_price <= self.robot_obj.stop_price:
+                self.Flag = False
 
+            elif current_price >= self.robot_obj.warning_price:
+                pass
 
     def run_thread(self):
         """

@@ -574,7 +574,7 @@ class ShowConfigInfo(View):
         robot_obj = Robot.objects.get(id=id)
         account_obj = Account.objects.filter(id=robot_obj.trading_account.id).first()
         # data = serialize("json", Robot.objects.filter(id=id))
-        account  = Robot.objects.get(id=id)
+        account = Robot.objects.get(id=id)
         serialize = RobotSerializer(account)
         print(serialize.data)
         user_obj, service_obj, market_obj = get_account_info(robot_obj.currency, robot_obj.market, robot_obj.trading_account.id)
