@@ -603,8 +603,7 @@ Robot.prototype.listenSubmitRobot = function () {
         var strr = curry.split('/')
         var curreny = strr[0]
         var market = strr[1]
-        console.log('交易币种', curreny)
-        console.log('交易市场', market)
+
         // var account = robotGroup.find('.strategy-parameters-top .user"').text() //交易账户
         var strategy = $('.set-risk-strategy .strategy-title .curry').text()
         console.log(strategy)//交易策略

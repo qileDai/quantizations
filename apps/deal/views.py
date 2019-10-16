@@ -702,40 +702,66 @@ class RobotList(View):
 机器人收益计算更新到数据库
 """
 @accept_websocket
-def webtask_stu(request):
-    if request.is_websocket():
-        while True:
-            user_id = request.session.get("user_id")
-            accounts = Account.objects.filter(users=user_id)
-            print(accounts)
-            account_id = []
-            for account in accounts:
-                print(account.id)
-                robots = Robot.objects.filter(trading_account_id=1)
-                for robot in robots:
-                    robot_id= robot.id
-                    currency = robot.currency          #交易币种
-                    market = robot.market              #市场币种
-                    total_money = robot.total_money    #总投入
-                    last_price = robot.current_price   #当时价格
-                    try:
-                        user_obj, service_obj, market_obj = get_account_info(currency, market, robot_id)
-                        info = service_obj.get_balance()
-                        info = info.get('funds')
-                        info1 = market_obj.get_ticker()
-                        info1 = info1.get('ticker')
-                        current_price = info1.get('last')   #最新价格
-                        print(current_price)
-                        num = ''
-                        run_time = ''
-                        float_profit = num * current_price - total_money * last_price
-                        realized_profit = num - total_money
-                        total_profit = float_profit + realized_profit
-                        annual_yield = realized_profit/total_money/run_time  * 525600*100
-                        Robot.objects.get(id=robot_id).updata(float_profit=float_profit,realized_profit=realized_profit,total_profit=total_profit,annual_yield=annual_yield)
-                    except:
-                        pass
-                request.websocket.send("总线程")
+class RoboEarnings(View):
+    def data_format(self, data):
+        data = str(round(float(data), 2))
+        return data
+
+    def changeTime(self, allTime):
+        day = 24 * 60 * 60
+        hour = 60 * 60
+        min = 60
+        if allTime < 60:
+            return "%d 秒" % math.ceil(allTime)
+        elif allTime > day:
+            days = divmod(allTime, day)
+            return "%d 天, %s" % (int(days[0]), self.changeTime(days[1]))
+        elif allTime > hour:
+            hours = divmod(allTime, hour)
+            return '%d 时, %s' % (int(hours[0]), self.changeTime(hours[1]))
+        else:
+            mins = divmod(allTime, min)
+            return "%d 分, %d 秒" % (int(mins[0]), math.ceil(mins[1]))
+
+    for item in StartRobot.order_list:
+        try:
+            # 获取机器人对应的线程对象
+            robot = item.robot_obj
+            running_time = time.time() - item.start_time
+        except:
+            pass
+    def webtask_stu(request):
+        if request.is_websocket():
+            while True:
+                user_id = request.session.get("user_id")
+                accounts = Account.objects.filter(users=user_id)
+                for account in accounts:
+                    print(account.id)
+                    robots = Robot.objects.filter(trading_account_id=1)
+                    for robot in robots:
+                        robot_id= robot.id                #机器人id
+                        currency = robot.currency          #交易币种
+                        market = robot.market              #市场币种
+                        total_money = robot.total_money    #总投入
+                        last_price = robot.current_price   #当时价格
+                        try:
+                            user_obj, service_obj, market_obj = get_account_info(currency, market, robot_id)
+                            info = service_obj.get_balance()
+                            info = info.get('funds')
+                            info1 = market_obj.get_ticker()
+                            info1 = info1.get('ticker')
+                            current_price = info1.get('last')   #最新价格
+                            print(current_price)
+                            num = ''
+                            run_time = ''
+                            float_profit = num * current_price - total_money * last_price
+                            realized_profit = num - total_money
+                            total_profit = float_profit + realized_profit
+                            annual_yield = realized_profit/total_money/run_time  * 525600*100
+                            Robot.objects.get(id=robot_id).updata(float_profit=float_profit,realized_profit=realized_profit,total_profit=total_profit,annual_yield=annual_yield)
+                        except:
+                            pass
+                    request.websocket.send("总线程")
 
 
 # 分页
