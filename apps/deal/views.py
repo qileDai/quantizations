@@ -446,6 +446,8 @@ class StartRobot(View):
                         robot = item.robot_obj
                         if robot_obj.id == robot.id:
                             item.setFlag(False)
+                            rtime = time.time() - item.start_time
+                            Robot.objects.filter(id=robot_obj.id).update(running_time=rtime)
                     except:
                         print('对象没有属性robot_obj')
                         continue
@@ -761,9 +763,7 @@ def webtask_stu(request):
                         info1 = market_obj.get_ticker()
                         info1 = info1.get('ticker')
                         current_price = info1.get('last')  # 最新价格
-                        print("saf")
                         print("最新价格:"+current_price)
-                        print("daiie")
                         num = ''
                         float_profit = num * current_price - total_money * last_price           #浮动盈亏（折算为交易市场币种）：当前剩余币种数量*当前价格-总投入数量*当时价格
                         print(float_profit)
@@ -771,7 +771,6 @@ def webtask_stu(request):
                         realized_profit = num - total_money                                     #实现利润（折算为交易市场币种）：当前剩余币种数量-总投入数量
                         total_profit = float_profit + realized_profit                           #总利润（折算为交易市场币种）：浮动盈亏+实现利润
                         annual_yield = realized_profit / total_money / run_time * 525600 * 1  #年化收益率：实现利润/总投入/运行分钟数*525,600*100%
-                        print("diaiel")
                         Robot.objects.get(id=robot_id).updata(float_profit=float_profit,
                                                               realized_profit=realized_profit,
                                                               total_profit=total_profit, annual_yield=20)

@@ -16,17 +16,18 @@ class GridStrategy(Thread):
     def __init__(self, **kwargs):
         # kwargs = {'robot_obj': robot_obj, 'order_type': order_type}
         super().__init__()
-        self.robot_obj = kwargs['robot_obj']                                          # 机器人对象
+        self.robot_obj = kwargs['robot_obj']        # 机器人对象
         self.currency_type = self.robot_obj.currency.lower() + '_' + self.robot_obj.market.lower()    # 交易对
-        self.order_type = kwargs['order_type']                                        # 挂单类型
-        self.id_dict = dict()                                                         # 挂单字典，保存挂单信息
+        self.order_type = kwargs['order_type']      # 挂单类型
         self.grid_range = float(self.robot_obj.resistance - self.robot_obj.support_level) / float(self.robot_obj.girding_num)
-        self.Flag = True  # 停止标志位
-        self.start_time = time.time()       # 启动时间
-        self.lock = threading.Lock()
+        self.Flag = True                            # 停止标志位
+        self.start_time = time.time()               # 启动时间
+        self.lock = threading.Lock()                # 锁对象
+        self.id_dict = dict()                       # 挂单字典，保存挂单信息
+
         # 初始化平台接口对象
         account_obj = Account.objects.get(id=self.robot_obj.trading_account_id)  # 获取账户信息
-        platform = account_obj.platform                                          # 账户对应的平台
+        platform = account_obj.platform             # 账户对应的平台
         if str(platform) == 'EXX':
             self.market_api = MarketCondition(self.currency_type)
             self.server_api = ExxService(account_obj.secretkey, account_obj.accesskey)
@@ -376,16 +377,6 @@ class GridStrategy(Thread):
                 if not self.Flag:
                     break
                 else:
-
-                    # if self.order_type == "sell":
-                    #     self.lock.acquire()
-                    #     # 针对sell类型的挂单进行排序
-                    #     id_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"])
-                    #     self.lock.release()
-                    # elif self.order_type == "buy":
-                    #     self.lock.acquire()
-                    #     id_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"])
-                    #     self.lock.release()
                     self.lock.acquire()
                     id_dicts = sorted(self.id_dict.items(), key=lambda x: x[1]["price"])
                     self.lock.release()

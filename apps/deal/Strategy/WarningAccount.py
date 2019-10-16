@@ -24,8 +24,8 @@ class WarningAccount(object):
         self.ip = myaddr
 
     def send_msg(self):
-        msg = dict()
         for item in self.warning_account:
+            msg = dict()
             msg['contact'] = item
             msg['ip'] = self.ip
             # "yyyy/MM/dd HH:mm:ss"
