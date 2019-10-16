@@ -443,8 +443,9 @@ class GridStrategy(Thread):
                             print('traceback.print_exc():', traceback.print_exc())
                             print("获取委托单失败...", e)
                         time.sleep(0.1)
-            # if not self.Flag:
-            #     self.cancel_orders()
+            if not self.Flag:
+                for i in range(3):
+                    self.cancel_orders()
 
     def update_order_info(self):
         """
@@ -519,10 +520,6 @@ class GridStrategy(Thread):
                         print("获取委托单失败...", e)
             # 控制更新频率
                 time.sleep(orders_frequency[0]/1000)
-
-        if not self.Flag:
-            for i in range(3):
-                self.cancel_orders()
 
 # ----------------------------------------------------------------------------------------------------------------------
 
