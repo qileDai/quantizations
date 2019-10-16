@@ -480,7 +480,7 @@ class GridStrategy(Thread):
                                 temp_dicts[k] = v
                         temp_dicts = sorted(temp_dicts.items(), key=lambda x: x[1]["price"])
                         if len(temp_dicts) > 8:
-                            order_dicts = random.sample(temp_dicts[0:10], 8)
+                            order_dicts = random.sample(temp_dicts[0:10], random.randint(1, 6))
                         else:
                             order_dicts = random.sample(temp_dicts, len(temp_dicts))
 
@@ -492,7 +492,7 @@ class GridStrategy(Thread):
                                 temp_dicts[k] = v
                         temp_dicts = sorted(temp_dicts.items(), key=lambda x: x[1]["price"], reverse=True)
                         if len(temp_dicts) > 8:
-                            order_dicts = random.sample(temp_dicts[0:10], 8)
+                            order_dicts = random.sample(temp_dicts[0:10], random.randint(1, 6))
                         else:
                             order_dicts = random.sample(temp_dicts, len(temp_dicts))
 
@@ -518,7 +518,7 @@ class GridStrategy(Thread):
                         # logging.exception("GET_ORDER_INFO...", e)
                         print('traceback.print_exc():', traceback.print_exc())
                         print("获取委托单失败...", e)
-            # 控制更新频率
+                # 控制更新频率
                 time.sleep(orders_frequency[0]/1000)
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -531,14 +531,22 @@ class GridStrategy(Thread):
         # 实时获取交易对当前价
         while True:
             markets_data = self.market_api.get_ticker()
-            depth_data = self.market_api.get_depth()
             current_price = markets_data.get("ticker")["last"]
-            sell_1_price, sell_1_amount = depth_data.get("asks")[-1]
+            # 当前价低于止损价
             if current_price <= self.robot_obj.stop_price:
                 self.Flag = False
-
+                getopen_data = self.server_api.get_openorders(self.currency_type, '1', 'sell')
+                if isinstance(getopen_data, dict):
+                    # 获取卖一价
+                    depth_data = self.market_api.get_depth()
+                    sell_1_price, sell_1_amount = depth_data.get("asks")[-1]
+                    self.server_api.order(sell_1_amount, self.currency_type, sell_1_price, "sell")
+            # 当前价高于预警价
             elif current_price >= self.robot_obj.warning_price:
                 pass
+
+            else:
+                break
 
     def run_thread(self):
         """
