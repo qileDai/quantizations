@@ -673,7 +673,6 @@ class RobotList(View):
             robots = Robot.objects.filter(market__icontains=market)
         if status:
             robots = Robot.objects.filter(status=status)
-
         paginator = Paginator(robots, 10)
         page_obj = paginator.page(page)
         context_data = get_pagination_data(paginator, page_obj)
@@ -698,70 +697,89 @@ class RobotList(View):
 
         return render(request, 'management/gridding.html', context=context)
 
+
 """
 机器人收益计算更新到数据库
 """
+
+
+# @accept_websocket
+
+def updaterobot(request):
+    Robot.objects.get(id=1).update(annual_yield=20)
+
+def data_format(self, data):
+    data = str(round(float(data), 2))
+    return data
+
+def changeTime(self, allTime):
+    day = 24 * 60 * 60
+    hour = 60 * 60
+    min = 60
+    if allTime < 60:
+        return "%d 秒" % math.ceil(allTime)
+    elif allTime > day:
+        days = divmod(allTime, day)
+        return "%d 天, %s" % (int(days[0]), self.changeTime(days[1]))
+    elif allTime > hour:
+        hours = divmod(allTime, hour)
+        return '%d 时, %s' % (int(hours[0]), self.changeTime(hours[1]))
+    else:
+        mins = divmod(allTime, min)
+        return "%d 分, %d 秒" % (int(mins[0]), math.ceil(mins[1]))
+
 @accept_websocket
-class RoboEarnings(View):
-    def data_format(self, data):
-        data = str(round(float(data), 2))
-        return data
+def webtask_stu(request):
+    if request.is_websocket():
+        while True:
+            user_id = request.session.get("user_id")
+            accounts = Account.objects.filter(users=user_id)
+            for account in accounts:
+                robots = Robot.objects.filter(trading_account_id=1)
+                for robot in robots:
+                    robot_id = robot.id  # 机器人id
+                    currency = robot.currency  # 交易币种
+                    market = robot.market  # 市场币种
+                    total_money = robot.total_money  # 总投入
+                    last_price = robot.current_price  # 当时价格
 
-    def changeTime(self, allTime):
-        day = 24 * 60 * 60
-        hour = 60 * 60
-        min = 60
-        if allTime < 60:
-            return "%d 秒" % math.ceil(allTime)
-        elif allTime > day:
-            days = divmod(allTime, day)
-            return "%d 天, %s" % (int(days[0]), self.changeTime(days[1]))
-        elif allTime > hour:
-            hours = divmod(allTime, hour)
-            return '%d 时, %s' % (int(hours[0]), self.changeTime(hours[1]))
-        else:
-            mins = divmod(allTime, min)
-            return "%d 分, %d 秒" % (int(mins[0]), math.ceil(mins[1]))
-
-    for item in StartRobot.order_list:
-        try:
-            # 获取机器人对应的线程对象
-            robot = item.robot_obj
-            running_time = time.time() - item.start_time
-        except:
-            pass
-    def webtask_stu(request):
-        if request.is_websocket():
-            while True:
-                user_id = request.session.get("user_id")
-                accounts = Account.objects.filter(users=user_id)
-                for account in accounts:
-                    print(account.id)
-                    robots = Robot.objects.filter(trading_account_id=1)
-                    for robot in robots:
-                        robot_id= robot.id                #机器人id
-                        currency = robot.currency          #交易币种
-                        market = robot.market              #市场币种
-                        total_money = robot.total_money    #总投入
-                        last_price = robot.current_price   #当时价格
+                    #用来获取机器人运行时间
+                    for item in StartRobot.order_list:
+                        print(item)
                         try:
-                            user_obj, service_obj, market_obj = get_account_info(currency, market, robot_id)
-                            info = service_obj.get_balance()
-                            info = info.get('funds')
-                            info1 = market_obj.get_ticker()
-                            info1 = info1.get('ticker')
-                            current_price = info1.get('last')   #最新价格
-                            print(current_price)
-                            num = ''
-                            run_time = ''
-                            float_profit = num * current_price - total_money * last_price
-                            realized_profit = num - total_money
-                            total_profit = float_profit + realized_profit
-                            annual_yield = realized_profit/total_money/run_time  * 525600*100
-                            Robot.objects.get(id=robot_id).updata(float_profit=float_profit,realized_profit=realized_profit,total_profit=total_profit,annual_yield=annual_yield)
-                        except:
-                            pass
-                    request.websocket.send("总线程")
+                            # 获取机器人对应的线程对象
+                            robot = item.robot_obj
+                            if robot_id ==str(robot.id):
+                                run_time = time.time() - item.start_time
+                            print("运行时间：" +run_time)
+                        except(SystemError):
+                            raise
+                    try:
+                        user_obj, service_obj, market_obj = get_account_info(currency, market, robot_id)
+                        info = service_obj.get_balance()
+                        info = info.get('funds')
+                        info1 = market_obj.get_ticker()
+                        info1 = info1.get('ticker')
+                        current_price = info1.get('last')  # 最新价格
+                        print("saf")
+                        print("最新价格:"+current_price)
+                        print("daiie")
+                        num = ''
+                        float_profit = num * current_price - total_money * last_price           #浮动盈亏（折算为交易市场币种）：当前剩余币种数量*当前价格-总投入数量*当时价格
+                        print(float_profit)
+                        print("禁停啊")
+                        realized_profit = num - total_money                                     #实现利润（折算为交易市场币种）：当前剩余币种数量-总投入数量
+                        total_profit = float_profit + realized_profit                           #总利润（折算为交易市场币种）：浮动盈亏+实现利润
+                        annual_yield = realized_profit / total_money / run_time * 525600 * 1  #年化收益率：实现利润/总投入/运行分钟数*525,600*100%
+                        print("diaiel")
+                        Robot.objects.get(id=robot_id).updata(float_profit=float_profit,
+                                                              realized_profit=realized_profit,
+                                                              total_profit=total_profit, annual_yield=20)
+                    except:
+                        pass
+            time.sleep(10)
+            request.websocket.send("d")
+
 
 
 # 分页
@@ -783,6 +801,8 @@ def get_pagination_data(paginator, page_obj, around_count=2):
     else:
         right_has_more = True
         right_pages = range(current_page + 1, current_page + around_count + 1)
+
+
 
     return {
         # left_pages：代表的是当前这页的左边的页的页码

@@ -145,7 +145,7 @@ Robot.prototype.run = function () {
     self.getUser();
     self.submitTipsEvent();
     // self.getRobotsId();
-    // self.websocketRobot();
+    self.websocketRobot();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
@@ -1038,7 +1038,7 @@ Robot.prototype.submitTipsEvent = function () {
 
 Robot.prototype.websocketRobot = function () {
     var self = this;
-    var socket = new WebSocket(window.location.host + "/deal/webtask_stu/");
+    var socket = new WebSocket("ws://"+window.location.host + "/deal/webtask_stu/");
     socket.onopen = function () {
         console.log('WebSocket open');//成功连接上Websocket
         socket.send('1');//发送数据到服务端
