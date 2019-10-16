@@ -374,8 +374,8 @@
 
                             <li>
                                 <span>买</span>
-                                <span>{{ buys.amount.toFixed(2) }}</span>
-                                <span>{{ buys.price.toFixed(2) }}{{ robots.currency_market.currency }}</span>
+                                <span>{{ buys.amount }}</span>
+                                <span>{{ buys.price }}{{ robots.currency_market.currency }}</span>
                             </li>
 
                             {{ /each }}
@@ -390,8 +390,8 @@
                             {{ each robots.SELL sells index }}
                             <li>
                                 <span>卖</span>
-                                <span>{{ sells.amount.toFixed(2) }}</span>
-                                <span>{{ sells.price.toFixed(2) }}{{ robots.currency_market.market }}</span>
+                                <span>{{ sells.amount}}</span>
+                                <span>{{ sells.price }}{{ robots.currency_market.market }}</span>
                             </li>
                             {{ /each }}
 
