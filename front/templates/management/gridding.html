@@ -204,7 +204,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="trading-parameters account-details">
+                        <div class="trading-parameters account-details" total_input="">
                             <span class="title">可用:</span>
                             <span class="currency"> 45,000.00 usdt</span>
                             <span class="market"> 6,000.0000 ltc</span>
@@ -429,21 +429,23 @@
                         <th>创建时间</th>
                         <th>收益(USDT)</th>
                     </tr>
-                    {{ each closed_info closeds index }}
+                    {{ each robots.closed_info closeds index }}
                     <tr>
-                        {{ if closeds.fields.order_type == 'sell' }}
+                        {{ if closeds.order_type == 'buy' }}
                         <td>买入</td>
+                        <td>{{ closeds.closing_price}}</td>
+                        <td>{{ closeds.total_price }}</td>
+                        <td>{{ closeds.closing_time }}</td>
+                        {{ else }}
+                        <td>卖出</td>
                         <td>{{ closeds.closing_price }}</td>
                         <td>{{ closeds.total_price }}</td>
-                        <td>2019080721：33</td>
-                        {{ /if }}
-                        <td>卖出</td>
-                        <td>75.21</td>
-                        <td>1.338737</td>
-                        <td>2019/080722：42</td>
+                        <td>{{ closeds.closing_time }}</td>
                         <td>+0.07654</td>
+                        {{ /if }}
                     </tr>
                     {{ /each }}
+
                 </table>
                 {% endverbatim %}
                 {% include 'cms/box_footer.html' %}
@@ -470,7 +472,9 @@
                         <ul>
                             <li><span>交易账户</span><input type="text" disabled="disabled" value="{{ robots.account_name
                  }}"></li>
-                            <li class="account_details"><span>可用</span><input disabled value="{{ robots.currency }}&nbsp;&nbsp;{{ robots.market }}"></li>
+                            <li class="account_details"><span>可用</span><input disabled
+                                                                              value="{{ robots.currency }}&nbsp;&nbsp;{{ robots.market }}">
+                            </li>
                             <li><span>当前价</span><input type="text" disabled="disabled"
                                                        value="{{ robots.robot.current_price }}"></li>
                             <li><span>重新挂单频率</span><input type="text" class="edit-orders-frequency" disabled="disabled"
@@ -509,8 +513,6 @@
                                 <input type="checkbox">
                                 {{ robots.robot.warning_account}}
                             </label>
-
-
                         </div>
                     </div>
                     {% endverbatim %}

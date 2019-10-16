@@ -22,8 +22,9 @@ from django.core import serializers
 from django.core.serializers import serialize
 from django.contrib.sessions import serializers
 import json
-from apps.deal.serializers import AccountSerializer,RobotSerializer
+from apps.deal.serializers import AccountSerializer, RobotSerializer, OrderInfoSerializer
 from apps.rbac.serializers import UserSerializer
+from dwebsocket.decorators import accept_websocket
 
 
 # Create your views here.r
@@ -280,12 +281,12 @@ class ConfigCurrency(View):
         user_id = request.session.get("user_id")
         accounts = Account.objects.filter(users=user_id)
         for account in accounts:
-            print(account.id, '-'*30)
+            print(account.id, '-' * 30)
             for currency in currency_list:
                 if currency:
                     # 账户存在此币种则不添加
                     property_obj = Property.objects.filter(Q(account=account.id) & Q(currency=currency))
-                    print('+'*30, list(property_obj))
+                    print('+' * 30, list(property_obj))
                     if not list(property_obj):
                         # 保存币种信息
                         LastdayAssets.objects.create(currency=currency, account=account)
@@ -344,6 +345,7 @@ class GetAccountInfo(View):
     """
     展示交易对可用额度/当前价,计算默认值
     """
+
     def data_format(self, data):
         data = str(round(float(data), 2))
         return data
@@ -461,6 +463,7 @@ class ShowTradeDetail(View):
     """
     展示机器人交易详情
     """
+
     def data_format(self, data):
         data = str(round(float(data), 2))
         return data
@@ -494,6 +497,7 @@ class ShowTradeDetail(View):
         return dict(sells), dict(buys)
 
     def post(self, request):
+        page = int(request.GET.get('p', 1))
         # 获取机器人id
         id = request.POST.get('robot_id')
         robot_obj = Robot.objects.get(id=id)
@@ -509,7 +513,9 @@ class ShowTradeDetail(View):
         except:
             return restful.params_error(message='币种错误，请核对！')
         property_obj = Property.objects.get(Q(account_id=robot_obj.trading_account) & Q(currency=currency))
-        closed_order = OrderInfo.objects.filter(robot=id)
+        closed_order = OrderInfo.objects.filter(robot=id).order_by("-id")
+        serialize = OrderInfoSerializer(closed_order, many=True)
+
         # 获取挂单信息
         order_info = dict()
         # print('11111', StartRobot.order_list)
@@ -525,13 +531,14 @@ class ShowTradeDetail(View):
                 print('对象没有属性robot_obj')
                 continue
         sell, buy = self.sort_data(order_info)
+
         context = {
             # 交易币种和交易市场
             'currency_market': {"currency": currency, "market": market},
             # 已完成笔数
             'closed_num': len(closed_order),
             # 已完成挂单信息
-            'closed_info': serialize("json", closed_order.order_by("-id")),
+            'closed_info': serialize.data,
             # 未完成笔数
             'open_num': len(order_info),
             # 未完成卖单信息
@@ -553,11 +560,13 @@ class ShowTradeDetail(View):
             # 当前价
             'last': self.data_format(info1.get('last')) + ' ' + market,
             # 总收益
-            'profit': self.data_format((float(info[currency.upper()].get('total')) - float(property_obj.original_assets))
-                                       * float(info1.get('last'))) + ' ' + market,
+            'profit': self.data_format(
+                (float(info[currency.upper()].get('total')) - float(property_obj.original_assets))
+                * float(info1.get('last'))) + ' ' + market,
         }
-        print(context)
-        print('/-'*30, len(sell), len(buy))
+
+        # print(context)
+        print('/-' * 30, len(sell), len(buy))
         return restful.result(data=context)
 
 
@@ -565,6 +574,7 @@ class ShowConfigInfo(View):
     """
     展示机器人配置信息
     """
+
     def data_format(self, data):
         data = str(round(float(data), 2))
         return data
@@ -577,7 +587,8 @@ class ShowConfigInfo(View):
         account = Robot.objects.get(id=id)
         serialize = RobotSerializer(account)
         print(serialize.data)
-        user_obj, service_obj, market_obj = get_account_info(robot_obj.currency, robot_obj.market, robot_obj.trading_account.id)
+        user_obj, service_obj, market_obj = get_account_info(robot_obj.currency, robot_obj.market,
+                                                             robot_obj.trading_account.id)
         try:
             info = service_obj.get_balance()
             info = info.get('funds')
@@ -629,7 +640,6 @@ class ShowConfig(View):
 
 
 def waring_usrs(request):
-
     users = UserInfo.objects.filter(status=1)
     print(users)
     data = serialize('json', users)
@@ -637,6 +647,7 @@ def waring_usrs(request):
         'users': json.loads(data)
     }
     return restful.result(data=context)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -666,7 +677,9 @@ class RobotList(View):
         paginator = Paginator(robots, 10)
         page_obj = paginator.page(page)
         context_data = get_pagination_data(paginator, page_obj)
-
+        robot_id = ''
+        # total_money = Robot.objects.get(id=robot_id).total_money
+        # current_price = ''
         context = {
             'robots': page_obj.object_list,
             'page_obj': page_obj,
@@ -684,6 +697,71 @@ class RobotList(View):
         context.update(context_data)
 
         return render(request, 'management/gridding.html', context=context)
+
+"""
+机器人收益计算更新到数据库
+"""
+@accept_websocket
+class RoboEarnings(View):
+    def data_format(self, data):
+        data = str(round(float(data), 2))
+        return data
+
+    def changeTime(self, allTime):
+        day = 24 * 60 * 60
+        hour = 60 * 60
+        min = 60
+        if allTime < 60:
+            return "%d 秒" % math.ceil(allTime)
+        elif allTime > day:
+            days = divmod(allTime, day)
+            return "%d 天, %s" % (int(days[0]), self.changeTime(days[1]))
+        elif allTime > hour:
+            hours = divmod(allTime, hour)
+            return '%d 时, %s' % (int(hours[0]), self.changeTime(hours[1]))
+        else:
+            mins = divmod(allTime, min)
+            return "%d 分, %d 秒" % (int(mins[0]), math.ceil(mins[1]))
+
+    for item in StartRobot.order_list:
+        try:
+            # 获取机器人对应的线程对象
+            robot = item.robot_obj
+            running_time = time.time() - item.start_time
+        except:
+            pass
+    def webtask_stu(request):
+        if request.is_websocket():
+            while True:
+                user_id = request.session.get("user_id")
+                accounts = Account.objects.filter(users=user_id)
+                for account in accounts:
+                    print(account.id)
+                    robots = Robot.objects.filter(trading_account_id=1)
+                    for robot in robots:
+                        robot_id= robot.id                #机器人id
+                        currency = robot.currency          #交易币种
+                        market = robot.market              #市场币种
+                        total_money = robot.total_money    #总投入
+                        last_price = robot.current_price   #当时价格
+                        try:
+                            user_obj, service_obj, market_obj = get_account_info(currency, market, robot_id)
+                            info = service_obj.get_balance()
+                            info = info.get('funds')
+                            info1 = market_obj.get_ticker()
+                            info1 = info1.get('ticker')
+                            current_price = info1.get('last')   #最新价格
+                            print(current_price)
+                            num = ''
+                            run_time = ''
+                            float_profit = num * current_price - total_money * last_price
+                            realized_profit = num - total_money
+                            total_profit = float_profit + realized_profit
+                            annual_yield = realized_profit/total_money/run_time  * 525600*100
+                            Robot.objects.get(id=robot_id).updata(float_profit=float_profit,realized_profit=realized_profit,total_profit=total_profit,annual_yield=annual_yield)
+                        except:
+                            pass
+                    request.websocket.send("总线程")
 
 
 # 分页

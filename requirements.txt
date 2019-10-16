@@ -5,6 +5,7 @@ cycler==0.10.0
 Django==2.2.3
 django-crontab==0.7.1
 djangorestframework==3.10.3
+dwebsocket==0.5.11
 idna==2.8
 joblib==0.13.2
 kiwisolver==1.1.0
