@@ -546,7 +546,8 @@ class GridStrategy(Thread):
             elif current_price >= self.robot_obj.warning_price:
                 # 获取机器人的预警账户
                 warning_account = self.robot_obj.warning_account
-
+                print(warning_account)
+                WarningAccount(warning_account, '网格', self.currency_type)
             else:
                 break
 
