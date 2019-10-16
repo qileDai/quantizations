@@ -144,6 +144,8 @@ Robot.prototype.run = function () {
     self.listenRightFlagEvent();
     self.getUser();
     self.submitTipsEvent();
+    // self.getRobotsId();
+    // self.websocketRobot();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
@@ -349,13 +351,13 @@ Robot.prototype.listenCreatTradingEvent = function () {
                 var robot = result['data']
                 var close = robot['closed_num']
                 var opne = robot['open_num']
-                var closed_info = JSON.parse(robot['closed_info'])
+                // var closed_info = JSON.parse(robot['closed_info'])
 
-                console.log(closed_info)
+                // console.log(closed_info)
                 $('.deal-opening').text("(" + opne + ")")
                 $('.deal-completed').text("(" + close + ")")
                 console.log(robot)
-                var tpl = template('robot-deal-details', {'robots': robot}, {'closed_info': closed_info})
+                var tpl = template('robot-deal-details', {'robots': robot})
                 var details = $('.tradingParticulars')
                 details.append(tpl)
             }
@@ -489,6 +491,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                     var currency = data['currency']  //可用
                     var last = data['last']    //当前价
                     var market = data['market']  //市场价
+                    // var total_input = currency/last
 
                     //往设置策略中插入请求到的账户信息
                     $('.current-price .price').text(last)
@@ -511,10 +514,11 @@ Robot.prototype.getAccountInfoEvent = function () {
 
                     $('.support-value').val(support_level)
                     //判断阻力位不能大于当前价
-                    if(resistance <= last){
+                    if (resistance <= last) {
                         xfzalert.alertError("阻力位不能小于等于当前价")
                     }
                     $('.profit-value').text(profit)
+                    //网格数量焦点事件
                     $('#stratery-girding-num').on('blur', function () {
                         if (!$('#stratery-girding-num').val() == '') {
                             var num = $('#stratery-girding-num ').val()
@@ -526,7 +530,7 @@ Robot.prototype.getAccountInfoEvent = function () {
                             $('.profit-value').text(profit)
                         }
                     })
-
+                    //交易手续费焦点事件
                     $('#one-girding-free').on('blur', function () {
                         if (!$('#one-girding-free').val() == '') {
                             var num = $('#stratery-girding-num ').val()
@@ -539,6 +543,27 @@ Robot.prototype.getAccountInfoEvent = function () {
                             $('.profit-value').text(profit)
                         }
                     });
+                    //支撑位位失去焦点事件
+                    $('.support-value').on('blur', function () {
+                        console.log("支撑位")
+                        var resistance = $('.resistance-value').val()
+                        // var price = $('.current-price .price').text()
+                        var support_level = $('.support-value').val()
+                        console.log(support_level,resistance)
+
+                        if (!support_level == '') {
+                            console.log("wori")
+                            var num = $('#stratery-girding-num ').val()
+                            var free = $('#one-girding-free').val() / 100
+                            var girding = (resistance - support_level) / num     //单网格=（阻力位价格-支撑位价格）/网格数量
+                            var mix_profit = (girding - (resistance * 2 + girding) * free) / resistance
+
+                            var max_price = (girding - (support_level * 2 + girding) * free) / support_level
+                            var profit = self.fomatFloat(mix_profit * 100, 2) + '%' + '-' + self.fomatFloat(max_price * 100, 2) + '%'
+                            $('.profit-value').text(profit)
+                            console.log(profit)
+                        }
+                    })
 
 
                 }
@@ -948,10 +973,12 @@ Robot.prototype.listenCurrencySelecctedEvent = function () {
  * 单网格不能超过交易币种，市场币种价格提示
  */
 Robot.prototype.submitTipsEvent = function () {
+    var self = this;
     //止损价提示
     $('.stopLoss .loss').on('blur', function () {
         var support = $('.strategy-parameters-top .support-level').text()
         var loss = $('.stopLoss .loss').val()
+        console.log(support,loss)
         if (loss > support) {
             xfzalert.alertError("止损价必须低于支撑位")
         }
@@ -961,42 +988,84 @@ Robot.prototype.submitTipsEvent = function () {
         var max_num = $('.max-number-value').val()
         var currency = $('.account-details .currency').text().replace(/[^\d.]/g, "")
         var market = $('.account-details .market').text().replace(/[^\d.]/g, "")
-        console.log(currency, market)
+        console.log('currency:'+currency,'market:'+ market)
         var support = $('.support-value').val()
         var resistance = $('.resistance-value').val()
-        console.log(support, resistance)
+        console.log("支撑位"+support, "阻力位："+resistance)
         var num = $('#stratery-girding-num').val()
         // var current_matket = max_num *
-        var market_price = (resistance + support) / 2 * max_num * num  //账户市场
-        console.log(market_price)
+        var average_price = (parseInt(resistance) + parseInt(support)) / 2
+        var market_price = average_price * max_num * num  //账户市场
+        console.log("市场价计算："+market_price)
+
         var currency_price = max_num * num
-        if (market < market_price) {
+        console.log(currency_price,"交易币种价格")
+        if (parseInt(market) < parseInt(market_price)) {
             xfzalert.alertError("账户市场币种余额不足")
         }
-        if (currency < currency_price) {
+        if (parseInt(currency) < parseInt(currency_price)) {
             xfzalert.alertError("账户交易币种余额不足")
         }
-        if (market < market_price && currency < currency_price) {
+        if (parseInt(market) < parseInt(market_price) && parseInt(currency) < parseInt(currency_price)) {
             xfzalert.alertError("账户市场币种和交易币种余额不足")
         }
 
     })
 
     $('.resistance-value').on('blur', function () {
+
         var resistance = $('.resistance-value').val()
         var price = $('.current-price .price').text()
-        console.log(price, resistance)
+        var support_level = $('.support-value').val()
         if (!resistance == '') {
-            if (resistance <= price) {
+            if (parseInt(resistance) <= parseInt(price)) {
                 xfzalert.alertError("阻力位不得低于等于当前价")
                 // $('.resistance-value').after("<span class='error-account'>阻力位不得低于等于当前价</span>")
             } else {
-                $('.resistance-error-message .error').text("")
+                var num = $('#stratery-girding-num ').val()
+                var free = $('#one-girding-free').val() / 100
+                var girding = (resistance - support_level) / num     //单网格=（阻力位价格-支撑位价格）/网格数量
+                var mix_profit = (girding - (resistance * 2 + girding) * free) / resistance
+
+                var max_price = (girding - (support_level * 2 + girding) * free) / support_level
+                var profit = self.fomatFloat(mix_profit * 100, 2) + '%' + '-' + self.fomatFloat(max_price * 100, 2) + '%'
+                $('.profit-value').text(profit)
             }
         }
     });
 
 }
+
+
+Robot.prototype.websocketRobot = function () {
+    var self = this;
+    var socket = new WebSocket(window.location.host + "/deal/webtask_stu/");
+    socket.onopen = function () {
+        console.log('WebSocket open');//成功连接上Websocket
+        socket.send('1');//发送数据到服务端
+    };
+    socket.onmessage = function (result) {
+        // console.log('message: ' + e.data);//打印服务端返回的数据
+        // console.log(typeof (e.data));
+        console.log(result);
+        console.log("dfa")
+
+    };
+    socket.onclose = function (e) {
+        console.log(e);
+        socket.close(); //关闭TCP连接
+    };
+
+}
+
+// Robot.prototype.getRobotsId = function () {
+//     xfzajax.get({
+//         'url': '/deal/get_robotid/',
+//         'success': function (result) {
+//             console.log(result)
+//         }
+//     })
+// }
 $(function () {
     var robot = new Robot();
     robot.run();
