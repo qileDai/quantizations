@@ -546,8 +546,8 @@ class GridStrategy(Thread):
                     # 一段时间内未成交，撤单
                     self.cancel_orders()
 
-            # 当前价高于预警价
-            elif float(current_price) >= float(self.robot_obj.warning_price):
+            # 当前价低于预警价
+            elif float(current_price) <= float(self.robot_obj.warning_price):
                 print('---------预警')
                 # 获取机器人的预警账户
                 warning_account = self.robot_obj.warning_account
