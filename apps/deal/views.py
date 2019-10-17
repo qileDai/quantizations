@@ -10,6 +10,7 @@ from dealapi.exx.exxService import ExxService
 from .forms import AccountModelForm, RobotFrom, EditAccountFrom
 from django.db.models import Q
 from utils.mixin import LoginRequireMixin
+import datetime,re
 
 from utils import restful
 from apps.deal.Strategy.Grid import GridStrategy
@@ -379,12 +380,16 @@ class GetAccountInfo(View):
                 max += float(i[2])
                 min += float(i[3])
         context = {
+            #账户起始交易币种总资产
+            'total_currency': self.data_format(info[currency.upper()].get('total')) + ' ' + currency,
+            # 账户起始交易市场币种总资产
+            'total_market': self.data_format(info[market.upper()].get('total')) + ' ' + market,
             # 交易币种可用
             'currency': self.data_format(info[currency.upper()].get('balance')) + ' ' + currency,
             # 交易市场可用
             'market': self.data_format(info[market.upper()].get('balance')) + ' ' + market,
             # 当前价
-            'last': self.data_format(info1.get('last')),
+            'last': self.data_format(info1.get('last'))+ '' + market,
             # 阻力位
             'resistance': round(float(max / int(info2['limit'])), 2),
             # 支撑位
@@ -513,6 +518,7 @@ class ShowTradeDetail(View):
         try:
             user_obj, service_obj, market_obj = get_account_info(currency, market, robot_obj.trading_account_id)
             info = service_obj.get_balance()
+            print("交易详情"+info)
             info = info.get('funds')
             info1 = market_obj.get_ticker()
             info1 = info1.get('ticker')
@@ -711,9 +717,9 @@ class RobotList(View):
 """
 机器人收益计算更新到数据库
 """
-
-
 class RobotYield(View):
+
+    robot_yield = {}
     #用作对数据做精度处理
     def data_format(self, data):
         data = str(round(float(data), 2))
@@ -723,39 +729,53 @@ class RobotYield(View):
         user_id = request.session.get("user_id")   #获取用户id
         accounts = Account.objects.filter(users=user_id)
         for account in accounts:
-            robots = Robot.objects.filter(trading_account_id=2)
+            exx_service = ExxService(account.secretkey, account.accesskey)
+            robots = Robot.objects.filter(trading_account_id=account.id)
             for robot in robots:
                 robot_id = robot.id  # 机器人id
+                print("机器人id:"+str(robot_id))
                 currency = robot.currency  # 交易币种
                 market = robot.market  # 市场币种
-                total_money = robot.total_money  # 总投入
+                total_money = re.findall('\d+\.\d\d',robot.total_money )[0]  # 总投入
+                print("总投入",total_money)
                 last_price = robot.current_price  # 当时价格
-                create_time  = robot.create_time     #创建时间
+                start_time  = float(robot.running_time )    #创建时间
                 try:
-                    user_obj, service_obj, market_obj = get_account_info(currency, market, robot_id)
-                    info = service_obj.get_balance()
+                    print("交易币种："+currency,"市场币种:"+market,"账户id:"+ str(account.id))
+                    user_obj, service_obj, market_obj = get_account_info(currency, market, account.id)
+                    info = exx_service.get_balance()
                     info = info.get('funds')
                     info1 = market_obj.get_ticker()
                     info1 = info1.get('ticker')
                     current_price = info1.get('last')  # 最新价格
-
-                    balance_currency = self.data_format(info[currency.upper()].get('balance')) + ' ' + currency  #可用的交易币种数量
-                    balance_market = self.data_format(info[market.upper()].get('balance')) + ' ' + market        #可用的市场币种数量
-                    freeze_currecy = self.data_format(info[currency.upper()].get('freeze'))
+                    balance_currency = self.data_format(info[currency.upper()].get('total'))                            #可用的交易币种数量
+                    balance_market = self.data_format(info[market.upper()].get('total'))                                #冻结的市场币种
                     current_time = time.time()         #获取最新的时间
-                    run_time = (current_price - create_time)/1000*60  #运行多少分钟
-                    residue_num = ''
-                    float_profit = residue_num * current_price - total_money * last_price           #浮动盈亏（折算为交易市场币种）：当前剩余币种数量*当前价格-总投入数量*当时价格
-                    realized_profit = residue_num - total_money                                     #实现利润（折算为交易市场币种）：当前剩余币种数量-总投入数量
-                    total_profit = float_profit + realized_profit                           #总利润（折算为交易市场币种）：浮动盈亏+实现利润
-                    annual_yield = realized_profit / total_money / run_time * 525600 * 1  #年化收益率：实现利润/总投入/运行分钟数*525,600*100%
-                    Robot.objects.get(id=robot_id).updata(float_profit=float_profit,
-                                                          realized_profit=realized_profit,
-                                                          total_profit=total_profit, annual_yield=annual_yield)
+
+                    run_time = (int(current_time) - int(start_time))/1000*60  #运行多少分钟
+                    print(balance_market,balance_currency)
+                    residue_num = ((float(balance_currency) ) / float(last_price) ) + (float(balance_market) )
+                    float_profit = residue_num * float(current_price) - float(total_money) * float(last_price)           #浮动盈亏（折算为交易市场币种）：当前剩余币种数量*当前价格-总投入数量*当时价格
+                    realized_profit = residue_num - float(total_money)                                                   #实现利润（折算为交易市场币种）：当前剩余币种数量-总投入数量
+                    total_profit = float_profit + realized_profit                                                         #总利润（折算为交易市场币种）：浮动盈亏+实现利润
+                    annual_yield = realized_profit / float(total_money) / (run_time * 525600 * 1 )                        #年化收益率：实现利润/总投入/运行分钟数*525,600*100%
+                    Robot.objects.filter(id=robot_id).update(float_profit=self.data_format(float_profit),
+                                                             realized_profit=self.data_format(realized_profit),
+                                                             total_profit=self.data_format(total_profit),
+                                                             annual_yield=self.data_format(annual_yield))
                     robot_obj = Robot.objects.get(id=robot_id)
                     serialize = RobotSerializer(robot_obj)   #序列化机器人数据返回客户端
-                except(SystemError):
-                    raise
+                    print(serialize.data)
+                    context = {
+                        'id':robot_id,
+                        'float_profit':self.data_format(float_profit) + market,
+                        'realized_profit':self.data_format(realized_profit) + market,
+                        'total_profit':self.data_format(total_profit) + market,
+                        'annual_yield':self.data_format(annual_yield)+ '%'
+                    }
+                    self.robot_yield.update(context)
+                except robot.DoesNotExist:
+                    robot_obj = None
         return restful.result(data=serialize.data)
 
 

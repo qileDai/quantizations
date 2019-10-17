@@ -474,13 +474,13 @@ Robot.prototype.getAccountInfoEvent = function () {
         var currency = parantersGroup.find('.strategy-curry .curry').text()
         var strr = currency.split('/')
         var curry = strr[0]
-        var market = strr[1]
+        var market_cuurrency = strr[1]
         var id = $('#robot-account').find("option:selected").val()
         xfzajax.post({
             'url': '/deal/getaccountinfo/',
             'data': {
                 'curry-title': curry,
-                'market-title': market,
+                'market-title': market_cuurrency,
                 'account_id': id,
             },
             'success': function (result) {
@@ -492,6 +492,14 @@ Robot.prototype.getAccountInfoEvent = function () {
                     var currency = data['currency']  //可用
                     var last = data['last']    //当前价
                     var market = data['market']  //市场价
+                    var total_currency = data['total_currency'].replace(/[^\d.]/g, "")
+                    console.log(total_currency)
+                    var total_market = data['total_market'].replace(/[^\d.]/g, "")
+                    var currency_price = last.replace(/[^\d.]/g, "")
+                    console.log(currency_price)
+                    var total_money = Number(total_currency) * Number(currency_price) + Number(total_market)
+                    console.log(total_money)
+                    $('.current-price .price').attr("total_money",total_money.toFixed(2) + market_cuurrency)
                     // var total_input = currency/last
 
                     //往设置策略中插入请求到的账户信息
@@ -609,10 +617,13 @@ Robot.prototype.listenSubmitRobot = function () {
         var strategy = $('.set-risk-strategy .strategy-title .curry').text()
         console.log(strategy)//交易策略
         var account = $('#robot-account').find("option:selected").val()
+        var total_money = $('.current-price .price').attr('total_money')
+        console.log(total_money)
+
         var resistance = $('.strategy-parameters-top .resistance').text()//阻力位
         var support = $('.strategy-parameters-top .support-level').text()
         var girding_num = $('.strategy-parameters-top .girding-num').text()
-        var curren_price = $('.current-price .price').text()
+        var curren_price = $('.current-price .price').text().replace(/[^\d.]/g, "")
         var millisecond = $('.millisecond-value').val()
         var mix_num = $('.mix-number .value ').val()
         var max_num = $('.max-number .value ').val()
@@ -645,7 +656,7 @@ Robot.prototype.listenSubmitRobot = function () {
                 'currency': curreny,
                 'market': market,
                 'trading_strategy': strategy,
-                'total_money': 0,
+                'total_money': total_money,
                 'float_profit': 0,
                 'realized_profit': 0,
                 'total_profit': 0,
@@ -1059,13 +1070,19 @@ Robot.prototype.websocketRobot = function () {
 
 
 Robot.prototype.robotYieldEvent = function(){
+    var self = this
     xfzajax.post({
         'url': '/deal/robot_yield/',
         'success':function (result) {
             console.log(result)
         }
+
     })
+
+
+
 }
+
 
 template.defaults.imports.fomat= function (n) {
         return n.toFixed(2)
