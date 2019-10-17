@@ -450,8 +450,6 @@ class StartRobot(View):
                         robot = item.robot_obj
                         if robot_obj.id == robot.id:
                             item.setFlag(False)
-                            rtime = time.time() - item.start_time
-                            Robot.objects.filter(id=robot_obj.id).update(running_time=rtime)
                     except:
                         print('对象没有属性robot_obj')
                         continue
@@ -644,12 +642,11 @@ class ShowConfig(View):
         )
         return restful.ok()
 
-
+"""
+序列化预警账户
+"""
 class WraingUsers(View):
-    """
-    序列化预警账户
-    """
-    def get(self, request):
+    def get(self,request):
         users = UserInfo.objects.filter(status=1)
         print(users)
         # data = serialize('json', users)
@@ -714,52 +711,50 @@ class RobotList(View):
 """
 
 
-@accept_websocket
-def webtask_stu(request):
-    if request.is_websocket():
-        while True:
-            user_id = request.session.get("user_id")
-            accounts = Account.objects.filter(users=user_id)
-            for account in accounts:
-                robots = Robot.objects.filter(trading_account_id=2)
-                for robot in robots:
-                    robot_id = robot.id  # 机器人id
-                    currency = robot.currency  # 交易币种
-                    market = robot.market  # 市场币种
-                    total_money = robot.total_money  # 总投入
-                    last_price = robot.current_price  # 当时价格
+class RobotYield(View):
+    #用作对数据做精度处理
+    def data_format(self, data):
+        data = str(round(float(data), 2))
+        return data
 
-                    #用来获取机器人运行时间
-                    for item in StartRobot.order_list:
-                        print(item)
-                        try:
-                            # 获取机器人对应的线程对象
-                            robot = item.robot_obj
-                            if robot_id ==str(robot.id):
-                                run_time = time.time() - item.start_time
-                            print("运行时间：" +run_time)
-                        except(SystemError):
-                            raise
-                    try:
-                        user_obj, service_obj, market_obj = get_account_info(currency, market, robot_id)
-                        info = service_obj.get_balance()
-                        info = info.get('funds')
-                        info1 = market_obj.get_ticker()
-                        info1 = info1.get('ticker')
-                        current_price = info1.get('last')  # 最新价格
-                        print("最新价格:"+current_price)
-                        num = ''
-                        float_profit = num * current_price - total_money * last_price           #浮动盈亏（折算为交易市场币种）：当前剩余币种数量*当前价格-总投入数量*当时价格
-                        realized_profit = num - total_money                                     #实现利润（折算为交易市场币种）：当前剩余币种数量-总投入数量
-                        total_profit = float_profit + realized_profit                           #总利润（折算为交易市场币种）：浮动盈亏+实现利润
-                        annual_yield = realized_profit / total_money / run_time * 525600 * 1  #年化收益率：实现利润/总投入/运行分钟数*525,600*100%
-                        Robot.objects.get(id=robot_id).updata(float_profit=float_profit,
-                                                              realized_profit=realized_profit,
-                                                              total_profit=total_profit, annual_yield=annual_yield)
-                    except:
-                        pass
-            time.sleep(10)
-            request.websocket.send("d")
+    def post(self,request):
+        user_id = request.session.get("user_id")   #获取用户id
+        accounts = Account.objects.filter(users=user_id)
+        for account in accounts:
+            robots = Robot.objects.filter(trading_account_id=2)
+            for robot in robots:
+                robot_id = robot.id  # 机器人id
+                currency = robot.currency  # 交易币种
+                market = robot.market  # 市场币种
+                total_money = robot.total_money  # 总投入
+                last_price = robot.current_price  # 当时价格
+                create_time  = robot.create_time     #创建时间
+                try:
+                    user_obj, service_obj, market_obj = get_account_info(currency, market, robot_id)
+                    info = service_obj.get_balance()
+                    info = info.get('funds')
+                    info1 = market_obj.get_ticker()
+                    info1 = info1.get('ticker')
+                    current_price = info1.get('last')  # 最新价格
+
+                    balance_currency = self.data_format(info[currency.upper()].get('balance')) + ' ' + currency  #可用的交易币种数量
+                    balance_market = self.data_format(info[market.upper()].get('balance')) + ' ' + market        #可用的市场币种数量
+                    freeze_currecy = self.data_format(info[currency.upper()].get('freeze'))
+                    current_time = time.time()         #获取最新的时间
+                    run_time = (current_price - create_time)/1000*60  #运行多少分钟
+                    residue_num = ''
+                    float_profit = residue_num * current_price - total_money * last_price           #浮动盈亏（折算为交易市场币种）：当前剩余币种数量*当前价格-总投入数量*当时价格
+                    realized_profit = residue_num - total_money                                     #实现利润（折算为交易市场币种）：当前剩余币种数量-总投入数量
+                    total_profit = float_profit + realized_profit                           #总利润（折算为交易市场币种）：浮动盈亏+实现利润
+                    annual_yield = realized_profit / total_money / run_time * 525600 * 1  #年化收益率：实现利润/总投入/运行分钟数*525,600*100%
+                    Robot.objects.get(id=robot_id).updata(float_profit=float_profit,
+                                                          realized_profit=realized_profit,
+                                                          total_profit=total_profit, annual_yield=annual_yield)
+                    robot_obj = Robot.objects.get(id=robot_id)
+                    serialize = RobotSerializer(robot_obj)   #序列化机器人数据返回客户端
+                except(SystemError):
+                    raise
+        return restful.result(data=serialize.data)
 
 
 

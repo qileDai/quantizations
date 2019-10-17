@@ -144,8 +144,9 @@ Robot.prototype.run = function () {
     self.listenRightFlagEvent();
     self.getUser();
     self.submitTipsEvent();
+    self.robotYieldEvent();
     // self.getRobotsId();
-    self.websocketRobot();
+    // self.websocketRobot();
     // self.listenClickStragerty();
     // self.getAccountInfoEvent();
 
@@ -1057,9 +1058,20 @@ Robot.prototype.websocketRobot = function () {
 }
 
 
+Robot.prototype.robotYieldEvent = function(){
+    xfzajax.post({
+        'url': '/deal/robot_yield/',
+        'success':function (result) {
+            console.log(result)
+        }
+    })
+}
+
 template.defaults.imports.fomat= function (n) {
         return n.toFixed(2)
     }
+
+
 
 // Robot.prototype.getRobotsId = function () {
 //     xfzajax.get({
