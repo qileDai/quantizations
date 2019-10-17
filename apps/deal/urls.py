@@ -25,7 +25,7 @@ urlpatterns = [
     path('showconfig/', views.ShowConfig.as_view(), name='showconfig'),
     path('showconfiginfo/', views.ShowConfigInfo.as_view(), name='showconfiginfo'),
     path('waring_usrs/', views.WraingUsers.as_view(), name='waring_usrs'),
-    path('webtask_stu/', views.webtask_stu, name='webtask_stu'),
+    path('robot_yield/', views.RobotYield.as_view(), name='robot_yield'),
 
 
 ]
