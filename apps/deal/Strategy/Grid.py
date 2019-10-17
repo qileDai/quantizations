@@ -1,4 +1,6 @@
 import random
+import traceback
+import threading
 from pymysql import *
 import time
 import logging
@@ -6,8 +8,7 @@ from threading import Thread
 from dealapi.exx.exxService import ExxService
 from dealapi.exx.exxMarket import MarketCondition
 from apps.deal.models import Account, Property, LastdayAssets
-import traceback
-import threading
+from .WarningAccount import WarningAccount
 
 
 class GridStrategy(Thread):
@@ -543,8 +544,10 @@ class GridStrategy(Thread):
                     self.server_api.order(sell_1_amount, self.currency_type, sell_1_price, "sell")
             # 当前价高于预警价
             elif current_price >= self.robot_obj.warning_price:
-                pass
-
+                # 获取机器人的预警账户
+                warning_account = self.robot_obj.warning_account
+                print(warning_account)
+                WarningAccount(warning_account, '网格', self.currency_type)
             else:
                 break
 
