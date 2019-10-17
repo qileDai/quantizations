@@ -98,7 +98,7 @@ class Robot(models.Model):
     currency = models.CharField(max_length=32)                                              # 交易币种
     market = models.CharField(max_length=32)                                                # 交易市场
     trading_strategy = models.CharField(max_length=32)                                      # 交易策略
-    total_money = models.DecimalField(max_digits=19, decimal_places=2,null=True)            # 总投入
+    total_money = models.CharField(max_length=64,null=True)          # 总投入
     float_profit = models.DecimalField(max_digits=19, decimal_places=2,null=True)           # 浮动盈亏
     realized_profit = models.DecimalField(max_digits=19, decimal_places=2,null=True)        # 实现利润
     total_profit = models.DecimalField(max_digits=19, decimal_places=2,null=True)           # 总利润
