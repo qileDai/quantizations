@@ -271,7 +271,7 @@ class WithDraw(View):
         if currency:
             # 提币折合成usdt
             property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
-            original_assets = float(property_obj.original_assets) + float(num) * float(last)
+            original_assets = float(property_obj.original_assets) - float(num) * float(last)
             Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
             return restful.ok()
 
@@ -437,8 +437,8 @@ class StartRobot(View):
         # 调用对应策略
         for robot_obj in robots:
             if robot_obj.trading_strategy == '网格交易V1.0' and Flag == 1:
-                Robot.objects.filter(id=robot_obj.id).update(run_status=0)
-                Robot.objects.filter(id=robot_obj.id).update(status=Flag)
+                Robot.objects.filter(id=robot_obj.id).update(run_status=0, status=Flag)
+                # Robot.objects.filter(id=robot_obj.id).update(status=Flag)
                 # 启动线程
                 thread1 = GridStrategy(robot_obj=robot_obj, order_type="buy")
                 thread2 = GridStrategy(robot_obj=robot_obj, order_type="sell")
@@ -446,8 +446,8 @@ class StartRobot(View):
                 thread2.start()
                 print('-' * 30, '启动线程')
             elif robot_obj.trading_strategy == '网格交易V1.0' and Flag == 0:
-                Robot.objects.filter(id=robot_obj.id).update(status=Flag)
-                Robot.objects.filter(id=robot_obj.id).update(run_status=1)
+                Robot.objects.filter(id=robot_obj.id).update(run_status=1, status=Flag)
+                # Robot.objects.filter(id=robot_obj.id).update(run_status=1)
                 # 停止线程
                 for item in threading.enumerate():
                     try:
@@ -455,6 +455,8 @@ class StartRobot(View):
                         robot = item.robot_obj
                         if robot_obj.id == robot.id:
                             item.setFlag(False)
+                            rtime = time.time() - item.start_time
+                            Robot.objects.filter(id=robot_obj.id).update(running_time=rtime)
                     except:
                         print('对象没有属性robot_obj')
                         continue
