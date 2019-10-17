@@ -80,7 +80,7 @@ class ExxService(object):
             result = response.json()
             # print(result)
         except Exception as e:
-            print("取消委托失败", e)
+            print("取消委托失败")
         return result
 
     """
