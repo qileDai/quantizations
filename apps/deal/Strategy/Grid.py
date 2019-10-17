@@ -538,9 +538,9 @@ class GridStrategy(Thread):
                         depth_data = self.market_api.get_depth()
                         print('+'*30, depth_data)
                         sell_1_price, sell_1_amount = depth_data.get("bids")[1]
+                        self.server_api.order(sell_1_amount, self.currency_type, sell_1_price, "sell")
                     except:
                         print("未获取到买一价")
-                    self.server_api.order(sell_1_amount, self.currency_type, sell_1_price, "sell")
                 else:
                     # 一段时间内未成交，撤单
                     self.cancel_orders()

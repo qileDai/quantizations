@@ -380,7 +380,7 @@ class GetAccountInfo(View):
                 max += float(i[2])
                 min += float(i[3])
         context = {
-            #账户起始交易币种总资产
+            # 账户起始交易币种总资产
             'total_currency': self.data_format(info[currency.upper()].get('total')) + ' ' + currency,
             # 账户起始交易市场币种总资产
             'total_market': self.data_format(info[market.upper()].get('total')) + ' ' + market,
@@ -578,7 +578,7 @@ class ShowTradeDetail(View):
         }
 
         # print(context)
-        print('/-' * 30, len(sell), len(buy))
+        # print('/-' * 30, len(sell), len(buy))
         return restful.result(data=context)
 
 

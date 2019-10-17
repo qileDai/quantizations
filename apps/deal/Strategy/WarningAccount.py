@@ -50,8 +50,6 @@ class WarningAccount(object):
                 msg['sendNum'] = 1
                 msg['cont'] = '%s策略的%s交易对当前价格已低于您的预警价，请即时前往处理!' % (self.strategy, self.transaction_pair)
                 self.conn.lpush("sms", json.dumps(msg))
-                # res = self.conn.lrange("sms", 0, -1)
-                # print(res)
                 print(msg, '发送成功！')
             else:
                 print("手机或者邮箱格式有误！")
