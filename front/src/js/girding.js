@@ -909,7 +909,6 @@ Robot.prototype.getUser = function () {
                 if (result['code'] === 200) {
                     console.log(result)
                     var users = result['data']
-                    console.log(users)
                     var tpl = template('users-item', {'users': users})
                     var usersGroup = $('#waring-users')
                     usersGroup.append(tpl)
@@ -1056,6 +1055,11 @@ Robot.prototype.websocketRobot = function () {
     };
 
 }
+
+
+template.defaults.imports.fomat= function (n) {
+        return n.toFixed(2)
+    }
 
 // Robot.prototype.getRobotsId = function () {
 //     xfzajax.get({

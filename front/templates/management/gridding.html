@@ -1,5 +1,6 @@
 {% extends 'cms/base.html' %}
 {% load static %}
+{% load deal_filters %}
 {% block title %}
     交易账户管理
 {% endblock %}
@@ -7,6 +8,10 @@
     <link rel="stylesheet" href="{% static 'ystep-master/css/ystep.css' %}">
     <link rel="stylesheet" href="{% static 'css/manamegent/girding.min.css' %}">
     <script src="{% static 'arttemplate/template-web.js' %}"></script>
+    <script>
+
+
+    </script>
 
 {% endblock %}
 {% block header %}
@@ -302,9 +307,9 @@
                             <div class="btn-group" id="waring-users" data-toggle="buttons">
                                 <script id="users-item" type="text/html">
                                     {% verbatim %}
-                                    {{ each users.users user index }}
+                                    {{ each users user index }}
                                     <label class="btn btn-default">
-                                        <input type="checkbox" class="user">{{ user.fields.username }}
+                                        <input type="checkbox" class="user" value="{{ user.id }}">{{ user.username }}
                                     </label>
                                     {{ /each }}
                                     {% endverbatim %}
@@ -450,6 +455,7 @@
                 {% endverbatim %}
                 {% include 'cms/box_footer.html' %}
             </div>
+
         </script>
 
 

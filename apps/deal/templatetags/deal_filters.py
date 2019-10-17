@@ -44,7 +44,8 @@ def time_format(value):
     return localtime(value).strftime("%Y/%m/%d %H:%M:%S")
 
 @register.filter
-def round(value):
-    round(value,2)
+def data_format(data):
+    data = str(round(float(data), 2))
+    return data
 
 
