@@ -450,6 +450,8 @@ class StartRobot(View):
                         robot = item.robot_obj
                         if robot_obj.id == robot.id:
                             item.setFlag(False)
+                            rtime = time.time() - item.start_time
+                            Robot.objects.filter(id=robot_obj.id).update(running_time=rtime)
                     except:
                         print('对象没有属性robot_obj')
                         continue

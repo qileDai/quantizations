@@ -121,6 +121,7 @@ class Robot(models.Model):
     warning_account = models.CharField(max_length=1024, null=True)              # 预警账户
     run_status = models.SmallIntegerField(choices=Run_Status, default=1)        # 运行状态
     running_time = models.CharField(max_length=128)                             # 运行时间
+    warning_time = models.CharField(max_length=32)                             # 运行时间
 
     class Meta:
         ordering = ['-create_time']

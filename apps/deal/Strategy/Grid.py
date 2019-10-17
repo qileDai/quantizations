@@ -540,7 +540,6 @@ class GridStrategy(Thread):
                         sell_1_price, sell_1_amount = depth_data.get("bids")[1]
                     except:
                         print("未获取到买一价")
-                        break
                     self.server_api.order(sell_1_amount, self.currency_type, sell_1_price, "sell")
                 else:
                     # 一段时间内未成交，撤单
@@ -555,7 +554,7 @@ class GridStrategy(Thread):
                 acc_list.append(warning_account)
                 warn = WarningAccount(acc_list, '网格', self.currency_type)
                 warn.send_msg()
-                time.sleep(120)
+                time.sleep(float(self.robot_obj.warning_time)*60)
             else:
                 break
 
