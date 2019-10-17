@@ -10,7 +10,7 @@ from dealapi.exx.exxService import ExxService
 from .forms import AccountModelForm, RobotFrom, EditAccountFrom
 from django.db.models import Q
 from utils.mixin import LoginRequireMixin
-import datetime
+import datetime,re
 
 from utils import restful
 from apps.deal.Strategy.Grid import GridStrategy
@@ -736,7 +736,8 @@ class RobotYield(View):
                 print("机器人id:"+str(robot_id))
                 currency = robot.currency  # 交易币种
                 market = robot.market  # 市场币种
-                total_money = robot.total_money  # 总投入
+                total_money = re.findall('\d+\.\d\d',robot.total_money )[0]  # 总投入
+                print("总投入",total_money)
                 last_price = robot.current_price  # 当时价格
                 start_time  = float(robot.running_time )    #创建时间
                 try:

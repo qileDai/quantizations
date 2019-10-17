@@ -144,7 +144,7 @@ Robot.prototype.run = function () {
     self.listenRightFlagEvent();
     self.getUser();
     self.submitTipsEvent();
-    // self.robotYieldEvent();
+    self.robotYieldEvent();
     // self.getRobotsId();
     // self.websocketRobot();
     // self.listenClickStragerty();
@@ -623,7 +623,7 @@ Robot.prototype.listenSubmitRobot = function () {
         var resistance = $('.strategy-parameters-top .resistance').text()//阻力位
         var support = $('.strategy-parameters-top .support-level').text()
         var girding_num = $('.strategy-parameters-top .girding-num').text()
-        var curren_price = $('.current-price .price').text()
+        var curren_price = $('.current-price .price').text().replace(/[^\d.]/g, "")
         var millisecond = $('.millisecond-value').val()
         var mix_num = $('.mix-number .value ').val()
         var max_num = $('.max-number .value ').val()
