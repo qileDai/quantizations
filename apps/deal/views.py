@@ -270,7 +270,7 @@ class WithDraw(View):
         if currency:
             # 提币折合成usdt
             property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
-            original_assets = float(property_obj.original_assets) + float(num) * float(last)
+            original_assets = float(property_obj.original_assets) - float(num) * float(last)
             Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
             return restful.ok()
 

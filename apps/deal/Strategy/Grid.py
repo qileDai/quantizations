@@ -525,7 +525,7 @@ class GridStrategy(Thread):
             markets_data = self.market_api.get_ticker()
             current_price = markets_data.get("ticker")["last"]
             # 当前价低于止损价
-            if current_price <= self.robot_obj.stop_price:
+            if float(current_price) <= float(self.robot_obj.stop_price):
                 self.Flag = False
                 getopen_data = self.server_api.get_openorders(self.currency_type, '1', 'sell')
                 if isinstance(getopen_data, dict):
@@ -534,13 +534,14 @@ class GridStrategy(Thread):
                     sell_1_price, sell_1_amount = depth_data.get("asks")[-1]
                     self.server_api.order(sell_1_amount, self.currency_type, sell_1_price, "sell")
             # 当前价高于预警价
-            elif current_price >= self.robot_obj.warning_price:
+            elif float(current_price) >= float(self.robot_obj.warning_price):
                 # 获取机器人的预警账户
                 warning_account = self.robot_obj.warning_account
                 print(warning_account)
                 WarningAccount(warning_account, '网格', self.currency_type)
             else:
                 break
+            time.sleep(2)
 
     def run_thread(self):
         """
@@ -549,10 +550,13 @@ class GridStrategy(Thread):
         """
         thread1 = Thread(target=self.reverse_order,)
         thread2 = Thread(target=self.update_order_info,)
+        thread3 = Thread(target=self.set_risk_strategy,)
         thread1.start()
         thread2.start()
+        thread3.start()
         thread1.join()
         thread2.join()
+        thread3.join()
 
     def run(self):
         self.place_many_order()
