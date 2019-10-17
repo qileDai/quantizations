@@ -644,11 +644,12 @@ class ShowConfig(View):
         )
         return restful.ok()
 
-"""
-序列化预警账户
-"""
+
 class WraingUsers(View):
-    def get(self,request):
+    """
+    序列化预警账户
+    """
+    def get(self, request):
         users = UserInfo.objects.filter(status=1)
         print(users)
         # data = serialize('json', users)
