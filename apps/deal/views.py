@@ -173,7 +173,11 @@ class ShowCollectAsset(View):
         if account_list:
             accounts = account_list
         else:
-            pass
+            user_id = request.session.get("user_id")
+            account_lists = Account.objects.filter(users=user_id)
+            for account in account_lists:
+                accounts = []
+                accounts.append(account.id)
 
         # user_id = request.session.get("user_id")
         #
@@ -638,15 +642,17 @@ class ShowConfig(View):
         )
         return restful.ok()
 
+"""
+序列化预警账户
+"""
+class WraingUsers(View):
+    def get(self,request):
+        users = UserInfo.objects.filter(status=1)
+        print(users)
+        # data = serialize('json', users)
+        serialize = UserSerializer(users,many=True)
 
-def waring_usrs(request):
-    users = UserInfo.objects.filter(status=1)
-    print(users)
-    data = serialize('json', users)
-    context = {
-        'users': json.loads(data)
-    }
-    return restful.result(data=context)
+        return restful.result(data=serialize.data)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -660,17 +666,19 @@ class RobotList(View):
     def get(self, request):
         page = int(request.GET.get('p', 1))
         curry = request.GET.get('deal-curry')  # 拿到下拉框交易币种值
+        print("currency",curry)
         # currys = Property.objects.filter(pk=curry).only('currency')
-        market = request.GET.get('deal_market')  # 拿到下拉框交易市场值
-        print(market)
+        marke_id = request.GET.get('deal_market')  # 拿到下拉框交易市场值
+        print("market",marke_id)
         # market = Market.objects.filter(pk=market_id).get('name')
         status = request.GET.get('deal_status')  # 拿到交易状态
-        print(curry, market, status)
+        print("status",status)
+
         robots = Robot.objects.all()
         if curry:
             robots = Robot.objects.filter(currency__icontains=curry)
-        if market:
-            robots = Robot.objects.filter(market__icontains=market)
+        if marke_id:
+            robots = Robot.objects.filter(market=marke_id)
         if status:
             robots = Robot.objects.filter(status=status)
         paginator = Paginator(robots, 10)
@@ -689,7 +697,7 @@ class RobotList(View):
             'robots': robots,
             'url_query': '&' + parse.urlencode({
                 'curry': curry or '',
-                'market': market or '',
+                'market': marke_id or '',
                 'status': status or ''
             })
         }
@@ -703,31 +711,6 @@ class RobotList(View):
 """
 
 
-# @accept_websocket
-
-def updaterobot(request):
-    Robot.objects.get(id=1).update(annual_yield=20)
-
-def data_format(self, data):
-    data = str(round(float(data), 2))
-    return data
-
-def changeTime(self, allTime):
-    day = 24 * 60 * 60
-    hour = 60 * 60
-    min = 60
-    if allTime < 60:
-        return "%d 秒" % math.ceil(allTime)
-    elif allTime > day:
-        days = divmod(allTime, day)
-        return "%d 天, %s" % (int(days[0]), self.changeTime(days[1]))
-    elif allTime > hour:
-        hours = divmod(allTime, hour)
-        return '%d 时, %s' % (int(hours[0]), self.changeTime(hours[1]))
-    else:
-        mins = divmod(allTime, min)
-        return "%d 分, %d 秒" % (int(mins[0]), math.ceil(mins[1]))
-
 @accept_websocket
 def webtask_stu(request):
     if request.is_websocket():
@@ -735,7 +718,7 @@ def webtask_stu(request):
             user_id = request.session.get("user_id")
             accounts = Account.objects.filter(users=user_id)
             for account in accounts:
-                robots = Robot.objects.filter(trading_account_id=1)
+                robots = Robot.objects.filter(trading_account_id=2)
                 for robot in robots:
                     robot_id = robot.id  # 机器人id
                     currency = robot.currency  # 交易币种
@@ -761,20 +744,16 @@ def webtask_stu(request):
                         info1 = market_obj.get_ticker()
                         info1 = info1.get('ticker')
                         current_price = info1.get('last')  # 最新价格
-                        print("saf")
                         print("最新价格:"+current_price)
-                        print("daiie")
                         num = ''
                         float_profit = num * current_price - total_money * last_price           #浮动盈亏（折算为交易市场币种）：当前剩余币种数量*当前价格-总投入数量*当时价格
-                        print(float_profit)
-                        print("禁停啊")
                         realized_profit = num - total_money                                     #实现利润（折算为交易市场币种）：当前剩余币种数量-总投入数量
                         total_profit = float_profit + realized_profit                           #总利润（折算为交易市场币种）：浮动盈亏+实现利润
                         annual_yield = realized_profit / total_money / run_time * 525600 * 1  #年化收益率：实现利润/总投入/运行分钟数*525,600*100%
                         print("diaiel")
                         Robot.objects.get(id=robot_id).updata(float_profit=float_profit,
                                                               realized_profit=realized_profit,
-                                                              total_profit=total_profit, annual_yield=20)
+                                                              total_profit=total_profit, annual_yield=annual_yield)
                     except:
                         pass
             time.sleep(10)
