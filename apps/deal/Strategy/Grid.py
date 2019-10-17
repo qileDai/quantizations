@@ -7,7 +7,7 @@ import logging
 from threading import Thread
 from dealapi.exx.exxService import ExxService
 from dealapi.exx.exxMarket import MarketCondition
-from apps.deal.models import Account, Property, LastdayAssets
+from apps.deal.models import Account, Property, LastdayAssets, Robot
 from .WarningAccount import WarningAccount
 
 
@@ -250,9 +250,9 @@ class GridStrategy(Thread):
                         if result:
                             id = result['id']
                             response = self.server_api.cancel_order(self.currency_type, id)
-                            print(response)
+                            # print(response)
             except Exception as e:
-                print("%s单撤单完成:" % self.order_type, e)
+                print("%s单撤单完成:" % self.order_type)
 
     def completed_order_info(self, price, item, order_info, order_type, numb=None):
         """
@@ -527,21 +527,37 @@ class GridStrategy(Thread):
             # 当前价低于止损价
             if float(current_price) <= float(self.robot_obj.stop_price):
                 self.Flag = False
+                time.sleep(3)
+                # 停止策略之后更改状态
+                Robot.objects.filter(id=self.robot_obj.id).update(run_status=1, status=0)
+                # 获取卖单信息
                 getopen_data = self.server_api.get_openorders(self.currency_type, '1', 'sell')
                 if isinstance(getopen_data, dict):
                     # 获取卖一价
-                    depth_data = self.market_api.get_depth()
-                    sell_1_price, sell_1_amount = depth_data.get("asks")[-1]
+                    try:
+                        depth_data = self.market_api.get_depth()
+                        print('+'*30, depth_data)
+                        sell_1_price, sell_1_amount = depth_data.get("bids")[1]
+                    except:
+                        print("未获取到买一价")
+                        break
                     self.server_api.order(sell_1_amount, self.currency_type, sell_1_price, "sell")
+                else:
+                    # 一段时间内未成交，撤单
+                    self.cancel_orders()
+
             # 当前价高于预警价
             elif float(current_price) >= float(self.robot_obj.warning_price):
+                print('---------预警')
                 # 获取机器人的预警账户
                 warning_account = self.robot_obj.warning_account
-                print(warning_account)
-                WarningAccount(warning_account, '网格', self.currency_type)
+                acc_list = list()
+                acc_list.append(warning_account)
+                warn = WarningAccount(acc_list, '网格', self.currency_type)
+                warn.send_msg()
+                time.sleep(120)
             else:
                 break
-            time.sleep(2)
 
     def run_thread(self):
         """
@@ -553,6 +569,7 @@ class GridStrategy(Thread):
         thread3 = Thread(target=self.set_risk_strategy,)
         thread1.start()
         thread2.start()
+        time.sleep(10)
         thread3.start()
         thread1.join()
         thread2.join()

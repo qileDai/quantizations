@@ -432,8 +432,8 @@ class StartRobot(View):
         # 调用对应策略
         for robot_obj in robots:
             if robot_obj.trading_strategy == '网格交易V1.0' and Flag == 1:
-                Robot.objects.filter(id=robot_obj.id).update(run_status=0)
-                Robot.objects.filter(id=robot_obj.id).update(status=Flag)
+                Robot.objects.filter(id=robot_obj.id).update(run_status=0, status=Flag)
+                # Robot.objects.filter(id=robot_obj.id).update(status=Flag)
                 # 启动线程
                 thread1 = GridStrategy(robot_obj=robot_obj, order_type="buy")
                 thread2 = GridStrategy(robot_obj=robot_obj, order_type="sell")
@@ -441,8 +441,8 @@ class StartRobot(View):
                 thread2.start()
                 print('-' * 30, '启动线程')
             elif robot_obj.trading_strategy == '网格交易V1.0' and Flag == 0:
-                Robot.objects.filter(id=robot_obj.id).update(status=Flag)
-                Robot.objects.filter(id=robot_obj.id).update(run_status=1)
+                Robot.objects.filter(id=robot_obj.id).update(run_status=1, status=Flag)
+                # Robot.objects.filter(id=robot_obj.id).update(run_status=1)
                 # 停止线程
                 for item in threading.enumerate():
                     try:

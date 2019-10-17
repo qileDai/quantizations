@@ -1,8 +1,8 @@
 import redis
 import socket
 import time
-
-
+import json
+import re
 class WarningAccount(object):
     """
     账户预警
@@ -24,16 +24,37 @@ class WarningAccount(object):
         self.ip = myaddr
 
     def send_msg(self):
+        email_pattern = r'^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}$'
+        phone_pattern = r'^1[34578]\d{9}$'
         for item in self.warning_account:
-            msg = dict()
-            msg['contact'] = item
-            msg['ip'] = self.ip
-            # "yyyy/MM/dd HH:mm:ss"
-            msg['date'] = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
-            msg['userName'] = item
-            msg['sendNum'] = 1
-            msg['cont'] = '%s策略的%s交易对当前价格已低于您的预警价，请即时前往处理!' % (self.strategy, self.transaction_pair)
-            self.conn.lpush("sms", msg)
+            if re.match(phone_pattern, item):
+                msg = dict()
+                msg['contact'] = '+86 ' + item
+                msg['ip'] = self.ip
+                # "yyyy/MM/dd HH:mm:ss"
+                msg['date'] = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
+                msg['userName'] = '+86 ' + item
+                msg['sendNum'] = 1
+                msg['cont'] = '%s策略的%s交易对当前价格已低于您的预警价，请即时前往处理!' % (self.strategy, self.transaction_pair)
+                self.conn.lpush("sms", json.dumps(msg))
+                # res = self.conn.lrange("sms", 0, -1)
+                # print(res)
+                print(msg, '发送成功！')
+            elif re.match(email_pattern, item):
+                msg = dict()
+                msg['contact'] = item
+                msg['ip'] = self.ip
+                # "yyyy/MM/dd HH:mm:ss"
+                msg['date'] = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
+                msg['userName'] = item
+                msg['sendNum'] = 1
+                msg['cont'] = '%s策略的%s交易对当前价格已低于您的预警价，请即时前往处理!' % (self.strategy, self.transaction_pair)
+                self.conn.lpush("sms", json.dumps(msg))
+                # res = self.conn.lrange("sms", 0, -1)
+                # print(res)
+                print(msg, '发送成功！')
+            else:
+                print("手机或者邮箱格式有误！")
 
 
 
