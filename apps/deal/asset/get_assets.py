@@ -21,16 +21,19 @@ class GetAssets(object):
     def showassets(self):
         # 调用对应平台API
         if self.platform.Platform_name == 'EXX':
-            # 创建接口对象
-            service_api = ExxService(self.account_obj.secretkey,    # key解码
-                                     self.account_obj.accesskey)
-            # 获取用户的资产信息
-            balance_info = service_api.get_balance()
-            balance_info = balance_info['funds']
-            print("用户信息", balance_info)
-            # 获取所有行情信息
-            market_api = MarketCondition()
-            market_info = market_api.get_tickers()
+            try:
+                # 创建接口对象
+                service_api = ExxService(self.account_obj.secretkey,    # key解码
+                                         self.account_obj.accesskey)
+                # 获取用户的资产信息
+                balance_info = service_api.get_balance()
+                balance_info = balance_info['funds']
+                print("用户信息", balance_info)
+                # 获取所有行情信息
+                market_api = MarketCondition()
+                market_info = market_api.get_tickers()
+            except:
+                print('获取接口失败或获取返回值key失败')
         elif self.platform.Platform_name == 'HUOBI':
             # 返回数据格式需要统一, 待完成-----------------------------------------------
             pass
@@ -43,7 +46,7 @@ class GetAssets(object):
             exx_market_info = exx_market_api.get_tickers()
 
         show_currency = Property.objects.filter(Q(account_id=self.id) & Q(currency_status='1'))
-        lastday_obj = LastdayAssets.objects.filter(account_id=self.id)
+        lastday_obj = LastdayAssets.objects.filter(Q(account_id=self.id) & Q(currency_status='1'))
         lastday_assets = 0              # 昨日24时资产
         current_total = 0               # 当前资产
         original_total = 0              # 初始资产

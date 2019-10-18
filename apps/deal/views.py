@@ -85,6 +85,13 @@ class AddAccount(View):
             # 添加数据需为模型类对象
             obj.users = user_obj
             obj.save()
+            accounts = Account.objects.filter(Q(title=obj) & Q(platform=model_form.cleaned_data['platform']))
+            currency = Property.objects.values("currency").distinct()
+            print(accounts, currency)
+            for account in accounts:
+                for cur in currency:
+                    LastdayAssets.objects.create(currency=cur['currency'], account=account)
+                    Property.objects.create(currency=cur['currency'], account=account, currency_status=0)
             return restful.ok()
         else:
             return restful.params_error(model_form.get_errors())
@@ -158,7 +165,6 @@ class ShowAssert(View):
         # 创建对象
         con = GetAssets(id, account_obj, platform)
         data = con.showassets()
-        print(type(data))
         return restful.result(data=data)
 
 
@@ -177,7 +183,7 @@ class ShowCollectAsset(View):
             user_id = request.session.get("user_id")
             account_lists = Account.objects.filter(users=user_id)
             for account in account_lists:
-                accounts = []
+                accounts = list()
                 accounts.append(account.id)
 
         # user_id = request.session.get("user_id")
@@ -234,14 +240,13 @@ class ChargeAccount(View):
                 currency_pair = currency.lower() + '_usdt'
                 market_api = MarketCondition(currency_pair)
                 info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
+                info = info['ticker']['last']
             elif str(platform) == 'HUOBI':
                 pass
         except:
-            info = dict()
-            info['ticker'] = {}
-            info['last'] = 0
+            info = 0
         property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
-        original_assets = float(property_obj.original_assets) + float(num) * float(info['ticker']['last'])
+        original_assets = float(property_obj.original_assets) + float(num) * float(info)
         Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
         return restful.ok()
 
@@ -267,6 +272,7 @@ class WithDraw(View):
             elif str(platform) == 'HUOBI':
                 pass
         except:
+            print('未获取到当前价')
             last = 0
         if currency:
             # 提币折合成usdt
@@ -282,7 +288,7 @@ class ConfigCurrency(View):
     """
 
     def post(self, request):
-        currency_list = request.POST.getlist('currency[]')
+        currency_list = request.POST.get('currency')
         user_id = request.session.get("user_id")
         accounts = Account.objects.filter(users=user_id)
         for account in accounts:
@@ -295,16 +301,31 @@ class ConfigCurrency(View):
                     if not list(property_obj):
                         # 保存币种信息
                         LastdayAssets.objects.create(currency=currency, account=account)
-                        Property.objects.create(currency=currency, account=account, currency_status=1)
+                        Property.objects.create(currency=currency, account=account, currency_status=0)
                 else:
                     return restful.params_error(message='请选择账户币种')
+        # 返回数据为json格式
+        data = Property.objects.values("currency").distinct()
+        return HttpResponse(json.dumps(data), content_type="application/json")
 
-        return restful.ok(message='success')
+
+class SelectCurrency(View):
+    """
+    勾选的币种
+    """
+    def post(self, request):
+        currency_list = request.POST.getlist('currency')
+        Property.objects.values("currency").update(currency_status='0')
+        LastdayAssets.objects.values("currency").update(currency_status='0')
+        for cur in currency_list:
+            Property.objects.filter(currency=cur).update(currency_status='1')
+            LastdayAssets.objects.filter(currency=cur).update(currency_status='1')
+        return HttpResponse('OK')
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 创建机器人
-class createRobot(View):
+class CreateRobot(View):
     """
     获取配置策略的参数
     """
