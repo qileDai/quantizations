@@ -277,8 +277,8 @@ class WithDraw(View):
         if currency:
             # 提币折合成usdt
             property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
-            original_assets = float(property_obj.original_assets) - float(num) * float(last)
-            Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
+            withdraw_record = float(property_obj.withdraw_record) + float(num) * float(last)
+            Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(withdraw_record=withdraw_record)
             return restful.ok()
 
 
@@ -320,7 +320,7 @@ class SelectCurrency(View):
         for cur in currency_list:
             Property.objects.filter(currency=cur).update(currency_status='1')
             LastdayAssets.objects.filter(currency=cur).update(currency_status='1')
-        return HttpResponse('OK')
+        return restful.ok()
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -671,15 +671,16 @@ class ShowConfig(View):
         )
         return restful.ok()
 
-"""
-序列化预警账户
-"""
+
 class WraingUsers(View):
-    def get(self,request):
+    """
+    序列化预警账户
+    """
+    def get(self, request):
         users = UserInfo.objects.filter(status=1)
         print(users)
         # data = serialize('json', users)
-        serialize = UserSerializer(users,many=True)
+        serialize = UserSerializer(users, many=True)
 
         return restful.result(data=serialize.data)
 
@@ -798,7 +799,6 @@ class RobotYield(View):
                 except robot.DoesNotExist:
                     robot_obj = None
         return restful.result(data=serialize.data)
-
 
 
 # 分页

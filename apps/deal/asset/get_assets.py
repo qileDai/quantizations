@@ -35,7 +35,7 @@ class GetAssets(object):
             except:
                 print('获取接口失败或获取返回值key失败')
         elif self.platform.Platform_name == 'HUOBI':
-            # 返回数据格式需要统一, 待完成-----------------------------------------------
+            # 返回数据格式需要统一
             pass
         elif self.platform.Platform_name == 'BINANCE':
             pass
@@ -61,17 +61,18 @@ class GetAssets(object):
 
         # 计算账户总初始资产/总提币，获取币种初始资产
         for queryset in show_currency:
-            # 账户总初始资产
+            currency = queryset.currency
+            # 账户初始总资产
             original_total += float(queryset.original_assets)
             # 提币总额
             withdraw_record += float(queryset.withdraw_record)
             # 损益表字典
-            profit_loss_dict[queryset.currency] = dict()
+            profit_loss_dict[currency] = dict()
             # 交易对
-            transaction_pair = queryset.currency.lower() + '_usdt'
+            transaction_pair = currency.lower() + '_usdt'
             # 资产表-初始资产
-            assets_dict[queryset.currency] = dict()
-            assets_dict[queryset.currency]['original_assets'] = self.data_format(queryset.original_assets)
+            assets_dict[currency] = dict()
+            assets_dict[currency]['original_assets'] = self.data_format(queryset.original_assets)
             # 当前参考价
             if self.flag:
                 # 资产汇总，所有平台参考价以EXX为准
@@ -80,33 +81,32 @@ class GetAssets(object):
                 last = market_info.get(transaction_pair, None)
             if last:
                 # 资产表-参考价
-                assets_dict[queryset.currency]['last'] = self.data_format(last.get('last'))
+                assets_dict[currency]['last'] = self.data_format(last.get('last'))
                 # 损益表-参考价
-                profit_loss_dict[queryset.currency]['last'] = self.data_format(last.get('last'))
+                profit_loss_dict[currency]['last'] = self.data_format(last.get('last'))
             else:
-                assets_dict[queryset.currency]['last'] = 0
-                profit_loss_dict[queryset.currency]['last'] = 0
+                assets_dict[currency]['last'] = 0
+                profit_loss_dict[currency]['last'] = 0
             # 资产表-交易币种总资产
-            assets_dict[queryset.currency]['current_assets'] = self.data_format(balance_info[queryset.currency]['total'])
+            assets_dict[currency]['current_assets'] = self.data_format(balance_info[currency]['total'])
             # 资产表-交易币种冻结
-            assets_dict[queryset.currency]['freeze'] = self.data_format(balance_info[queryset.currency]['freeze'])
+            assets_dict[currency]['freeze'] = self.data_format(balance_info[currency]['freeze'])
             # 资产表-交易币种可用
-            assets_dict[queryset.currency]['balance'] = self.data_format(balance_info[queryset.currency]['balance'])
+            assets_dict[currency]['balance'] = self.data_format(balance_info[currency]['balance'])
             # 当前总资产
-            current_total += float(balance_info[queryset.currency]['total']) * \
-                             float(assets_dict[queryset.currency]['last'])
+            current_total += float(balance_info[currency]['total']) * float(assets_dict[currency]['last'])
             # 损益表-当前总资产
-            profit_loss_dict[queryset.currency]['current_assets'] = self.data_format(balance_info[queryset.currency]['total'])
+            profit_loss_dict[currency]['current_assets'] = self.data_format(balance_info[currency]['total'])
             # 损益表-初始资产
-            profit_loss_dict[queryset.currency]['original_assets'] = self.data_format(queryset.original_assets)
+            profit_loss_dict[currency]['original_assets'] = self.data_format(queryset.original_assets)
             # 损益表-差额
-            profit_loss_dict[queryset.currency]['gap'] = self.data_format(
-                float(profit_loss_dict[queryset.currency]['current_assets']) -
-                float(profit_loss_dict[queryset.currency]['original_assets'])
+            profit_loss_dict[currency]['gap'] = self.data_format(
+                float(profit_loss_dict[currency]['current_assets']) -
+                float(profit_loss_dict[currency]['original_assets'])
             )
             # 损益表-折合差额
-            profit_loss_dict[queryset.currency]['convert'] = self.data_format(
-                float(profit_loss_dict[queryset.currency]['gap']) * float(profit_loss_dict[queryset.currency]['last']))
+            profit_loss_dict[currency]['convert'] = self.data_format(
+                float(profit_loss_dict[currency]['gap']) * float(profit_loss_dict[currency]['last']))
 
         # 资产变化
         asset_change = dict()
@@ -127,7 +127,7 @@ class GetAssets(object):
         else:
             if original_total != 0:
                 history_profit['percent'] = self.data_format((current_total + withdraw_record - original_total)
-                                                / original_total) + "usdt"
+                                                             / original_total) + "usdt"
             else:
                 history_profit['percent'] = 0
         print(lastday_assets, current_total)
