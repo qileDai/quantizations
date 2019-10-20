@@ -1,37 +1,36 @@
-from django.shortcuts import render, redirect, HttpResponse
-from django.views.generic import View
-from .models import Account, Property, LastdayAssets, Market, Robot, TradingPlatform, OrderInfo
-from apps.rbac.models import UserInfo
-from django.core.paginator import Paginator
-from urllib import parse
-from apps.deal.asset.get_assets import GetAssets
-from dealapi.exx.exxMarket import MarketCondition
-from dealapi.exx.exxService import ExxService
-from .forms import AccountModelForm, RobotFrom, EditAccountFrom
-from django.db.models import Q
-from utils.mixin import LoginRequireMixin
-import datetime,re
-
-from utils import restful
-from apps.deal.Strategy.Grid import GridStrategy
 import threading
 import time
 import math
+import re
+import json
+
+from urllib import parse
+from django.db.models import Q
+from django.shortcuts import render, redirect, HttpResponse
+from .models import Account, Property, LastdayAssets, Market, Robot, TradingPlatform, OrderInfo
+from .forms import AccountModelForm, RobotFrom, EditAccountFrom
+from apps.rbac.models import UserInfo
+from django.core.paginator import Paginator
+from apps.deal.asset.get_assets import GetAssets
+from dealapi.exx.exxMarket import MarketCondition
+from dealapi.exx.exxService import ExxService
+from apps.deal.Strategy.Grid import GridStrategy
+
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
-from django.core import serializers
-from django.core.serializers import serialize
 from django.contrib.sessions import serializers
-import json
+from dwebsocket.decorators import accept_websocket
+from utils import restful
+from utils.mixin import LoginRequireMixin
+from rest_framework import generics
+from django.core.serializers import serialize
 from apps.deal.serializers import AccountSerializer, RobotSerializer, OrderInfoSerializer
 from apps.rbac.serializers import UserSerializer
-from dwebsocket.decorators import accept_websocket
+
+# Create your views here.
 
 
-# Create your views here.r
-
-
-class AccountList(LoginRequireMixin, View):
+class AccountList(generics.ListAPIView, LoginRequireMixin):
     """
     显示用户所有账户信息
     """
@@ -43,14 +42,9 @@ class AccountList(LoginRequireMixin, View):
             return render(request, "cms/login.html", {'error': '账户失效，请重新登陆！'})
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
-        # ids = Account.objects.filter(users__id=user_id).values('id')
-        # print(ids)
-        # for id in ids:
-        #     print(id)
         # 获取用户所有币种
         currency_list = Property.objects.filter(account__users__id=user_id).distinct()
-        print(currency_list)
-        print(accounts)
+        # serializer_class = PropertySerializer
         # 分页
         paginator = Paginator(accounts, 10)
         page_obj = paginator.page(page)
@@ -61,7 +55,7 @@ class AccountList(LoginRequireMixin, View):
             'accounts': accounts,
             'page_obj': page_obj,
             'paginator': paginator,
-            'platfotms': TradingPlatform.objects.all(),
+            'platforms': TradingPlatform.objects.all(),
             # 用户所有账户币种信息
             'currency_list': currency_list,
             'properties': Property.objects.all(),
@@ -70,10 +64,12 @@ class AccountList(LoginRequireMixin, View):
         return render(request, 'management/tradingaccount.html', context=context)
 
 
-class AddAccount(View):
+class AddAccount(generics.CreateAPIView):
     """
     添加账户
     """
+    # queryset = Account.objects.get_queryset().order_by('id')
+    serializer_class = AccountSerializer
 
     def post(self, request):
         model_form = AccountModelForm(request.POST)
@@ -105,14 +101,18 @@ def accountinfo(request):
     return restful.result(data=serialize.data)
 
 
-class EditAccount(View):
+class EditAccount(generics.ListCreateAPIView):
     """
-    编辑账户
+    get:
+    获取要修改账户信息.
+    post:
+    提交修改信息.
     """
+    queryset = Account.objects.get_queryset().order_by('id')
+    serializer_class = AccountSerializer
 
     def get(self, request):
         accout_id = request.GET.get('account_id')
-        print(accout_id)
         account = Account.objects.get(pk=accout_id)
         # context = {
         #    'account': account,
@@ -137,10 +137,11 @@ class EditAccount(View):
             return restful.params_error(form.get_errors())
 
 
-class DeleteAccount(View):
+class DeleteAccount(generics.CreateAPIView):
     """
     删除账户
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
         pk = request.POST.get('pk')
@@ -151,12 +152,14 @@ class DeleteAccount(View):
             return restful.params_error(message="该账户不存在")
 
 
-class ShowAssert(View):
+class ShowAssert(generics.CreateAPIView):
     """
     显示账户资产信息
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
+        print('---------', self.serializer_class)
         id = request.POST.get('pk')
         # 获取账户信息
         account_obj = Account.objects.get(id=id)
@@ -168,10 +171,11 @@ class ShowAssert(View):
         return restful.result(data=data)
 
 
-class ShowCollectAsset(View):
+class ShowCollectAsset(generics.CreateAPIView):
     """
     汇总资产信息
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
 
@@ -186,15 +190,6 @@ class ShowCollectAsset(View):
                 accounts = list()
                 accounts.append(account.id)
 
-        # user_id = request.session.get("user_id")
-        #
-        # ids = serializers.Serializer('json', Account.objects.filter(users__id=user_id).values('id'))
-        # print(ids)
-        # ids = Account.objects.filter(users__id=user_id).values('id')
-        # ids = json.dumps(ids)
-        # print(ids)
-        # 多个账户
-        # ids = request.POST.get("pk")
         flag = True
         context_list = list()
         for id in accounts:
@@ -222,16 +217,16 @@ class ShowCollectAsset(View):
         return restful.result(data=context_list[0])
 
 
-class ChargeAccount(View):
+class ChargeAccount(generics.CreateAPIView):
     """
     增资
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
         id = request.POST.get('pk')
         account_obj = Account.objects.get(id=id)  # 获取账户信息
         platform = account_obj.platform  # 账户对应的平台
-        print(str(platform))
         currency = request.POST.get('currency')
         num = request.POST.get('num')
         # 根据平台调用对应接口
@@ -251,10 +246,11 @@ class ChargeAccount(View):
         return restful.ok()
 
 
-class WithDraw(View):
+class WithDraw(generics.CreateAPIView):
     """
     提币
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
         id = request.POST.get('pk')
@@ -282,10 +278,11 @@ class WithDraw(View):
             return restful.ok()
 
 
-class ConfigCurrency(View):
+class ConfigCurrency(generics.CreateAPIView):
     """
     币种新增/配置
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
         currency_list = request.POST.get('currency')
@@ -309,10 +306,12 @@ class ConfigCurrency(View):
         return HttpResponse(json.dumps(data), content_type="application/json")
 
 
-class SelectCurrency(View):
+class SelectCurrency(generics.CreateAPIView):
     """
     勾选的币种
     """
+    serializer_class = AccountSerializer
+
     def post(self, request):
         currency_list = request.POST.getlist('currency')
         Property.objects.values("currency").update(currency_status='0')
@@ -325,10 +324,11 @@ class SelectCurrency(View):
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 创建机器人
-class CreateRobot(View):
+class CreateRobot(generics.CreateAPIView):
     """
     获取配置策略的参数
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
         form = RobotFrom(request.POST)
@@ -367,10 +367,11 @@ def get_account_info(currency, market, id):
     return user_obj, service_obj, market_obj
 
 
-class GetAccountInfo(View):
+class GetAccountInfo(generics.CreateAPIView):
     """
     展示交易对可用额度/当前价,计算默认值
     """
+    serializer_class = AccountSerializer
 
     def data_format(self, data):
         data = str(round(float(data), 2))
@@ -422,10 +423,11 @@ class GetAccountInfo(View):
         return restful.result(data=context)
 
 
-class RobotProtection(View):
+class RobotProtection(generics.CreateAPIView):
     """
     机器人保护
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
         id = request.POST.get('robot_id')
@@ -437,10 +439,11 @@ class RobotProtection(View):
         return restful.ok()
 
 
-class StartRobot(View):
+class StartRobot(generics.CreateAPIView):
     """
     管理机器人
     """
+    serializer_class = AccountSerializer
     order_list = ""
 
     def post(self, request):
@@ -491,10 +494,11 @@ class StartRobot(View):
         return restful.ok()
 
 
-class ShowTradeDetail(View):
+class ShowTradeDetail(generics.CreateAPIView):
     """
     展示机器人交易详情
     """
+    serializer_class = AccountSerializer
 
     def data_format(self, data):
         data = str(round(float(data), 2))
@@ -603,10 +607,11 @@ class ShowTradeDetail(View):
         return restful.result(data=context)
 
 
-class ShowConfigInfo(View):
+class ShowConfigInfo(generics.CreateAPIView):
     """
     展示机器人配置信息
     """
+    serializer_class = AccountSerializer
 
     def data_format(self, data):
         data = str(round(float(data), 2))
@@ -642,10 +647,11 @@ class ShowConfigInfo(View):
         return restful.result(data=context)
 
 
-class ShowConfig(View):
+class ShowConfig(generics.CreateAPIView):
     """
     修改机器人配置信息
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
         # 获取机器人id
@@ -672,10 +678,12 @@ class ShowConfig(View):
         return restful.ok()
 
 
-class WraingUsers(View):
+class WraingUsers(generics.CreateAPIView):
     """
     序列化预警账户
     """
+    serializer_class = AccountSerializer
+
     def get(self, request):
         users = UserInfo.objects.filter(status=1)
         print(users)
@@ -688,10 +696,11 @@ class WraingUsers(View):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-class RobotList(View):
+class RobotList(generics.CreateAPIView):
     """
     机器人管理列表页面
     """
+    serializer_class = AccountSerializer
 
     def get(self, request):
         page = int(request.GET.get('p', 1))
@@ -736,18 +745,19 @@ class RobotList(View):
         return render(request, 'management/gridding.html', context=context)
 
 
-"""
-机器人收益计算更新到数据库
-"""
-class RobotYield(View):
-
+class RobotYield(generics.CreateAPIView):
+    """
+    机器人收益计算更新到数据库
+    """
+    serializer_class = AccountSerializer
     robot_yield = {}
-    #用作对数据做精度处理
+
+    # 用作对数据做精度处理
     def data_format(self, data):
         data = str(round(float(data), 2))
         return data
 
-    def post(self,request):
+    def post(self, request):
         user_id = request.session.get("user_id")   #获取用户id
         accounts = Account.objects.filter(users=user_id)
         for account in accounts:

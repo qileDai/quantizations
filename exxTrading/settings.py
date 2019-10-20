@@ -157,10 +157,15 @@ SAFE_URL = [
     '^/rbac/',
     r'/exx/',
     '/deal/',
+    '/docs/',
 ]
 
 # 用户是否登陆
 LOGIN = 'is_login'
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.AutoSchema'
+}
 
 # 分钟(0-59) 小时(0-23) 每个月的哪一天(1-31) 月份(1-12) 周几(0-6) shell脚本或者命令
 CRONJOBS = [

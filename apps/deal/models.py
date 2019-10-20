@@ -26,7 +26,7 @@ class Account(models.Model):
     账户信息
     """
     # 账户名称
-    title = models.CharField(max_length=32,verbose_name="账户名称",unique=True)
+    title = models.CharField(max_length=32, verbose_name="账户名称", unique=True)
     accesskey = models.CharField(max_length=128)
     secretkey = models.CharField(max_length=128)
     # 创建时间
@@ -38,6 +38,7 @@ class Account(models.Model):
 
     class Meta:
         ordering = ['-createtime']
+
     def __str__(self):
         return self.title
 
