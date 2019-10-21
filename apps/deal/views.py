@@ -44,7 +44,6 @@ class AccountList(generics.ListAPIView, LoginRequireMixin):
         accounts = Account.objects.filter(users__id=user_id)
         # 获取用户所有币种
         currency_list = Property.objects.filter(account__users__id=user_id).distinct()
-        # serializer_class = PropertySerializer
         # 分页
         paginator = Paginator(accounts, 10)
         page_obj = paginator.page(page)
@@ -113,7 +112,7 @@ class EditAccount(generics.ListCreateAPIView):
 
     def get(self, request):
         accout_id = request.GET.get('account_id')
-        account = Account.objects.get(pk=accout_id)
+        account = self.queryset.objects.get(pk=accout_id)
         # context = {
         #    'account': account,
         # }
@@ -159,7 +158,6 @@ class ShowAssert(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def post(self, request):
-        print('---------', self.serializer_class)
         id = request.POST.get('pk')
         # 获取账户信息
         account_obj = Account.objects.get(id=id)

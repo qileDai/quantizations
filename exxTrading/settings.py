@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'apps.deal',
     'django_crontab',       # 定时任务
     'rest_framework',
+    'rest_framework_swagger',
 
 ]
 
