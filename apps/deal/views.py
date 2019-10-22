@@ -246,11 +246,12 @@ class ChargeAccount(generics.CreateAPIView):
 
     def post(self, request):
         id = request.POST.get('id')
-        if id:
+        currency = request.POST.get('currency')
+        num = request.POST.get('num')
+        print(id, currency)
+        if id and currency and num:
             account_obj = Account.objects.get(id=id)  # 获取账户信息
             platform = account_obj.platform  # 账户对应的平台
-            currency = request.POST.get('currency')
-            num = request.POST.get('num')
             # 根据平台调用对应接口
             try:
                 if str(platform) == 'EXX':
@@ -267,7 +268,7 @@ class ChargeAccount(generics.CreateAPIView):
             Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
             return restful.ok()
         else:
-            restful.params_error(message='参数为空')
+            return restful.params_error(message='参数为空')
 
 
 class WithDraw(generics.CreateAPIView):
@@ -278,11 +279,11 @@ class WithDraw(generics.CreateAPIView):
 
     def post(self, request):
         id = request.POST.get('id')
-        if id:
+        currency = request.POST.get('currency')
+        num = request.POST.get('num')
+        if id and currency and num:
             account_obj = Account.objects.get(id=id)  # 获取账户信息
             platform = account_obj.platform  # 账户对应的平台
-            currency = request.POST.get('currency')
-            num = request.POST.get('num')
             # 根据平台调用对应接口
             try:
                 if str(platform) == 'EXX':
@@ -302,7 +303,7 @@ class WithDraw(generics.CreateAPIView):
                 Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(withdraw_record=withdraw_record)
                 return restful.ok()
         else:
-            restful.params_error(message='参数为空')
+            return restful.params_error(message='参数为空')
 
 
 class ConfigCurrency(generics.CreateAPIView):
