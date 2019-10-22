@@ -279,11 +279,11 @@ class WithDraw(generics.CreateAPIView):
 
     def post(self, request):
         id = request.POST.get('id')
-        if id:
+        currency = request.POST.get('currency')
+        num = request.POST.get('num')
+        if id and currency and num:
             account_obj = Account.objects.get(id=id)  # 获取账户信息
             platform = account_obj.platform  # 账户对应的平台
-            currency = request.POST.get('currency')
-            num = request.POST.get('num')
             # 根据平台调用对应接口
             try:
                 if str(platform) == 'EXX':
