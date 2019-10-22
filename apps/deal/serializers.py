@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .forms import Account, TradingPlatform, Robot
-from .models import OrderInfo
+from .models import OrderInfo, Property, LastdayAssets
 
 
 class PlatformSerializer(serializers.ModelSerializer):
@@ -17,6 +17,10 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ('id', 'title', 'accesskey', 'secretkey', 'users_id', 'platform')
         extra_kwargs = {
+            'id': {
+                'required': True,
+                'help_text': 'ID'
+            },
             'title': {
                 'required': True,
                 'help_text': '账户名称'
@@ -50,6 +54,22 @@ class OrderInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderInfo
         fields = ('id', 'order_type', 'closing_price', 'total_price', 'closing_time', 'robot', 'currency_pair', 'order_id')
+
+
+class PropertySerializer(serializers.ModelSerializer):
+    account = AccountSerializer()
+
+    class Meta:
+        model = Property
+        fields = '__all__'
+
+
+class LastdayAssetsSerializer(serializers.ModelSerializer):
+    account = AccountSerializer()
+
+    class Meta:
+        model = LastdayAssets
+        fields = '__all__'
 
 
 

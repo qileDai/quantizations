@@ -1,6 +1,5 @@
-
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import path
 from . import views
 
 app_name = 'deal'
@@ -25,7 +24,7 @@ urlpatterns = [
     path('robot_protection/', views.RobotProtection.as_view(), name='robot_protection'),
     path('showconfig/', views.ShowConfig.as_view(), name='showconfig'),
     path('showconfiginfo/', views.ShowConfigInfo.as_view(), name='showconfiginfo'),
-    path('waring_usrs/', views.WraingUsers.as_view(), name='waring_usrs'),
+    path('warning_users/', views.WarningUsers.as_view(), name='warning_users'),
     path('robot_yield/', views.RobotYield.as_view(), name='robot_yield'),
 
 
