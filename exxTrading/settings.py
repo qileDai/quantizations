@@ -82,6 +82,7 @@ WSGI_APPLICATION = 'exxTrading.wsgi.application'
 
 
 # Database
+# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 import pymysql
 pymysql.install_as_MySQLdb()
 DATABASES = {
@@ -181,7 +182,9 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-CORS_ORIGIN_WHITELIST = ('*')
+CORS_ORIGIN_WHITELIST = (
+    'http://127.0.0.1:8080',
+)
 
 CORS_ALLOW_METHODS = (
     'DELETE',
