@@ -1,79 +1,84 @@
-from django.shortcuts import render, redirect, HttpResponse
-from django.views.generic import View
-from .models import Account, Property, LastdayAssets, Market, Robot, TradingPlatform, OrderInfo
-from apps.rbac.models import UserInfo
-from django.core.paginator import Paginator
-from urllib import parse
-from apps.deal.asset.get_assets import GetAssets
-from dealapi.exx.exxMarket import MarketCondition
-from dealapi.exx.exxService import ExxService
-from .forms import AccountModelForm, RobotFrom, EditAccountFrom
-from django.db.models import Q
-from utils.mixin import LoginRequireMixin
-import datetime,re
-
-from utils import restful
-from apps.deal.Strategy.Grid import GridStrategy
 import threading
 import time
 import math
-from django.core.exceptions import ValidationError
-from rest_framework import serializers
-from django.core import serializers
-from django.core.serializers import serialize
-from django.contrib.sessions import serializers
+import re
 import json
-from apps.deal.serializers import AccountSerializer, RobotSerializer, OrderInfoSerializer
+
+from urllib import parse
+from django.db.models import Q
+from django.shortcuts import render, redirect, HttpResponse
+from django.http import JsonResponse
+from .models import Account, Property, LastdayAssets, Market, Robot, TradingPlatform, OrderInfo
+from .forms import AccountModelForm, RobotFrom, EditAccountFrom
+from apps.rbac.models import UserInfo
+from django.core.paginator import Paginator
+from apps.deal.asset.get_assets import GetAssets
+from dealapi.exx.exxMarket import MarketCondition
+from dealapi.exx.exxService import ExxService
+from apps.deal.Strategy.Grid import GridStrategy
+
+from django.core.exceptions import ValidationError
+from rest_framework.response import Response
+from rest_framework import serializers
+from utils import restful
+from utils.mixin import LoginRequireMixin
+from rest_framework import generics
+from django.core.serializers import serialize
+from apps.deal.serializers import AccountSerializer, RobotSerializer, OrderInfoSerializer, LastdayAssetsSerializer, PropertySerializer
 from apps.rbac.serializers import UserSerializer
-from dwebsocket.decorators import accept_websocket
+
+# Create your views here.
 
 
-# Create your views here.r
-
-
-class AccountList(LoginRequireMixin, View):
+class AccountList(generics.ListAPIView, LoginRequireMixin):
     """
     显示用户所有账户信息
     """
+    serializer_class = AccountSerializer
 
     def get(self, request):
-        page = int(request.GET.get('p', 1))
-        user_id = request.session.get("user_id")
+        page = int(request.GET.get('pageIndex', 1))
+        pagesize = request.GET.get('pageSize')
+        # user_id = request.session.get("user_id")
+        user_id = 1
         if not user_id:
             return render(request, "cms/login.html", {'error': '账户失效，请重新登陆！'})
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
-        # ids = Account.objects.filter(users__id=user_id).values('id')
-        # print(ids)
-        # for id in ids:
-        #     print(id)
         # 获取用户所有币种
-        currency_list = Property.objects.filter(account__users__id=user_id).distinct()
-        print(currency_list)
-        print(accounts)
+        # currency_list = Property.objects.values("currency",).distinct()
+        currency_list = Property.objects.all()
         # 分页
-        paginator = Paginator(accounts, 10)
+        paginator = Paginator(Account.objects.filter(users__id=user_id), 10)
         page_obj = paginator.page(page)
         context_data = get_pagination_data(paginator, page_obj)
         context = {
             # 用户信息分页列表
             'accounts_list': page_obj.object_list,
-            'accounts': accounts,
-            'page_obj': page_obj,
-            'paginator': paginator,
-            'platfotms': TradingPlatform.objects.all(),
+            'accounts': AccountSerializer(accounts, many=True).data,
+            'page_obj': serialize('json', page_obj),
+            # 'paginator': paginator,
+            'paginator': AccountSerializer(accounts, many=True).data,
+            'platforms': TradingPlatform.objects.all(),
             # 用户所有账户币种信息
-            'currency_list': currency_list,
-            'properties': Property.objects.all(),
+            # 'currency_list': PropertySerializer(currency_list, many=True).data
+            'currency_list': serialize('json', currency_list, fields=('currency',))
         }
+        # context = {
+        #     'numPerPage': len(page)
+        # }
         context.update(context_data)
+        print(context)
+        # return restful.result(data=context['paginator'])
         return render(request, 'management/tradingaccount.html', context=context)
 
 
-class AddAccount(View):
+class AddAccount(generics.CreateAPIView):
     """
     添加账户
     """
+    # queryset = Account.objects.get_queryset().order_by('id')
+    serializer_class = AccountSerializer
 
     def post(self, request):
         model_form = AccountModelForm(request.POST)
@@ -85,6 +90,13 @@ class AddAccount(View):
             # 添加数据需为模型类对象
             obj.users = user_obj
             obj.save()
+            accounts = Account.objects.filter(Q(title=obj) & Q(platform=model_form.cleaned_data['platform']))
+            currency = Property.objects.values("currency").distinct()
+            print(accounts, currency)
+            for account in accounts:
+                for cur in currency:
+                    LastdayAssets.objects.create(currency=cur['currency'], account=account)
+                    Property.objects.create(currency=cur['currency'], account=account, currency_status=0)
             return restful.ok()
         else:
             return restful.params_error(model_form.get_errors())
@@ -98,20 +110,20 @@ def accountinfo(request):
     return restful.result(data=serialize.data)
 
 
-class EditAccount(View):
+class EditAccount(generics.ListCreateAPIView):
     """
-    编辑账户
+    get:
+    获取要修改账户信息.
+    post:
+    提交修改信息.
     """
+    serializer_class = AccountSerializer
 
     def get(self, request):
-        accout_id = request.GET.get('account_id')
-        print(accout_id)
-        account = Account.objects.get(pk=accout_id)
-        # context = {
-        #    'account': account,
-        # }
-        # print(account)
-        return render(request, 'management/tradingaccount.html')
+        account_id = request.GET.get('account_id')
+        account = Account.objects.get(pk=account_id)
+        account = AccountSerializer(account)
+        return restful.result(data=account.data)
 
     def post(self, request):
         form = EditAccountFrom(request.POST)
@@ -130,10 +142,11 @@ class EditAccount(View):
             return restful.params_error(form.get_errors())
 
 
-class DeleteAccount(View):
+class DeleteAccount(generics.CreateAPIView):
     """
     删除账户
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
         pk = request.POST.get('pk')
@@ -144,10 +157,11 @@ class DeleteAccount(View):
             return restful.params_error(message="该账户不存在")
 
 
-class ShowAssert(View):
+class ShowAssert(generics.CreateAPIView):
     """
     显示账户资产信息
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
         id = request.POST.get('pk')
@@ -158,18 +172,18 @@ class ShowAssert(View):
         # 创建对象
         con = GetAssets(id, account_obj, platform)
         data = con.showassets()
-        print(type(data))
         return restful.result(data=data)
 
 
-class ShowCollectAsset(View):
+class ShowCollectAsset(generics.CreateAPIView):
     """
     汇总资产信息
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
 
-        account_list = request.POST.getlist('account_list[]')
+        account_list = request.POST.getlist('account_list')
         print(account_list)
         if account_list:
             accounts = account_list
@@ -177,18 +191,9 @@ class ShowCollectAsset(View):
             user_id = request.session.get("user_id")
             account_lists = Account.objects.filter(users=user_id)
             for account in account_lists:
-                accounts = []
+                accounts = list()
                 accounts.append(account.id)
 
-        # user_id = request.session.get("user_id")
-        #
-        # ids = serializers.Serializer('json', Account.objects.filter(users__id=user_id).values('id'))
-        # print(ids)
-        # ids = Account.objects.filter(users__id=user_id).values('id')
-        # ids = json.dumps(ids)
-        # print(ids)
-        # 多个账户
-        # ids = request.POST.get("pk")
         flag = True
         context_list = list()
         for id in accounts:
@@ -216,16 +221,16 @@ class ShowCollectAsset(View):
         return restful.result(data=context_list[0])
 
 
-class ChargeAccount(View):
+class ChargeAccount(generics.CreateAPIView):
     """
     增资
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
         id = request.POST.get('pk')
         account_obj = Account.objects.get(id=id)  # 获取账户信息
         platform = account_obj.platform  # 账户对应的平台
-        print(str(platform))
         currency = request.POST.get('currency')
         num = request.POST.get('num')
         # 根据平台调用对应接口
@@ -234,22 +239,22 @@ class ChargeAccount(View):
                 currency_pair = currency.lower() + '_usdt'
                 market_api = MarketCondition(currency_pair)
                 info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
+                info = info['ticker']['last']
             elif str(platform) == 'HUOBI':
                 pass
         except:
-            info = dict()
-            info['ticker'] = {}
-            info['last'] = 0
+            info = 0
         property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
-        original_assets = float(property_obj.original_assets) + float(num) * float(info['ticker']['last'])
+        original_assets = float(property_obj.original_assets) + float(num) * float(info)
         Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
         return restful.ok()
 
 
-class WithDraw(View):
+class WithDraw(generics.CreateAPIView):
     """
     提币
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
         id = request.POST.get('pk')
@@ -267,22 +272,24 @@ class WithDraw(View):
             elif str(platform) == 'HUOBI':
                 pass
         except:
+            print('未获取到当前价')
             last = 0
         if currency:
             # 提币折合成usdt
             property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
-            original_assets = float(property_obj.original_assets) - float(num) * float(last)
-            Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
+            withdraw_record = float(property_obj.withdraw_record) + float(num) * float(last)
+            Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(withdraw_record=withdraw_record)
             return restful.ok()
 
 
-class ConfigCurrency(View):
+class ConfigCurrency(generics.CreateAPIView):
     """
     币种新增/配置
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
-        currency_list = request.POST.getlist('currency[]')
+        currency_list = request.POST.get('currency')
         user_id = request.session.get("user_id")
         accounts = Account.objects.filter(users=user_id)
         for account in accounts:
@@ -295,19 +302,37 @@ class ConfigCurrency(View):
                     if not list(property_obj):
                         # 保存币种信息
                         LastdayAssets.objects.create(currency=currency, account=account)
-                        Property.objects.create(currency=currency, account=account, currency_status=1)
+                        Property.objects.create(currency=currency, account=account, currency_status=0)
                 else:
                     return restful.params_error(message='请选择账户币种')
+        # 返回数据为json格式
+        data = Property.objects.values("currency").distinct()
+        return restful.result(data=list(data))
 
-        return restful.ok(message='success')
+
+class SelectCurrency(generics.CreateAPIView):
+    """
+    勾选的币种
+    """
+    serializer_class = AccountSerializer
+
+    def post(self, request):
+        currency_list = request.POST.getlist('currency')
+        Property.objects.values("currency").update(currency_status='0')
+        LastdayAssets.objects.values("currency").update(currency_status='0')
+        for cur in currency_list:
+            Property.objects.filter(currency=cur).update(currency_status='1')
+            LastdayAssets.objects.filter(currency=cur).update(currency_status='1')
+        return restful.ok()
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 创建机器人
-class createRobot(View):
+class CreateRobot(generics.CreateAPIView):
     """
     获取配置策略的参数
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
         form = RobotFrom(request.POST)
@@ -346,10 +371,11 @@ def get_account_info(currency, market, id):
     return user_obj, service_obj, market_obj
 
 
-class GetAccountInfo(View):
+class GetAccountInfo(generics.CreateAPIView):
     """
     展示交易对可用额度/当前价,计算默认值
     """
+    serializer_class = AccountSerializer
 
     def data_format(self, data):
         data = str(round(float(data), 2))
@@ -380,7 +406,7 @@ class GetAccountInfo(View):
                 max += float(i[2])
                 min += float(i[3])
         context = {
-            #账户起始交易币种总资产
+            # 账户起始交易币种总资产
             'total_currency': self.data_format(info[currency.upper()].get('total')) + ' ' + currency,
             # 账户起始交易市场币种总资产
             'total_market': self.data_format(info[market.upper()].get('total')) + ' ' + market,
@@ -389,22 +415,22 @@ class GetAccountInfo(View):
             # 交易市场可用
             'market': self.data_format(info[market.upper()].get('balance')) + ' ' + market,
             # 当前价
-            'last': self.data_format(info1.get('last'))+ '' + market,
+            'last': self.data_format(info1.get('last')) + '' + market,
             # 阻力位
             'resistance': round(float(max / int(info2['limit'])), 2),
             # 支撑位
             'support_level': round(float(min / int(info2['limit'])), 2),
-            # 用户信息
-            'users': serialize("json", user_obj.order_by("-id")),
+
         }
         print(context)
         return restful.result(data=context)
 
 
-class RobotProtection(View):
+class RobotProtection(generics.CreateAPIView):
     """
     机器人保护
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
         id = request.POST.get('robot_id')
@@ -416,10 +442,11 @@ class RobotProtection(View):
         return restful.ok()
 
 
-class StartRobot(View):
+class StartRobot(generics.CreateAPIView):
     """
     管理机器人
     """
+    serializer_class = AccountSerializer
     order_list = ""
 
     def post(self, request):
@@ -470,10 +497,11 @@ class StartRobot(View):
         return restful.ok()
 
 
-class ShowTradeDetail(View):
+class ShowTradeDetail(generics.CreateAPIView):
     """
     展示机器人交易详情
     """
+    serializer_class = AccountSerializer
 
     def data_format(self, data):
         data = str(round(float(data), 2))
@@ -508,7 +536,6 @@ class ShowTradeDetail(View):
         return dict(sells), dict(buys)
 
     def post(self, request):
-        page = int(request.GET.get('p', 1))
         # 获取机器人id
         id = request.POST.get('robot_id')
         robot_obj = Robot.objects.get(id=id)
@@ -518,11 +545,11 @@ class ShowTradeDetail(View):
         try:
             user_obj, service_obj, market_obj = get_account_info(currency, market, robot_obj.trading_account_id)
             info = service_obj.get_balance()
-            print("交易详情"+info)
+            # print("交易详情"+info)
             info = info.get('funds')
             info1 = market_obj.get_ticker()
             info1 = info1.get('ticker')
-        except:
+        except Exception as e:
             return restful.params_error(message='币种错误，请核对！')
         property_obj = Property.objects.get(Q(account_id=robot_obj.trading_account) & Q(currency=currency))
         closed_order = OrderInfo.objects.filter(robot=id).order_by("-id")
@@ -530,7 +557,7 @@ class ShowTradeDetail(View):
 
         # 获取挂单信息
         order_info = dict()
-        # print('11111', StartRobot.order_list)
+        running_time = 0
         for item in StartRobot.order_list:
             try:
                 # 获取机器人对应的线程对象
@@ -578,14 +605,15 @@ class ShowTradeDetail(View):
         }
 
         # print(context)
-        print('/-' * 30, len(sell), len(buy))
+        # print('/-' * 30, len(sell), len(buy))
         return restful.result(data=context)
 
 
-class ShowConfigInfo(View):
+class ShowConfigInfo(generics.CreateAPIView):
     """
     展示机器人配置信息
     """
+    serializer_class = AccountSerializer
 
     def data_format(self, data):
         data = str(round(float(data), 2))
@@ -598,7 +626,6 @@ class ShowConfigInfo(View):
         # data = serialize("json", Robot.objects.filter(id=id))
         account = Robot.objects.get(id=id)
         serialize = RobotSerializer(account)
-        print(serialize.data)
         user_obj, service_obj, market_obj = get_account_info(robot_obj.currency, robot_obj.market,
                                                              robot_obj.trading_account.id)
         try:
@@ -621,15 +648,15 @@ class ShowConfigInfo(View):
         return restful.result(data=context)
 
 
-class ShowConfig(View):
+class ShowConfig(generics.CreateAPIView):
     """
     修改机器人配置信息
     """
+    serializer_class = AccountSerializer
 
     def post(self, request):
         # 获取机器人id
         id = request.POST.get('robot_id')
-        print(id)
         # 获取挂单频率
         orders_frequency = request.POST.get('orders_frequency')
         # 获取挂单最小数量
@@ -650,15 +677,18 @@ class ShowConfig(View):
         )
         return restful.ok()
 
-"""
-序列化预警账户
-"""
-class WraingUsers(View):
-    def get(self,request):
+
+class WarningUsers(generics.CreateAPIView):
+    """
+    序列化预警账户
+    """
+    serializer_class = AccountSerializer
+
+    def get(self, request):
         users = UserInfo.objects.filter(status=1)
         print(users)
         # data = serialize('json', users)
-        serialize = UserSerializer(users,many=True)
+        serialize = UserSerializer(users, many=True)
 
         return restful.result(data=serialize.data)
 
@@ -666,21 +696,22 @@ class WraingUsers(View):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-class RobotList(View):
+class RobotList(generics.CreateAPIView):
     """
     机器人管理列表页面
     """
+    serializer_class = AccountSerializer
 
     def get(self, request):
         page = int(request.GET.get('p', 1))
         curry = request.GET.get('deal-curry')  # 拿到下拉框交易币种值
-        print("currency",curry)
+        print("currency", curry)
         # currys = Property.objects.filter(pk=curry).only('currency')
         marke_id = request.GET.get('deal_market')  # 拿到下拉框交易市场值
-        print("market",marke_id)
+        print("market", marke_id)
         # market = Market.objects.filter(pk=market_id).get('name')
         status = request.GET.get('deal_status')  # 拿到交易状态
-        print("status",status)
+        print("status", status)
 
         robots = Robot.objects.all()
         if curry:
@@ -693,8 +724,6 @@ class RobotList(View):
         page_obj = paginator.page(page)
         context_data = get_pagination_data(paginator, page_obj)
         robot_id = ''
-        # total_money = Robot.objects.get(id=robot_id).total_money
-        # current_price = ''
         context = {
             'robots': page_obj.object_list,
             'page_obj': page_obj,
@@ -714,20 +743,22 @@ class RobotList(View):
         return render(request, 'management/gridding.html', context=context)
 
 
-"""
-机器人收益计算更新到数据库
-"""
-class RobotYield(View):
-
+class RobotYield(generics.CreateAPIView):
+    """
+    机器人收益计算更新到数据库
+    """
+    serializer_class = AccountSerializer
     robot_yield = {}
-    #用作对数据做精度处理
+
+    # 用作对数据做精度处理
     def data_format(self, data):
         data = str(round(float(data), 2))
         return data
 
-    def post(self,request):
-        user_id = request.session.get("user_id")   #获取用户id
+    def post(self, request):
+        user_id = request.session.get("user_id")   # 获取用户id
         accounts = Account.objects.filter(users=user_id)
+        # accounts = Account.objects.filter(users=1)
         for account in accounts:
             exx_service = ExxService(account.secretkey, account.accesskey)
             robots = Robot.objects.filter(trading_account_id=account.id)
@@ -736,10 +767,10 @@ class RobotYield(View):
                 print("机器人id:"+str(robot_id))
                 currency = robot.currency  # 交易币种
                 market = robot.market  # 市场币种
-                total_money = re.findall('\d+\.\d\d',robot.total_money )[0]  # 总投入
-                print("总投入",total_money)
+                total_money = re.findall('\d+\.\d\d',robot.total_money)[0]  # 总投入
+                print("总投入", total_money)
                 last_price = robot.current_price  # 当时价格
-                start_time  = float(robot.running_time )    #创建时间
+                start_time = float(robot.running_time)    # 创建时间
                 try:
                     print("交易币种："+currency,"市场币种:"+market,"账户id:"+ str(account.id))
                     user_obj, service_obj, market_obj = get_account_info(currency, market, account.id)
@@ -767,17 +798,16 @@ class RobotYield(View):
                     serialize = RobotSerializer(robot_obj)   #序列化机器人数据返回客户端
                     print(serialize.data)
                     context = {
-                        'id':robot_id,
-                        'float_profit':self.data_format(float_profit) + market,
-                        'realized_profit':self.data_format(realized_profit) + market,
-                        'total_profit':self.data_format(total_profit) + market,
-                        'annual_yield':self.data_format(annual_yield)+ '%'
+                        'id': robot_id,
+                        'float_profit': self.data_format(float_profit) + market,
+                        'realized_profit': self.data_format(realized_profit) + market,
+                        'total_profit': self.data_format(total_profit) + market,
+                        'annual_yield': self.data_format(annual_yield) + '%'
                     }
                     self.robot_yield.update(context)
                 except robot.DoesNotExist:
                     robot_obj = None
         return restful.result(data=serialize.data)
-
 
 
 # 分页

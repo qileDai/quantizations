@@ -37,23 +37,27 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'apps.exx',
     'apps.rbac',
     'apps.deal',
     'django_crontab',       # 定时任务
     'rest_framework',
+    'rest_framework_swagger',
 
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # 跨域
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.rbac.middleware.rbac.RbacMiddleware'  # 加入自定义的中间件到最后
+    'apps.rbac.middleware.rbac.RbacMiddleware',  # 加入自定义的中间件到最后
+
 ]
 
 ROOT_URLCONF = 'exxTrading.urls'
@@ -157,14 +161,63 @@ SAFE_URL = [
     '^/rbac/',
     r'/exx/',
     '/deal/',
+    '/docs/',
 ]
 
 # 用户是否登陆
 LOGIN = 'is_login'
 
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.AutoSchema'
+}
+
 # 分钟(0-59) 小时(0-23) 每个月的哪一天(1-31) 月份(1-12) 周几(0-6) shell脚本或者命令
 CRONJOBS = [
-    ('*/30 * * * *', 'app02.cron.exx_scheduled_job', '>> /run.log'),
-    ('*/30 * * * *', 'app02.cron.huobi_scheduled_job', '>> /run.log')
+    ('*/30 * * * *', 'apps.deal.cron.exx_scheduled_job', '>>../deal/crontab/run.log'),
+    ('*/30 * * * *', 'apps.deal.cron.huobi_scheduled_job', '>>../deal/crontab/run.log')
 ]
+
+# 跨域
+CORS_ORIGIN_ALLOW_ALL = True  # 允许所有的请求，或者设置CORS_ORIGIN_WHITELIST，二选一
+CORS_ALLOW_HEADERS = ('*')  # 允许所有的请求头
+CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie，前端需要携带cookies访问后端时,需要设置withCredentials: true
+
+# CORS_ALLOW_CREDENTIALS = True
+#
+# # CORS_ORIGIN_ALLOW_ALL = True
+#
+# CORS_ORIGIN_WHITELIST = (
+#     'http://127.0.0.1:8080',
+#     'http://127.0.0.1:8000',
+#     'http://localhost:8080',
+# )
+#
+# CORS_ALLOW_METHODS = (
+#     'DELETE',
+#     'GET',
+#     'OPTIONS',
+#     'PATCH',
+#     'POST',
+#     'PUT',
+#     'VIEW',
+# )
+#
+# CORS_ALLOW_HEADERS = (
+#     'XMLHttpRequest',
+#     'X_FILENAME',
+#     'accept-encoding',
+#     'authorization',
+#     'content-type',
+#     'dnt',
+#     'origin',
+#     'user-agent',
+#     'x-csrftoken',
+#     'x-requested-with',
+#     'Pragma',
+# )
+
+
+
+
+
 

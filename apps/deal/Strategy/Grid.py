@@ -434,7 +434,7 @@ class GridStrategy(Thread):
                             # logging.exception("GET_ORDER_INFO...", e)
                             print('traceback.print_exc():', traceback.print_exc())
                             print("获取委托单失败...", e)
-                        time.sleep(0.1)
+                        time.sleep(0.2)
             if not self.Flag:
                 for i in range(3):
                     self.cancel_orders()
@@ -538,23 +538,26 @@ class GridStrategy(Thread):
                         depth_data = self.market_api.get_depth()
                         print('+'*30, depth_data)
                         sell_1_price, sell_1_amount = depth_data.get("bids")[1]
+                        self.server_api.order(sell_1_amount, self.currency_type, sell_1_price, "sell")
                     except:
                         print("未获取到买一价")
-                    self.server_api.order(sell_1_amount, self.currency_type, sell_1_price, "sell")
                 else:
                     # 一段时间内未成交，撤单
                     self.cancel_orders()
 
             # 当前价低于预警价
             elif float(current_price) <= float(self.robot_obj.warning_price):
-                print('---------预警')
+                # 实时查询数据库中的warning_time
+                sql = "select warning_time from deal_robot where id = %s"
+                warning_time = self.connect_db(sql, (self.robot_obj.id,))
                 # 获取机器人的预警账户
                 warning_account = self.robot_obj.warning_account
                 acc_list = list()
                 acc_list.append(warning_account)
                 warn = WarningAccount(acc_list, '网格', self.currency_type)
                 warn.send_msg()
-                time.sleep(float(self.robot_obj.warning_time)*60)
+                print('---------预警', warning_time)
+                time.sleep(float(warning_time[0])*60)
             else:
                 break
 

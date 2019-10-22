@@ -16,6 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from apps.rbac import views
+from rest_framework.schemas import get_schema_view
+from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPICodec
+schema_view = get_schema_view(title='接口文档', renderer_classes=[SwaggerUIRenderer, OpenAPICodec])
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,4 +26,6 @@ urlpatterns = [
     path('exx/', include('apps.exx.urls')),
     path('login/', views.login),
     path('deal/', include('apps.deal.urls', namespace='deal')),
+    path('docs/', schema_view, name='docs')
+
 ]
