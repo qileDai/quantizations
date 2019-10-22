@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django_crontab',       # 定时任务
     'rest_framework',
     'rest_framework_swagger',
+    'corsheaders',
 
 ]
 
@@ -55,7 +56,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.rbac.middleware.rbac.RbacMiddleware',  # 加入自定义的中间件到最后
-    'apps.middleware.crossdomainxhr.XsSharing',  # 解决跨域
+    'corsheaders.middleware.CorsMiddleware',    # 跨域
+    'django.middleware.common.CommonMiddleware',    # 跨域
 ]
 
 ROOT_URLCONF = 'exxTrading.urls'
@@ -174,4 +176,35 @@ CRONJOBS = [
     ('*/30 * * * *', 'apps.deal.cron.exx_scheduled_job', '>>../deal/crontab/run.log'),
     ('*/30 * * * *', 'apps.deal.cron.huobi_scheduled_job', '>>../deal/crontab/run.log')
 ]
+
+# 跨域
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = ()
+
+CORS_ALLOW_METHODS = (
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+    'VIEW',
+)
+
+CORS_ALLOW_HEADERS = (
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+)
+
+
+
+
 
