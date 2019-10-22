@@ -163,7 +163,7 @@ class DeleteAccount(generics.CreateAPIView):
     def post(self, request):
         pk = request.POST.get('id')
         try:
-            Account.objects.filter(pk=pk).delete()
+            Account.objects.filter(id=pk).delete()
             return restful.ok()
         except:
             return restful.params_error(message="该账户不存在")
@@ -490,15 +490,17 @@ class StartRobot(generics.CreateAPIView):
         # 多个和一个
         ids = request.POST.get('robot_id')
         # Flag为1启动，为0停止
-        Flag = int(request.POST.get('flag'))
+        Flag = request.POST.get('flag')
+        if Flag is None:
+            return restful.params_error(message='参数为空')
         if ids:
             robots = Robot.objects.filter(id=ids)
         elif Flag == 1:
             robots = Robot.objects.filter(Q(status=0) & Q(protection=1))
         elif Flag == 0:
             robots = Robot.objects.filter(Q(status=1) & Q(protection=1))
-        elif Flag is None:
-            return restful.params_error(message='参数为空')
+
+        Flag = int(Flag)
         # 调用对应策略
         for robot_obj in robots:
             if robot_obj.trading_strategy == '网格交易V1.0' and Flag == 1:
@@ -800,6 +802,7 @@ class RobotYield(generics.CreateAPIView):
         # user_id = request.session.get("user_id")
         user_id = 1
         accounts = Account.objects.filter(users=user_id)
+        print(accounts)
         for account in accounts:
             exx_service = ExxService(account.secretkey, account.accesskey)
             robots = Robot.objects.filter(trading_account_id=account.id)
