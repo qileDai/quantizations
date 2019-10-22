@@ -315,8 +315,8 @@ def edit_permission(request):
 """
 返回用户信息
 """
-class UserInfo(View):
-    def post(self,request):
+class UserInfos(View):
+    def post(self, request):
         user_id = request.POST.get("user_id")
         user = UserInfo.objects.get(pk=user_id)
         serialize = UserSerializer(user)

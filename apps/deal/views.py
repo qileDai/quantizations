@@ -24,7 +24,7 @@ from utils.mixin import LoginRequireMixin
 from rest_framework import generics
 from django.core.serializers import serialize
 from apps.deal.serializers import AccountSerializer, RobotSerializer, OrderInfoSerializer, LastdayAssetsSerializer, PropertySerializer
-from apps.rbac.serializers import UserInfoSerializer
+from apps.rbac.serializers import UserSerializer
 
 # Create your views here.
 
@@ -696,7 +696,7 @@ class WarningUsers(generics.CreateAPIView):
         users = UserInfo.objects.filter(status=1)
         print(users)
         # data = serialize('json', users)
-        serialize = UserInfoSerializer(users, many=True)
+        serialize = UserSerializer(users, many=True)
 
         return restful.result(data=serialize.data)
 
