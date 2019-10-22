@@ -69,12 +69,15 @@ class GetCurrencies(generics.CreateAPIView):
     def get(self, request):
         # 获取用户所有币种
         user_id = request.session.get("user_id")
-        # user_id = 1
-        currency_list = Property.objects.filter(account__users__id=user_id).values("currency",).distinct()
-        # currency_list = Property.objects.all()
-        currency_list = list(currency_list)
-        data = json.dumps(currency_list)
-        return restful.result(data=data)
+        if user_id:
+            # user_id = 1
+            currency_list = Property.objects.filter(account__users__id=user_id).values("currency",).distinct()
+            # currency_list = Property.objects.all()
+            currency_list = list(currency_list)
+            data = json.dumps(currency_list)
+            return restful.result(data=data)
+        else:
+            return restful.params_error(message='参数为空')
 
 
 class AddAccount(generics.CreateAPIView):
@@ -108,8 +111,8 @@ class AddAccount(generics.CreateAPIView):
 
 
 def accountinfo(request):
-    accout_id = request.POST.get('pk')
-    account = Account.objects.get(pk=accout_id)
+    accout_id = request.POST.get('id')
+    account = Account.objects.get(id=accout_id)
     serialize = AccountSerializer(account)
     print(serialize.data)
     return restful.result(data=serialize.data)
@@ -126,9 +129,12 @@ class EditAccount(generics.ListCreateAPIView):
 
     def get(self, request):
         account_id = request.GET.get('account_id')
-        account = Account.objects.get(pk=account_id)
-        account = AccountSerializer(account)
-        return restful.result(data=account.data)
+        if account_id:
+            account = Account.objects.get(id=account_id)
+            account = AccountSerializer(account)
+            return restful.result(data=account.data)
+        else:
+            return restful.params_error(message='参数为空')
 
     def post(self, request):
         form = EditAccountFrom(request.POST)
@@ -137,7 +143,7 @@ class EditAccount(generics.ListCreateAPIView):
             accesskey = form.cleaned_data.get('accesskey')
             secretkey = form.cleaned_data.get('secretkey')
             platform = form.cleaned_data.get('platform')
-            pk = form.cleaned_data.get('pk')
+            pk = form.cleaned_data.get('id')
             # user_id = request.session.get("user_id")
             user_id = 1
             print(title, accesskey, secretkey, platform, pk, user_id)
@@ -155,7 +161,7 @@ class DeleteAccount(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def post(self, request):
-        pk = request.POST.get('pk')
+        pk = request.POST.get('id')
         try:
             Account.objects.filter(pk=pk).delete()
             return restful.ok()
@@ -170,15 +176,19 @@ class ShowAssert(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def post(self, request):
-        id = request.POST.get('pk')
-        # 获取账户信息
-        account_obj = Account.objects.get(id=id)
-        # 账户对应的平台
-        platform = account_obj.platform
-        # 创建对象
-        con = GetAssets(id, account_obj, platform)
-        data = con.showassets()
-        return restful.result(data=data)
+        id = request.POST.get('id')
+        print(id)
+        if id:
+            # 获取账户信息
+            account_obj = Account.objects.get(id=id)
+            # 账户对应的平台
+            platform = account_obj.platform
+            # 创建对象
+            con = GetAssets(id, account_obj, platform)
+            data = con.showassets()
+            return restful.result(data=data)
+        else:
+            return restful.params_error(message='参数为空')
 
 
 class ShowCollectAsset(generics.CreateAPIView):
@@ -235,7 +245,7 @@ class ChargeAccount(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def post(self, request):
-        id = request.POST.get('pk')
+        id = request.POST.get('id')
         account_obj = Account.objects.get(id=id)  # 获取账户信息
         platform = account_obj.platform  # 账户对应的平台
         currency = request.POST.get('currency')
@@ -264,7 +274,7 @@ class WithDraw(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def post(self, request):
-        id = request.POST.get('pk')
+        id = request.POST.get('id')
         account_obj = Account.objects.get(id=id)  # 获取账户信息
         platform = account_obj.platform  # 账户对应的平台
         currency = request.POST.get('currency')
