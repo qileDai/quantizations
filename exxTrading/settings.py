@@ -37,27 +37,27 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'apps.exx',
     'apps.rbac',
     'apps.deal',
     'django_crontab',       # 定时任务
     'rest_framework',
     'rest_framework_swagger',
-    'corsheaders',
 
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # 跨域
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.rbac.middleware.rbac.RbacMiddleware',  # 加入自定义的中间件到最后
-    'corsheaders.middleware.CorsMiddleware',    # 跨域
-    'django.middleware.common.CommonMiddleware',    # 跨域
+
 ]
 
 ROOT_URLCONF = 'exxTrading.urls'
