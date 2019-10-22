@@ -51,7 +51,7 @@ def login(request):
         request.session['user_id'] = user_obj.id
         # request.session.set_expiry(600)
         init_permission(request, user_obj)  # 调用权限初始化
-        return HttpResponseRedirect("/rbac/index/")
+        return restful.result(message="成功")
 
 
 @is_login
