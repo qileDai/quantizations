@@ -82,7 +82,6 @@ WSGI_APPLICATION = 'exxTrading.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 import pymysql
 pymysql.install_as_MySQLdb()
 DATABASES = {
@@ -179,8 +178,10 @@ CRONJOBS = [
 
 # 跨域
 CORS_ALLOW_CREDENTIALS = True
+
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = ()
+
+CORS_ORIGIN_WHITELIST = ('*')
 
 CORS_ALLOW_METHODS = (
     'DELETE',
@@ -193,7 +194,8 @@ CORS_ALLOW_METHODS = (
 )
 
 CORS_ALLOW_HEADERS = (
-    'accept',
+    'XMLHttpRequest',
+    'X_FILENAME',
     'accept-encoding',
     'authorization',
     'content-type',
@@ -202,7 +204,9 @@ CORS_ALLOW_HEADERS = (
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'Pragma',
 )
+
 
 
 
