@@ -11,7 +11,7 @@ from django.conf import settings
 from .service.init_permission import init_permission
 from utils.mixin import LoginRequireMixin
 from .models import NewMenu
-from .serializers import PermissonSerializer, MenuSerializer, UserInfoSerializer, RoleSerializer, NewmenuSerializer
+from .serializers import PermissonSerializer, MenuSerializer, UserSerializer, RoleSerializer, NewmenuSerializer
 
 
 # Create your views here.
@@ -308,21 +308,19 @@ def add_permission(request):
 
 def edit_permission(request):
     permission_id = request.POST.get('permission_id')
-    permissions = Permission.objects.get(pk=permission_id)
-    serialize = PermissonSerializer(permissions)
+    permissionss = Permission.objects.get(pk=permission_id)
+    serialize = PermissonSerializer(permissionss)
     return restful.result(data=serialize.data)
 
-
-class UserInfos(View):
-    """
-    返回用户信息
-    """
-    def post(self, request):
+"""
+返回用户信息
+"""
+class UserInfo(View):
+    def post(self,request):
         user_id = request.POST.get("user_id")
         user = UserInfo.objects.get(pk=user_id)
-        serialize = UserInfoSerializer(user)
+        serialize = UserSerializer(user)
         return restful.result(data=serialize.data)
-
 
 """
 返回角色信息
@@ -355,7 +353,6 @@ def edit_Menu(request):
     menu = Menu.objects.get(pk=menu_id)
     serialize = MenuSerializer(menu)
     return restful.result(serialize.data)
-
 
 class EditUsers(View):
     def post(self,request):

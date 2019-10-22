@@ -27,6 +27,7 @@ class PermissonSerializer(serializers.ModelSerializer):
 class NewmenuSerializer(serializers.ModelSerializer):
 
     class Meta:
+        model = NewMenu
         fields = "__all__"
 
 
