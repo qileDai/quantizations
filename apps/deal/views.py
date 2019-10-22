@@ -7,7 +7,6 @@ import json
 from urllib import parse
 from django.db.models import Q
 from django.shortcuts import render, redirect, HttpResponse
-from django.http import JsonResponse
 from .models import Account, Property, LastdayAssets, Market, Robot, TradingPlatform, OrderInfo
 from .forms import AccountModelForm, RobotFrom, EditAccountFrom
 from apps.rbac.models import UserInfo
@@ -39,8 +38,8 @@ class AccountList(generics.ListAPIView, LoginRequireMixin):
     def get(self, request):
         pageNum = int(request.GET.get('pageIndex', 1))
         pagesize = request.GET.get('pageSize')
-        user_id = request.session.get("user_id")
-        # user_id = 1
+        # user_id = request.session.get("user_id")
+        user_id = 1
         if not user_id:
             return render(request, "cms/login.html", {'error': '账户失效，请重新登陆！'})
         # 获取账户信息
@@ -90,7 +89,8 @@ class AddAccount(generics.CreateAPIView):
         if model_form.is_valid():
             # save()返回一个还未保存至数据库的对象,用这个对象添加一些额外的数据，然后在用save()保存到数据库
             obj = model_form.save(commit=False)
-            user_id = request.session.get("user_id")
+            # user_id = request.session.get("user_id")
+            user_id = 1
             user_obj = UserInfo.objects.get(id=user_id)
             # 添加数据需为模型类对象
             obj.users = user_obj
@@ -138,7 +138,8 @@ class EditAccount(generics.ListCreateAPIView):
             secretkey = form.cleaned_data.get('secretkey')
             platform = form.cleaned_data.get('platform')
             pk = form.cleaned_data.get('pk')
-            user_id = request.session.get("user_id")
+            # user_id = request.session.get("user_id")
+            user_id = 1
             print(title, accesskey, secretkey, platform, pk, user_id)
             Account.objects.filter(pk=pk).update(title=title, accesskey=accesskey, secretkey=secretkey,
                                                  platform=platform, users=user_id)
@@ -193,7 +194,8 @@ class ShowCollectAsset(generics.CreateAPIView):
         if account_list:
             accounts = account_list
         else:
-            user_id = request.session.get("user_id")
+            # user_id = request.session.get("user_id")
+            user_id = 1
             account_lists = Account.objects.filter(users=user_id)
             for account in account_lists:
                 accounts = list()
@@ -295,7 +297,8 @@ class ConfigCurrency(generics.CreateAPIView):
 
     def post(self, request):
         currency_list = request.POST.get('currency')
-        user_id = request.session.get("user_id")
+        # user_id = request.session.get("user_id")
+        user_id = 1
         accounts = Account.objects.filter(users=user_id)
         for account in accounts:
             print(account.id, '-' * 30)
@@ -805,9 +808,10 @@ class RobotYield(generics.CreateAPIView):
         return data
 
     def post(self, request):
-        user_id = request.session.get("user_id")   # 获取用户id
+        # 获取用户id
+        # user_id = request.session.get("user_id")
+        user_id = 1
         accounts = Account.objects.filter(users=user_id)
-        # accounts = Account.objects.filter(users=1)
         for account in accounts:
             exx_service = ExxService(account.secretkey, account.accesskey)
             robots = Robot.objects.filter(trading_account_id=account.id)
