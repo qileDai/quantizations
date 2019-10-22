@@ -4,12 +4,16 @@ from django.views.generic import View
 from utils import restful
 from django.core.paginator import Paginator
 from urllib import parse
-from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, PermissionModelForm, MenuModelForm
+from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, PermissionModelForm, MenuModelForm, \
+    NewRoleForm,EditUserForm
 import hashlib
 from django.conf import settings
 from .service.init_permission import init_permission
 from utils.mixin import LoginRequireMixin
-from .serializers import PermissonSerializer,MenuSerializer,UserSerializer,RoleSerializer
+from .models import NewMenu
+from .serializers import PermissonSerializer, MenuSerializer, UserSerializer, RoleSerializer, NewmenuSerializer
+
+
 # Create your views here.
 
 
@@ -21,6 +25,7 @@ def is_login(func):
             return res
         else:
             return redirect(settings.LOGIN_URL)
+
     return wrapper
 
 
@@ -35,16 +40,16 @@ def login(request):
         password = hl.hexdigest()
         user_obj = UserInfo.objects.filter(username=username, password=password).first()
         if not user_obj:
-            return render(request, "cms/login.html", {'error': '用户名或密码错误！'})
+            return restful.params_error(message="用户名或密码错误！")
         elif user_obj.status == 0:
-            return render(request, "cms/login.html", {'error': '用户已被禁用，请联系管理员！'})
-        else:                                   # 普通用户
+            return restful.params_error(message="用户已被禁用，请联系管理员！")
+        else:  # 普通用户
             request.session.clear()
             request.session['is_login'] = True
             request.session['user_id'] = user_obj.id
             # request.session.set_expiry(600)
             init_permission(request, user_obj)  # 调用权限初始化
-            return redirect('/rbac/index/')
+            return restful.ok(message="成功")
 
 
 @is_login
@@ -57,7 +62,7 @@ def index(request):
 
 def logout(request):
     request.session.clear()
-    return redirect('../../login/')
+    return restful.ok(message="成功")
 
 
 @is_login
@@ -107,7 +112,7 @@ def role(request):
 def users_list(request):
     users = UserInfo.objects.all()
     context = {
-      'users': users
+        'users': users
     }
     return render(request, 'cms/account.html', context=context)
 
@@ -127,9 +132,10 @@ def add_users(request):
     form = UserInfoAddModelForm(request.POST)
     if form.is_valid():
         form.save()
-        return restful.ok()
+        return restful.ok(message="成功")
     else:
         return restful.params_error(message=form.errors)
+
 
 def add_menu(request):
     form = MenuModelForm(request.POST)
@@ -142,11 +148,11 @@ def add_menu(request):
 
 @is_login
 def delete_users(request):
-    pk = request.POST.get('pk')
+    pk = request.POST.get('user_id')
     # print(pk)
     try:
         UserInfo.objects.filter(pk=pk).delete()
-        return restful.ok()
+        return restful.ok(message="成功")
     except:
         return restful.params_error(message="该用户不存在")
 
@@ -277,10 +283,10 @@ def delete_menu(request):
 
 @is_login
 def delete_roles(request):
-    pk = request.POST.get('pk')
+    pk = request.POST.get('role_id')
     try:
         Role.objects.filter(pk=pk).delete()
-        return restful.ok()
+        return restful.ok(message="成功")
     except:
         return restful.params_error(message='该角色不存在')
 
@@ -288,7 +294,7 @@ def delete_roles(request):
 @is_login
 def add_permission(request):
     form = PermissionModelForm(request.POST)
-    print('*'*20)
+    print('*' * 20)
     if form.is_valid():
         title = form.cleaned_data.get('title')
         url = form.cleaned_data.get('url')
@@ -301,24 +307,69 @@ def add_permission(request):
 
 
 def edit_permission(request):
-        permission_id = request.POST.get('permission_id')
-        permissionss = Permission.objects.get(pk=permission_id)
-        serialize = PermissonSerializer(permissionss)
+    permission_id = request.POST.get('permission_id')
+    permissionss = Permission.objects.get(pk=permission_id)
+    serialize = PermissonSerializer(permissionss)
+    return restful.result(data=serialize.data)
+
+"""
+返回用户信息
+"""
+class UserInfo(View):
+    def post(self,request):
+        user_id = request.POST.get("user_id")
+        user = UserInfo.objects.get(pk=user_id)
+        serialize = UserSerializer(user)
         return restful.result(data=serialize.data)
 
-
-def edit_Role(request):
+"""
+返回角色信息
+"""
+def role_info(request):
     role_id = request.POST.get('role_id')
     role = Role.objects.get(pk=role_id)
     serialize = RoleSerializer(role)
     return restful.result(data=serialize.data)
 
+
+"""
+角色修改
+"""
+class EditRole(View):
+    def post(self,request):
+        role_id = request.POST.get("role_id")
+        role_name = request.POST.get("role_name")
+        if role_name:
+            Role.objects.filter(pk=role_id).update(rolename=role_name)
+        else:
+            return restful.params_error(message="角色名称不能为空")
+        return restful.ok(message="角色修改成功")
+
+
+
+
 def edit_Menu(request):
-    menu_id = request.POST.get('menu_id')
+    menu_id = request.POST.get(2)
     menu = Menu.objects.get(pk=menu_id)
     serialize = MenuSerializer(menu)
     return restful.result(serialize.data)
 
+class EditUsers(View):
+    def post(self,request):
+        form = EditUserForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            phone_number = form.cleaned_data.get("phone_number")
+            password = form.cleaned_data.get("password")
+            email = form.cleaned_data.get("email")
+            status = form.cleaned_data.get("status")
+            roles = form.cleaned_data.get("status")
+            pk = form.cleaned_data.get("id")
+            UserInfo.objects.filter(pk=pk).update(username=username,phone_number=phone_number,password=password
+                                                  ,email=email,status=status,roles=roles)
+            return restful.ok(message="成功")
+        else:
+            return restful.params_error(form.get_errors())
 
 
 
@@ -329,6 +380,88 @@ def delete_permission(request):
         return restful.ok()
     except:
         return restful.params_error(message="该权限不存在")
+
+"""
+修改账户密码
+"""
+class UpdatePassword(View):
+    def post(self, request):
+        try:
+            user_id = request.POST.get("user_id")
+            old_password = request.POST.get("old_password")
+            if old_password:
+                user_obj = UserInfo.objects.get(pk = user_id)
+                password1 = user_obj.password
+                if password1 != old_password:
+                    return restful.params_error(message="原始密码输入错误")
+            new_password = request.POST.get('password')
+            # password2 = request.POST.get("")
+            UserInfo.objects.filter(pk=user_id).update(password=new_password)
+        except Exception as e:
+            print(e)
+        return restful.ok(message="账户密码修改成功")
+
+"""
+获取用户权限点跟一级菜单目录
+"""
+class UserMenuPermission(View):
+    def get(self, request):
+        user_id = request.session.get("user_id")  # 获取用户id
+        user = UserInfo.objects.get(pk=user_id)
+        menu_obj = NewMenu.objects.filter(parentid=0)
+        serialize = NewmenuSerializer(menu_obj)
+        roleids = user.roles
+        permission_list = []
+        for role_id in roleids:
+            role = Role.objects.get(pk=1)
+            for menu in role.menus:
+                menu_obj = NewMenu.objects.get(pk=menu)
+                # serialize = NewmenuSerializer(menu_obj)
+                permission = menu_obj.perms
+                permission_list.append(permission)
+
+        context = {
+            'menu_list': serialize.data,
+            'permissions': permission_list
+        }
+        print(context)
+        return restful.result(data=context)
+
+class GetUserPermisssion(View):
+    def get(self, request):
+        user_id = request.session.get("user_id")  # 获取用户id
+        user = UserInfo.objects.get(pk=user_id)
+
+"""
+分配权限
+当角色没有权限点时添加权限
+当角色有权限点时修改权限
+"""
+class AllotPermissson(View):
+    def post(self,request):
+        try:
+            menu_list = request.POST.get("menu_list")  #获取菜单id list
+            role_id = request.POST.get("role_id")     #获取角色id
+            role = Role.objects.get(pk=role_id)
+            obj = role.menus.all()
+            if obj:
+                role.menus.set(menu_list)
+            else:
+                for menus in menu_list:
+                    role.menus.add(menus)
+        except Exception as e:
+            return restful.params_error("分配权限失败",data=e)
+
+        return restful.ok(message="成功")
+
+
+
+def menu_permission(request):
+    menus = NewMenu.objects.exclude(parentid=0).order_by("orderNum")
+    print(menus)
+    serializer = NewmenuSerializer(menus, many=True)
+    print(serializer.data)
+    return restful.result(data=serializer.data)
 
 
 def get_pagination_data(paginator, page_obj, around_count=2):
@@ -355,8 +488,11 @@ def get_pagination_data(paginator, page_obj, around_count=2):
         'left_pages': left_pages,
         # right_pages：代表的是当前这页的右边的页的页码
         'right_pages': right_pages,
+
         'current_page': current_page,
         'left_has_more': left_has_more,
         'right_has_more': right_has_more,
         'num_pages': num_pages
     }
+
+

@@ -114,9 +114,9 @@ class Migration(migrations.Migration):
             name='platform',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='deal.TradingPlatform'),
         ),
-        migrations.AddField(
-            model_name='account',
-            name='users',
-            field=models.ForeignKey(blank=True, on_delete=django.db.models.deletion.CASCADE, to='rbac.UserInfo'),
-        ),
+        # migrations.AddField(
+        #     model_name='account',
+        #     name='users',
+        #     field=models.ForeignKey(blank=True, on_delete=django.db.models.deletion.CASCADE, to='rbac.UserInfo'),
+        # ),
     ]
