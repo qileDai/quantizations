@@ -7,7 +7,6 @@ import json
 from urllib import parse
 from django.db.models import Q
 from django.shortcuts import render, redirect, HttpResponse
-from django.http import JsonResponse
 from .models import Account, Property, LastdayAssets, Market, Robot, TradingPlatform, OrderInfo
 from .forms import AccountModelForm, RobotFrom, EditAccountFrom
 from apps.rbac.models import UserInfo
@@ -37,7 +36,7 @@ class AccountList(generics.ListAPIView, LoginRequireMixin):
     serializer_class = AccountSerializer
 
     def get(self, request):
-        page = int(request.GET.get('pageIndex', 1))
+        pageNum = int(request.GET.get('pageIndex', 1))
         pagesize = request.GET.get('pageSize')
         # user_id = request.session.get("user_id")
         user_id = 1
@@ -45,32 +44,37 @@ class AccountList(generics.ListAPIView, LoginRequireMixin):
             return render(request, "cms/login.html", {'error': '账户失效，请重新登陆！'})
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
-        # 获取用户所有币种
-        # currency_list = Property.objects.values("currency",).distinct()
-        currency_list = Property.objects.all()
         # 分页
-        paginator = Paginator(Account.objects.filter(users__id=user_id), 10)
-        page_obj = paginator.page(page)
-        context_data = get_pagination_data(paginator, page_obj)
+        paginator = Paginator(Account.objects.filter(users__id=user_id), 2)
+        page_obj = paginator.page(pageNum)
+        # print(paginator.num_pages)
+        numPerPage = len(page_obj.object_list),
+        totalCount = accounts.count(),
+        totalPageNum = paginator.num_pages
         context = {
-            # 用户信息分页列表
-            'accounts_list': page_obj.object_list,
-            'accounts': AccountSerializer(accounts, many=True).data,
-            'page_obj': serialize('json', page_obj),
-            # 'paginator': paginator,
-            'paginator': AccountSerializer(accounts, many=True).data,
-            'platforms': TradingPlatform.objects.all(),
-            # 用户所有账户币种信息
-            # 'currency_list': PropertySerializer(currency_list, many=True).data
-            'currency_list': serialize('json', currency_list, fields=('currency',))
+            'numPerPage': numPerPage,
+            'PageNum': pageNum,
+            'result': AccountSerializer(page_obj.object_list, many=True).data,
+            'totalCount': totalCount,
+            'totalPageNum': totalPageNum,
         }
-        # context = {
-        #     'numPerPage': len(page)
-        # }
-        context.update(context_data)
-        print(context)
-        # return restful.result(data=context['paginator'])
-        return render(request, 'management/tradingaccount.html', context=context)
+        # print(context)
+        return restful.result(data=context)
+
+
+class GetCurrencies(generics.CreateAPIView):
+    """
+    获取用户所有币种
+    """
+    def get(self, request):
+        # 获取用户所有币种
+        user_id = request.session.get("user_id")
+        # user_id = 1
+        currency_list = Property.objects.filter(account__users__id=user_id).values("currency",).distinct()
+        # currency_list = Property.objects.all()
+        currency_list = list(currency_list)
+        data = json.dumps(currency_list)
+        return restful.result(data=data)
 
 
 class AddAccount(generics.CreateAPIView):
@@ -85,7 +89,8 @@ class AddAccount(generics.CreateAPIView):
         if model_form.is_valid():
             # save()返回一个还未保存至数据库的对象,用这个对象添加一些额外的数据，然后在用save()保存到数据库
             obj = model_form.save(commit=False)
-            user_id = request.session.get("user_id")
+            # user_id = request.session.get("user_id")
+            user_id = 1
             user_obj = UserInfo.objects.get(id=user_id)
             # 添加数据需为模型类对象
             obj.users = user_obj
@@ -133,7 +138,8 @@ class EditAccount(generics.ListCreateAPIView):
             secretkey = form.cleaned_data.get('secretkey')
             platform = form.cleaned_data.get('platform')
             pk = form.cleaned_data.get('pk')
-            user_id = request.session.get("user_id")
+            # user_id = request.session.get("user_id")
+            user_id = 1
             print(title, accesskey, secretkey, platform, pk, user_id)
             Account.objects.filter(pk=pk).update(title=title, accesskey=accesskey, secretkey=secretkey,
                                                  platform=platform, users=user_id)
@@ -188,7 +194,8 @@ class ShowCollectAsset(generics.CreateAPIView):
         if account_list:
             accounts = account_list
         else:
-            user_id = request.session.get("user_id")
+            # user_id = request.session.get("user_id")
+            user_id = 1
             account_lists = Account.objects.filter(users=user_id)
             for account in account_lists:
                 accounts = list()
@@ -290,7 +297,8 @@ class ConfigCurrency(generics.CreateAPIView):
 
     def post(self, request):
         currency_list = request.POST.get('currency')
-        user_id = request.session.get("user_id")
+        # user_id = request.session.get("user_id")
+        user_id = 1
         accounts = Account.objects.filter(users=user_id)
         for account in accounts:
             print(account.id, '-' * 30)
@@ -696,7 +704,7 @@ class WarningUsers(generics.CreateAPIView):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-class RobotList(generics.CreateAPIView):
+class RobotList0(generics.CreateAPIView):
     """
     机器人管理列表页面
     """
@@ -704,10 +712,12 @@ class RobotList(generics.CreateAPIView):
 
     def get(self, request):
         page = int(request.GET.get('p', 1))
-        curry = request.GET.get('deal-curry')  # 拿到下拉框交易币种值
+        # 拿到下拉框交易币种值
+        curry = request.GET.get('deal-curry')
         print("currency", curry)
         # currys = Property.objects.filter(pk=curry).only('currency')
-        marke_id = request.GET.get('deal_market')  # 拿到下拉框交易市场值
+        # 拿到下拉框交易市场值
+        marke_id = request.GET.get('deal_market')
         print("market", marke_id)
         # market = Market.objects.filter(pk=market_id).get('name')
         status = request.GET.get('deal_status')  # 拿到交易状态
@@ -739,8 +749,50 @@ class RobotList(generics.CreateAPIView):
             })
         }
         context.update(context_data)
+        return restful.result(data=serialize.data)
+        # return render(request, 'management/gridding.html', context=context)
 
-        return render(request, 'management/gridding.html', context=context)
+
+class RobotList(generics.CreateAPIView):
+    """
+    机器人管理列表页面
+    """
+    serializer_class = AccountSerializer
+
+    def get(self, request):
+        pageNum = int(request.GET.get('pageIndex', 1))
+        pagesize = request.GET.get('pageSize')
+        # 拿到下拉框交易币种值
+        curry = request.GET.get('deal-curry')
+        # 拿到下拉框交易市场值
+        marke_id = request.GET.get('deal_market')
+        # 拿到交易状态
+        status = request.GET.get('deal_status')
+
+        robots = Robot.objects.all()
+        if curry:
+            robots = Robot.objects.filter(currency__icontains=curry)
+        if marke_id:
+            robots = Robot.objects.filter(market=marke_id)
+        if status:
+            robots = Robot.objects.filter(status=status)
+
+        paginator = Paginator(robots, 10)
+        page_obj = paginator.page(pageNum)
+        numPerPage = len(page_obj.object_list),
+        totalCount = robots.count(),
+        totalPageNum = paginator.num_pages
+
+        context = {
+            'numPerPage': numPerPage,
+            'PageNum': pageNum,
+            'result': RobotSerializer(page_obj.object_list, many=True).data,
+            'totalCount': totalCount,
+            'totalPageNum': totalPageNum,
+        }
+
+        return restful.result(data=context)
+
 
 
 class RobotYield(generics.CreateAPIView):
@@ -756,9 +808,10 @@ class RobotYield(generics.CreateAPIView):
         return data
 
     def post(self, request):
-        user_id = request.session.get("user_id")   # 获取用户id
+        # 获取用户id
+        # user_id = request.session.get("user_id")
+        user_id = 1
         accounts = Account.objects.filter(users=user_id)
-        # accounts = Account.objects.filter(users=1)
         for account in accounts:
             exx_service = ExxService(account.secretkey, account.accesskey)
             robots = Robot.objects.filter(trading_account_id=account.id)
