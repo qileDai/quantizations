@@ -15,7 +15,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ('id', 'title', 'accesskey', 'secretkey', 'users_id', 'platform')
+        fields = ('id', 'title', 'accesskey', 'secretkey', 'users_id', 'createtime', 'platform')
         extra_kwargs = {
             'id': {
                 'required': True,
