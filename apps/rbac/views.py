@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, reverse, HttpResponse
+from django.shortcuts import render, redirect, reverse, HttpResponse,HttpResponseRedirect
 from .models import UserInfo, Role, Menu, Permission
 from django.views.generic import View
 from utils import restful
@@ -7,6 +7,7 @@ from urllib import parse
 from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, PermissionModelForm, MenuModelForm, \
 EditUserForm
 import hashlib
+from django.contrib.auth import login,logout,authenticate
 from django.conf import settings
 from .service.init_permission import init_permission
 from utils.mixin import LoginRequireMixin
@@ -39,17 +40,18 @@ def login(request):
         hl.update(password.encode(encoding='utf-8'))
         password = hl.hexdigest()
         user_obj = UserInfo.objects.filter(username=username, password=password).first()
-        if not user_obj:
-            return restful.params_error(message="用户名或密码错误！")
-        elif user_obj.status == 0:
-            return restful.params_error(message="用户已被禁用，请联系管理员！")
-        else:  # 普通用户
-            request.session.clear()
-            request.session['is_login'] = True
-            request.session['user_id'] = user_obj.id
-            # request.session.set_expiry(600)
-            init_permission(request, user_obj)  # 调用权限初始化
-            return restful.ok(message="成功")
+
+        # if not user_obj:
+        #     return restful.params_error(message="用户名或密码错误！")
+        # elif user_obj.status == 0:
+        #     return restful.params_error(message="用户已被禁用，请联系管理员！")
+        # else:  # 普通用户
+        request.session.clear()
+        request.session['is_login'] = True
+        request.session['user_id'] = user_obj.id
+        # request.session.set_expiry(600)
+        init_permission(request, user_obj)  # 调用权限初始化
+        return HttpResponseRedirect("/rbac/index/")
 
 
 @is_login
@@ -62,7 +64,7 @@ def index(request):
 
 def logout(request):
     request.session.clear()
-    return restful.ok(message="成功")
+    return HttpResponseRedirect("/login/")
 
 
 @is_login
