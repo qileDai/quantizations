@@ -246,25 +246,28 @@ class ChargeAccount(generics.CreateAPIView):
 
     def post(self, request):
         id = request.POST.get('id')
-        account_obj = Account.objects.get(id=id)  # 获取账户信息
-        platform = account_obj.platform  # 账户对应的平台
-        currency = request.POST.get('currency')
-        num = request.POST.get('num')
-        # 根据平台调用对应接口
-        try:
-            if str(platform) == 'EXX':
-                currency_pair = currency.lower() + '_usdt'
-                market_api = MarketCondition(currency_pair)
-                info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
-                info = info['ticker']['last']
-            elif str(platform) == 'HUOBI':
-                pass
-        except:
-            info = 0
-        property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
-        original_assets = float(property_obj.original_assets) + float(num) * float(info)
-        Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
-        return restful.ok()
+        if id:
+            account_obj = Account.objects.get(id=id)  # 获取账户信息
+            platform = account_obj.platform  # 账户对应的平台
+            currency = request.POST.get('currency')
+            num = request.POST.get('num')
+            # 根据平台调用对应接口
+            try:
+                if str(platform) == 'EXX':
+                    currency_pair = currency.lower() + '_usdt'
+                    market_api = MarketCondition(currency_pair)
+                    info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
+                    info = info['ticker']['last']
+                elif str(platform) == 'HUOBI':
+                    pass
+            except:
+                info = 0
+            property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
+            original_assets = float(property_obj.original_assets) + float(num) * float(info)
+            Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
+            return restful.ok()
+        else:
+            restful.params_error(message='参数为空')
 
 
 class WithDraw(generics.CreateAPIView):
@@ -275,28 +278,31 @@ class WithDraw(generics.CreateAPIView):
 
     def post(self, request):
         id = request.POST.get('id')
-        account_obj = Account.objects.get(id=id)  # 获取账户信息
-        platform = account_obj.platform  # 账户对应的平台
-        currency = request.POST.get('currency')
-        num = request.POST.get('num')
-        # 根据平台调用对应接口
-        try:
-            if str(platform) == 'EXX':
-                currency_pair = currency.lower() + '_usdt'
-                market_api = MarketCondition(currency_pair)
-                info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
-                last = info['ticker']['last']
-            elif str(platform) == 'HUOBI':
-                pass
-        except:
-            print('未获取到当前价')
-            last = 0
-        if currency:
-            # 提币折合成usdt
-            property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
-            withdraw_record = float(property_obj.withdraw_record) + float(num) * float(last)
-            Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(withdraw_record=withdraw_record)
-            return restful.ok()
+        if id:
+            account_obj = Account.objects.get(id=id)  # 获取账户信息
+            platform = account_obj.platform  # 账户对应的平台
+            currency = request.POST.get('currency')
+            num = request.POST.get('num')
+            # 根据平台调用对应接口
+            try:
+                if str(platform) == 'EXX':
+                    currency_pair = currency.lower() + '_usdt'
+                    market_api = MarketCondition(currency_pair)
+                    info = market_api.get_ticker()  # 获取EXX单个交易对行情信息
+                    last = info['ticker']['last']
+                elif str(platform) == 'HUOBI':
+                    pass
+            except:
+                print('未获取到当前价')
+                last = 0
+            if currency:
+                # 提币折合成usdt
+                property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
+                withdraw_record = float(property_obj.withdraw_record) + float(num) * float(last)
+                Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(withdraw_record=withdraw_record)
+                return restful.ok()
+        else:
+            restful.params_error(message='参数为空')
 
 
 class ConfigCurrency(generics.CreateAPIView):
@@ -307,25 +313,28 @@ class ConfigCurrency(generics.CreateAPIView):
 
     def post(self, request):
         currency_list = request.POST.get('currency')
-        # user_id = request.session.get("user_id")
-        user_id = 1
-        accounts = Account.objects.filter(users=user_id)
-        for account in accounts:
-            print(account.id, '-' * 30)
-            for currency in currency_list:
-                if currency:
-                    # 账户存在此币种则不添加
-                    property_obj = Property.objects.filter(Q(account=account.id) & Q(currency=currency))
-                    print('+' * 30, list(property_obj))
-                    if not list(property_obj):
-                        # 保存币种信息
-                        LastdayAssets.objects.create(currency=currency, account=account)
-                        Property.objects.create(currency=currency, account=account, currency_status=0)
-                else:
-                    return restful.params_error(message='请选择账户币种')
-        # 返回数据为json格式
-        data = Property.objects.values("currency").distinct()
-        return restful.result(data=list(data))
+        if currency_list:
+            # user_id = request.session.get("user_id")
+            user_id = 1
+            accounts = Account.objects.filter(users=user_id)
+            for account in accounts:
+                print(account.id, '-' * 30)
+                for currency in currency_list:
+                    if currency:
+                        # 账户存在此币种则不添加
+                        property_obj = Property.objects.filter(Q(account=account.id) & Q(currency=currency))
+                        print('+' * 30, list(property_obj))
+                        if not list(property_obj):
+                            # 保存币种信息
+                            LastdayAssets.objects.create(currency=currency, account=account)
+                            Property.objects.create(currency=currency, account=account, currency_status=0)
+                    else:
+                        return restful.params_error(message='请选择账户币种')
+            # 返回数据为json格式
+            data = Property.objects.values("currency").distinct()
+            return restful.result(data=list(data))
+        else:
+            return restful.params_error(message='参数为空')
 
 
 class SelectCurrency(generics.CreateAPIView):
@@ -336,12 +345,15 @@ class SelectCurrency(generics.CreateAPIView):
 
     def post(self, request):
         currency_list = request.POST.getlist('currency')
-        Property.objects.values("currency").update(currency_status='0')
-        LastdayAssets.objects.values("currency").update(currency_status='0')
-        for cur in currency_list:
-            Property.objects.filter(currency=cur).update(currency_status='1')
-            LastdayAssets.objects.filter(currency=cur).update(currency_status='1')
-        return restful.ok()
+        if currency_list:
+            Property.objects.values("currency").update(currency_status='0')
+            LastdayAssets.objects.values("currency").update(currency_status='0')
+            for cur in currency_list:
+                Property.objects.filter(currency=cur).update(currency_status='1')
+                LastdayAssets.objects.filter(currency=cur).update(currency_status='1')
+            return restful.ok()
+        else:
+            return restful.params_error(message='参数为空')
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -404,44 +416,47 @@ class GetAccountInfo(generics.CreateAPIView):
         market = request.POST.get('market-title')
         # 获取账户id
         id = request.POST.get('account_id')
-        # 调用get_account_info函数
-        user_obj, service_obj, market_obj = get_account_info(currency, market, id)
-        try:
-            info = service_obj.get_balance()
-            info = info.get('funds')
-            info1 = market_obj.get_ticker()
-            info1 = info1['ticker']
-            info2 = market_obj.get_klines('1day', '30')
-            info2 = info2.get('datas')
-        except:
-            return restful.params_error(message='币种错误，请核对！')
+        if currency and market and id:
+            # 调用get_account_info函数
+            user_obj, service_obj, market_obj = get_account_info(currency, market, id)
+            try:
+                info = service_obj.get_balance()
+                info = info.get('funds')
+                info1 = market_obj.get_ticker()
+                info1 = info1['ticker']
+                info2 = market_obj.get_klines('1day', '30')
+                info2 = info2.get('datas')
+            except:
+                return restful.params_error(message='币种错误，请核对！')
 
-        # 计算阻力位/支撑位的默认值
-        if int(info2.get('limit', 0)) <= 30:
-            max = 0
-            min = 0
-            for i in info2['data']:
-                max += float(i[2])
-                min += float(i[3])
-        context = {
-            # 账户起始交易币种总资产
-            'total_currency': self.data_format(info[currency.upper()].get('total')) + ' ' + currency,
-            # 账户起始交易市场币种总资产
-            'total_market': self.data_format(info[market.upper()].get('total')) + ' ' + market,
-            # 交易币种可用
-            'currency': self.data_format(info[currency.upper()].get('balance')) + ' ' + currency,
-            # 交易市场可用
-            'market': self.data_format(info[market.upper()].get('balance')) + ' ' + market,
-            # 当前价
-            'last': self.data_format(info1.get('last')) + '' + market,
-            # 阻力位
-            'resistance': round(float(max / int(info2['limit'])), 2),
-            # 支撑位
-            'support_level': round(float(min / int(info2['limit'])), 2),
+            # 计算阻力位/支撑位的默认值
+            if int(info2.get('limit', 0)) <= 30:
+                max = 0
+                min = 0
+                for i in info2['data']:
+                    max += float(i[2])
+                    min += float(i[3])
+            context = {
+                # 账户起始交易币种总资产
+                'total_currency': self.data_format(info[currency.upper()].get('total')) + ' ' + currency,
+                # 账户起始交易市场币种总资产
+                'total_market': self.data_format(info[market.upper()].get('total')) + ' ' + market,
+                # 交易币种可用
+                'currency': self.data_format(info[currency.upper()].get('balance')) + ' ' + currency,
+                # 交易市场可用
+                'market': self.data_format(info[market.upper()].get('balance')) + ' ' + market,
+                # 当前价
+                'last': self.data_format(info1.get('last')) + '' + market,
+                # 阻力位
+                'resistance': round(float(max / int(info2['limit'])), 2),
+                # 支撑位
+                'support_level': round(float(min / int(info2['limit'])), 2),
 
-        }
-        print(context)
-        return restful.result(data=context)
+            }
+            print(context)
+            return restful.result(data=context)
+        else:
+            return restful.params_error(message='参数为空')
 
 
 class RobotProtection(generics.CreateAPIView):
@@ -454,10 +469,13 @@ class RobotProtection(generics.CreateAPIView):
         id = request.POST.get('robot_id')
         flag = request.POST.get('flag')
         protect = request.POST.get('protect')
-        Robot.objects.filter(id=id).update(status=flag)
-        Robot.objects.filter(id=id).update(protection=protect)
+        if id and flag and protect:
+            Robot.objects.filter(id=id).update(status=flag)
+            Robot.objects.filter(id=id).update(protection=protect)
 
-        return restful.ok()
+            return restful.ok()
+        else:
+            return restful.params_error(message='参数为空')
 
 
 class StartRobot(generics.CreateAPIView):
@@ -472,13 +490,14 @@ class StartRobot(generics.CreateAPIView):
         ids = request.POST.get('robot_id')
         # Flag为1启动，为0停止
         Flag = int(request.POST.get('flag'))
-        print(ids, Flag)
         if ids:
             robots = Robot.objects.filter(id=ids)
         elif Flag == 1:
             robots = Robot.objects.filter(Q(status=0) & Q(protection=1))
         elif Flag == 0:
             robots = Robot.objects.filter(Q(status=1) & Q(protection=1))
+        elif Flag is None:
+            return restful.params_error(message='参数为空')
         # 调用对应策略
         for robot_obj in robots:
             if robot_obj.trading_strategy == '网格交易V1.0' and Flag == 1:
@@ -556,75 +575,78 @@ class ShowTradeDetail(generics.CreateAPIView):
     def post(self, request):
         # 获取机器人id
         id = request.POST.get('robot_id')
-        robot_obj = Robot.objects.get(id=id)
-        currency = robot_obj.currency
-        market = robot_obj.market
-        # 调用函数
-        try:
-            user_obj, service_obj, market_obj = get_account_info(currency, market, robot_obj.trading_account_id)
-            info = service_obj.get_balance()
-            # print("交易详情"+info)
-            info = info.get('funds')
-            info1 = market_obj.get_ticker()
-            info1 = info1.get('ticker')
-        except Exception as e:
-            return restful.params_error(message='币种错误，请核对！')
-        property_obj = Property.objects.get(Q(account_id=robot_obj.trading_account) & Q(currency=currency))
-        closed_order = OrderInfo.objects.filter(robot=id).order_by("-id")
-        serialize = OrderInfoSerializer(closed_order, many=True)
-
-        # 获取挂单信息
-        order_info = dict()
-        running_time = 0
-        for item in StartRobot.order_list:
+        if id:
+            robot_obj = Robot.objects.get(id=id)
+            currency = robot_obj.currency
+            market = robot_obj.market
+            # 调用函数
             try:
-                # 获取机器人对应的线程对象
-                robot = item.robot_obj
-                if id == str(robot.id):
-                    # 向字典中添加数据
-                    order_info = {**order_info, **item.id_dict}
-                running_time = time.time() - item.start_time
-            except:
-                print('对象没有属性robot_obj')
-                continue
-        sell, buy = self.sort_data(order_info)
+                user_obj, service_obj, market_obj = get_account_info(currency, market, robot_obj.trading_account_id)
+                info = service_obj.get_balance()
+                # print("交易详情"+info)
+                info = info.get('funds')
+                info1 = market_obj.get_ticker()
+                info1 = info1.get('ticker')
+            except Exception as e:
+                return restful.params_error(message='币种错误，请核对！')
+            property_obj = Property.objects.get(Q(account_id=robot_obj.trading_account) & Q(currency=currency))
+            closed_order = OrderInfo.objects.filter(robot=id).order_by("-id")
+            serialize = OrderInfoSerializer(closed_order, many=True)
 
-        context = {
-            # 交易币种和交易市场
-            'currency_market': {"currency": currency, "market": market},
-            # 已完成笔数
-            'closed_num': len(closed_order),
-            # 已完成挂单信息
-            'closed_info': serialize.data,
-            # 未完成笔数
-            'open_num': len(order_info),
-            # 未完成卖单信息
-            'SELL': sell,
-            # 未完成买单信息
-            'BUY': buy,
-            # 总投入
-            'total_input': self.data_format(property_obj.original_assets),
-            # 运行时间
-            'running_time': self.changeTime(running_time),
-            # 交易币种可用
-            'currency_balance': self.data_format(info[currency.upper()].get('balance')) + ' ' + currency,
-            # 交易市场可用
-            'market_balance': self.data_format(info[market.upper()].get('balance')) + ' ' + market,
-            # 交易币种冻结
-            'currency_freeze': self.data_format(info[currency.upper()].get('freeze')) + ' ' + currency,
-            # 交易市场冻结
-            'market_freeze': self.data_format(info[market.upper()].get('freeze')) + ' ' + market,
-            # 当前价
-            'last': self.data_format(info1.get('last')) + ' ' + market,
-            # 总收益
-            'profit': self.data_format(
-                (float(info[currency.upper()].get('total')) - float(property_obj.original_assets))
-                * float(info1.get('last'))) + ' ' + market,
-        }
+            # 获取挂单信息
+            order_info = dict()
+            running_time = 0
+            for item in StartRobot.order_list:
+                try:
+                    # 获取机器人对应的线程对象
+                    robot = item.robot_obj
+                    if id == str(robot.id):
+                        # 向字典中添加数据
+                        order_info = {**order_info, **item.id_dict}
+                    running_time = time.time() - item.start_time
+                except:
+                    print('对象没有属性robot_obj')
+                    continue
+            sell, buy = self.sort_data(order_info)
 
-        # print(context)
-        # print('/-' * 30, len(sell), len(buy))
-        return restful.result(data=context)
+            context = {
+                # 交易币种和交易市场
+                'currency_market': {"currency": currency, "market": market},
+                # 已完成笔数
+                'closed_num': len(closed_order),
+                # 已完成挂单信息
+                'closed_info': serialize.data,
+                # 未完成笔数
+                'open_num': len(order_info),
+                # 未完成卖单信息
+                'SELL': sell,
+                # 未完成买单信息
+                'BUY': buy,
+                # 总投入
+                'total_input': self.data_format(property_obj.original_assets),
+                # 运行时间
+                'running_time': self.changeTime(running_time),
+                # 交易币种可用
+                'currency_balance': self.data_format(info[currency.upper()].get('balance')) + ' ' + currency,
+                # 交易市场可用
+                'market_balance': self.data_format(info[market.upper()].get('balance')) + ' ' + market,
+                # 交易币种冻结
+                'currency_freeze': self.data_format(info[currency.upper()].get('freeze')) + ' ' + currency,
+                # 交易市场冻结
+                'market_freeze': self.data_format(info[market.upper()].get('freeze')) + ' ' + market,
+                # 当前价
+                'last': self.data_format(info1.get('last')) + ' ' + market,
+                # 总收益
+                'profit': self.data_format(
+                    (float(info[currency.upper()].get('total')) - float(property_obj.original_assets))
+                    * float(info1.get('last'))) + ' ' + market,
+            }
+
+            # print(context)
+            # print('/-' * 30, len(sell), len(buy))
+            return restful.result(data=context)
+        else:
+            return restful.params_error(message='参数为空')
 
 
 class ShowConfigInfo(generics.CreateAPIView):
@@ -639,31 +661,34 @@ class ShowConfigInfo(generics.CreateAPIView):
 
     def post(self, request):
         id = request.POST.get('robot_id')
-        robot_obj = Robot.objects.get(id=id)
-        account_obj = Account.objects.filter(id=robot_obj.trading_account.id).first()
-        # data = serialize("json", Robot.objects.filter(id=id))
-        account = Robot.objects.get(id=id)
-        serialize = RobotSerializer(account)
-        user_obj, service_obj, market_obj = get_account_info(robot_obj.currency, robot_obj.market,
-                                                             robot_obj.trading_account.id)
-        try:
-            info = service_obj.get_balance()
-            info = info.get('funds')
-        except:
-            return restful.params_error(message='币种错误，请核对！')
-        # print(json.loads(data)['pk'], type(json.loads(data)))
-        context = {
-            # 交易币种可用
-            'currency': self.data_format(info[robot_obj.currency.upper()].get('balance')) + ' ' + robot_obj.currency,
-            # 交易市场可用
-            'market': self.data_format(info[robot_obj.market.upper()].get('balance')) + ' ' + robot_obj.market,
-            # 账户信息
-            'account_name': str(account_obj.title),
-            # 机器人信息
-            'robot': serialize.data,
-        }
-        print(context)
-        return restful.result(data=context)
+        if id:
+            robot_obj = Robot.objects.get(id=id)
+            account_obj = Account.objects.filter(id=robot_obj.trading_account.id).first()
+            # data = serialize("json", Robot.objects.filter(id=id))
+            account = Robot.objects.get(id=id)
+            serialize = RobotSerializer(account)
+            user_obj, service_obj, market_obj = get_account_info(robot_obj.currency, robot_obj.market,
+                                                                 robot_obj.trading_account.id)
+            try:
+                info = service_obj.get_balance()
+                info = info.get('funds')
+            except:
+                return restful.params_error(message='币种错误，请核对！')
+            # print(json.loads(data)['pk'], type(json.loads(data)))
+            context = {
+                # 交易币种可用
+                'currency': self.data_format(info[robot_obj.currency.upper()].get('balance')) + ' ' + robot_obj.currency,
+                # 交易市场可用
+                'market': self.data_format(info[robot_obj.market.upper()].get('balance')) + ' ' + robot_obj.market,
+                # 账户信息
+                'account_name': str(account_obj.title),
+                # 机器人信息
+                'robot': serialize.data,
+            }
+            print(context)
+            return restful.result(data=context)
+        else:
+            return restful.params_error(message='参数为空')
 
 
 class ShowConfig(generics.CreateAPIView):
