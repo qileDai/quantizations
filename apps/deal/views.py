@@ -39,7 +39,8 @@ class AccountList(generics.ListAPIView, LoginRequireMixin):
     def get(self, request):
         page = int(request.GET.get('pageIndex', 1))
         pagesize = request.GET.get('pageSize')
-        user_id = request.session.get("user_id")
+        # user_id = request.session.get("user_id")
+        user_id = 1
         if not user_id:
             return render(request, "cms/login.html", {'error': '账户失效，请重新登陆！'})
         # 获取账户信息
@@ -49,7 +50,6 @@ class AccountList(generics.ListAPIView, LoginRequireMixin):
         currency_list = Property.objects.all()
         # 分页
         paginator = Paginator(Account.objects.filter(users__id=user_id), 10)
-        # paginator = Paginator(AccountSerializer(accounts, many=True).data, 10)
         page_obj = paginator.page(page)
         context_data = get_pagination_data(paginator, page_obj)
         context = {
@@ -57,14 +57,19 @@ class AccountList(generics.ListAPIView, LoginRequireMixin):
             'accounts_list': page_obj.object_list,
             'accounts': AccountSerializer(accounts, many=True).data,
             'page_obj': serialize('json', page_obj),
-            'paginator': paginator,
+            # 'paginator': paginator,
+            'paginator': AccountSerializer(accounts, many=True).data,
             'platforms': TradingPlatform.objects.all(),
             # 用户所有账户币种信息
-            'currency_list': PropertySerializer(currency_list, many=True).data
+            # 'currency_list': PropertySerializer(currency_list, many=True).data
+            'currency_list': serialize('json', currency_list, fields=('currency',))
         }
+        # context = {
+        #     'numPerPage': len(page)
+        # }
         context.update(context_data)
         print(context)
-        # return restful.result(data=context['currency_list'])
+        # return restful.result(data=context['paginator'])
         return render(request, 'management/tradingaccount.html', context=context)
 
 

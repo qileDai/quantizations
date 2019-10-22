@@ -54,7 +54,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.rbac.middleware.rbac.RbacMiddleware'  # 加入自定义的中间件到最后
+    'apps.rbac.middleware.rbac.RbacMiddleware',  # 加入自定义的中间件到最后
+    'apps.middleware.crossdomainxhr.XsSharing',  # 解决跨域
 ]
 
 ROOT_URLCONF = 'exxTrading.urls'
