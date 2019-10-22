@@ -1,11 +1,10 @@
 # encoding: utf-8
 from rest_framework import serializers
-from .models import Role, UserInfo, Menu, Permission
+from .models import Role, UserInfo, Menu, Permission,NewMenu
 
 
 class RoleSerializer(serializers.ModelSerializer):
     permission = Permission.title
-
     class Meta:
         model = Role
         fields = ('id', 'rolename', 'permission')
@@ -24,6 +23,11 @@ class PermissonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
         fields = ('id', 'title', 'url', 'menu')
+
+class NewmenuSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = "__all__"
 
 
 class MenuSerializer(serializers.ModelSerializer):

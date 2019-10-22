@@ -88,7 +88,7 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'exx_quantitative_admin',
+        'NAME': 'exx_quantitvate_streagety',
         'HOST': '192.168.4.201',
         'PORT': 3306,
         'USER': 'root',

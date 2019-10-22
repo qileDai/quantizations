@@ -5,7 +5,7 @@ from utils import restful
 from django.core.paginator import Paginator
 from urllib import parse
 from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, PermissionModelForm, MenuModelForm, \
-    NewRoleForm,EditUserForm
+EditUserForm
 import hashlib
 from django.conf import settings
 from .service.init_permission import init_permission

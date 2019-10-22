@@ -21,8 +21,14 @@ urlpatterns = [
     path('delete_permission/', views.delete_permission, name='delete_permission'),
     path('rolesList/', views.RolesListView.as_view(), name='rolesList'),
     path('edit_permission/', views.edit_permission, name='edit_permission'),
-    path('edit_role/', views.edit_Role, name='edit_role'),
+    path('edit_role/', views.EditRole.as_view, name='edit_role'),
     path('edit_menu/', views.edit_Menu, name='edit_menu'),
     path('add_menu/', views.add_menu, name='add_menu'),
+    path('user_info/', views.UserInfo.as_view(), name='user_info'),
+    path('role_info/', views.role_info, name='role_info'),
+    path('update_password/', views.UpdatePassword, name='update_password'),
+    path('menu_permission/', views.menu_permission, name='menu_permission'),
+    path('allot_permission/', views.AllotPermissson.as_view(), name='allot_permission'),
+    path('user_permission/', views.UserMenuPermission.as_view(), name='user_permission'),
 
 ]
