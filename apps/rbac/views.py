@@ -7,12 +7,13 @@ from urllib import parse
 from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, PermissionModelForm, MenuModelForm, \
 EditUserForm
 import hashlib
+from django.middleware.csrf import get_token ,rotate_token
 from django.conf import settings
 from .service.init_permission import init_permission
 from utils.mixin import LoginRequireMixin
 from .models import NewMenu
 from .serializers import PermissonSerializer, MenuSerializer, UserSerializer, RoleSerializer, NewmenuSerializer
-
+from django.contrib.auth import login,logout,authenticate
 
 # Create your views here.
 
@@ -28,28 +29,76 @@ def is_login(func):
 
     return wrapper
 
+def get_csrf(request):
+    csrf_token= get_token(request)
+    print(csrf_token)
+    context = {
+        "csrf_token": csrf_token
+    }
+    return restful.result(data=context)
 
-def login(request):
-    if request.method == "GET":
-        return render(request, "cms/login.html")
-    else:
+class Login(View):
+    def get(self,request):
+        csrf_token= get_token(request)
+        print(csrf_token)
+        context = {
+            "csrf_token":csrf_token
+        }
+        return restful.result(data=context)
+    def post(self,request):
+        request.META["CSRF_COOKIE_USED"] = True
         username = request.POST.get('username')
         password = request.POST.get('password')
+        print(username, password)
         hl = hashlib.md5()
         hl.update(password.encode(encoding='utf-8'))
         password = hl.hexdigest()
+        uers = UserInfo.objects.filter(username=username,password=password).first()
+        if uers:
+            print("sdfs")
+            request.session.clear()
+            request.session['is_login'] = True
+            request.session['user_id'] = uers.id
+            # request.session.set_expiry(600)
+            # init_permission(request, uers)
+            return restful.ok()
+        else:
+            return restful.result(message="用户名或密码错误！")
+
+
+
+def login(request):
+    if request.method == "GET":
+        print("带起了")
+        csrf_token= get_token(request)
+        context = {
+            "csrf_token": csrf_token
+        }
+        return restful.result(data=context)
+    else:
+        request.META["CSRF_COOKIE_USED"] = True
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        print(username,password)
+        hl = hashlib.md5()
+        hl.update(password.encode(encoding='utf-8'))
+        password = hl.hexdigest()
+        print(password)
+
         user_obj = UserInfo.objects.filter(username=username, password=password).first()
+        print(user_obj)
         if not user_obj:
-            return restful.params_error(message="用户名或密码错误！")
+            return render(request, "cms/login.html", {'error': '用户名或密码错误！'})
         elif user_obj.status == 0:
-            return restful.params_error(message="用户已被禁用，请联系管理员！")
+            return render(request, "cms/login.html", {'error': '用户已被禁用，请联系管理员！'})
         else:  # 普通用户
             request.session.clear()
             request.session['is_login'] = True
             request.session['user_id'] = user_obj.id
             # request.session.set_expiry(600)
-            init_permission(request, user_obj)  # 调用权限初始化
-            return restful.ok(message="成功")
+            # init_permission(request, user_obj)  # 调用权限初始化
+            print("asdlfjafjladjfal")
+            return redirect('/rbac/index/')
 
 
 @is_login
@@ -62,7 +111,9 @@ def index(request):
 
 def logout(request):
     request.session.clear()
-    return restful.ok(message="成功")
+    # return restful.ok(message="成功")
+    return redirect('../../login/')
+
 
 
 @is_login

@@ -134,7 +134,6 @@ class Permission(models.Model):
     """
     title = models.CharField(max_length=32, unique=True)
     url = models.CharField(max_length=128, unique=True)
-    menu = models.ForeignKey("Menu", on_delete=models.CASCADE, null=True, blank=True)
 
 
 class Role(models.Model):
@@ -143,7 +142,6 @@ class Role(models.Model):
     """
     rolename = models.CharField(max_length=64, unique=True)
     menus = models.ManyToManyField("NewMenu")
-    permissions = models.ManyToManyField("Permission")
 
     # 定义角色和权限的多对多关系
     def __str__(self):
