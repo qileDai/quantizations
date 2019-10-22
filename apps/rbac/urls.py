@@ -24,11 +24,13 @@ urlpatterns = [
     path('edit_role/', views.EditRole.as_view, name='edit_role'),
     path('edit_menu/', views.edit_Menu, name='edit_menu'),
     path('add_menu/', views.add_menu, name='add_menu'),
-    path('user_info/', views.UserInfo.as_view(), name='user_info'),
+    path('user_info/', views.UserInfos.as_view(), name='user_info'),
     path('role_info/', views.role_info, name='role_info'),
     path('update_password/', views.UpdatePassword, name='update_password'),
     path('menu_permission/', views.menu_permission, name='menu_permission'),
     path('allot_permission/', views.AllotPermissson.as_view(), name='allot_permission'),
     path('user_permission/', views.UserMenuPermission.as_view(), name='user_permission'),
+    path('get_csrf/', views.get_csrf, name='get_csrf'),
+    path('looo/', views.Login.as_view(), name='looo'),
 
 ]

@@ -154,6 +154,7 @@ REGEX_URL = r'^{url}$'
 
 # 配置url权限白名单
 SAFE_URL = [
+    r'',
     r'/login/',
     '/admin/.*',
     '/test/',
