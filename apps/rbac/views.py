@@ -14,7 +14,7 @@ from utils.mixin import LoginRequireMixin
 from .models import NewMenu
 from .serializers import PermissonSerializer, MenuSerializer, UserSerializer, RoleSerializer, NewmenuSerializer
 from django.contrib.auth import login,logout,authenticate
-
+from django.views.decorators.csrf import csrf_exempt
 # Create your views here.
 
 
@@ -66,7 +66,7 @@ class Login(View):
             return restful.result(message="用户名或密码错误！")
 
 
-
+@csrf_exempt
 def login(request):
     if request.method == "GET":
         print("带起了")
