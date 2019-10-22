@@ -24,7 +24,7 @@ from utils.mixin import LoginRequireMixin
 from rest_framework import generics
 from django.core.serializers import serialize
 from apps.deal.serializers import AccountSerializer, RobotSerializer, OrderInfoSerializer, LastdayAssetsSerializer, PropertySerializer
-from apps.rbac.serializers import UserSerializer
+from apps.rbac.serializers import UserInfoSerializer
 
 # Create your views here.
 
@@ -696,62 +696,12 @@ class WarningUsers(generics.CreateAPIView):
         users = UserInfo.objects.filter(status=1)
         print(users)
         # data = serialize('json', users)
-        serialize = UserSerializer(users, many=True)
+        serialize = UserInfoSerializer(users, many=True)
 
         return restful.result(data=serialize.data)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-
-
-class RobotList0(generics.CreateAPIView):
-    """
-    机器人管理列表页面
-    """
-    serializer_class = AccountSerializer
-
-    def get(self, request):
-        page = int(request.GET.get('p', 1))
-        # 拿到下拉框交易币种值
-        curry = request.GET.get('deal-curry')
-        print("currency", curry)
-        # currys = Property.objects.filter(pk=curry).only('currency')
-        # 拿到下拉框交易市场值
-        marke_id = request.GET.get('deal_market')
-        print("market", marke_id)
-        # market = Market.objects.filter(pk=market_id).get('name')
-        status = request.GET.get('deal_status')  # 拿到交易状态
-        print("status", status)
-
-        robots = Robot.objects.all()
-        if curry:
-            robots = Robot.objects.filter(currency__icontains=curry)
-        if marke_id:
-            robots = Robot.objects.filter(market=marke_id)
-        if status:
-            robots = Robot.objects.filter(status=status)
-        paginator = Paginator(robots, 10)
-        page_obj = paginator.page(page)
-        context_data = get_pagination_data(paginator, page_obj)
-        robot_id = ''
-        context = {
-            'robots': page_obj.object_list,
-            'page_obj': page_obj,
-            'paginator': paginator,
-            'properties': Property.objects.values('currency').distinct(),
-            'markets': Market.objects.all(),
-            'accounts': Account.objects.all(),
-            'robots': robots,
-            'url_query': '&' + parse.urlencode({
-                'curry': curry or '',
-                'market': marke_id or '',
-                'status': status or ''
-            })
-        }
-        context.update(context_data)
-        return restful.result(data=serialize.data)
-        # return render(request, 'management/gridding.html', context=context)
-
 
 class RobotList(generics.CreateAPIView):
     """
