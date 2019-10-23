@@ -170,7 +170,7 @@ class UserInfo(models.Model):
         ordering = ['-create_time']
 
     def __str__(self):
-        return self.nickname
+        return self.username
 
 
 ''' 继承自带的用户表

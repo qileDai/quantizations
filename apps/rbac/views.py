@@ -5,16 +5,22 @@ from utils import restful
 from django.core.paginator import Paginator
 from urllib import parse
 from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, PermissionModelForm, MenuModelForm, \
-EditUserForm
+    EditUserForm
 import hashlib
-from django.middleware.csrf import get_token ,rotate_token
+from django.middleware.csrf import get_token, rotate_token
 from django.conf import settings
 from .service.init_permission import init_permission
 from utils.mixin import LoginRequireMixin
 from .models import NewMenu
 from .serializers import PermissonSerializer, MenuSerializer, UserSerializer, RoleSerializer, NewmenuSerializer
-from django.contrib.auth import login,logout,authenticate
+from django.contrib.auth import login, logout, authenticate
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import User
+from rest_framework import permissions
+from .token_module import get_token, out_token
+
+
 # Create your views here.
 
 
@@ -29,23 +35,26 @@ def is_login(func):
 
     return wrapper
 
+
 def get_csrf(request):
-    csrf_token= get_token(request)
+    csrf_token = get_token(request)
     print(csrf_token)
     context = {
         "csrf_token": csrf_token
     }
     return restful.result(data=context)
 
+
 class Login(View):
-    def get(self,request):
-        csrf_token= get_token(request)
+    def get(self, request):
+        csrf_token = get_token(request)
         print(csrf_token)
         context = {
-            "csrf_token":csrf_token
+            "csrf_token": csrf_token
         }
         return restful.result(data=context)
-    def post(self,request):
+
+    def post(self, request):
         request.META["CSRF_COOKIE_USED"] = True
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -53,7 +62,7 @@ class Login(View):
         hl = hashlib.md5()
         hl.update(password.encode(encoding='utf-8'))
         password = hl.hexdigest()
-        uers = UserInfo.objects.filter(username=username,password=password).first()
+        uers = UserInfo.objects.filter(username=username, password=password).first()
         if uers:
             print("sdfs")
             request.session.clear()
@@ -61,6 +70,7 @@ class Login(View):
             request.session['user_id'] = uers.id
             # request.session.set_expiry(600)
             # init_permission(request, uers)
+
             return restful.ok()
         else:
             return restful.result(message="用户名或密码错误！")
@@ -68,37 +78,45 @@ class Login(View):
 
 @csrf_exempt
 def login(request):
-    if request.method == "GET":
-        print("带起了")
-        csrf_token= get_token(request)
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    if username == '':
+        return restful.params_error(message="用户名不能为空")
+    if password == '':
+        return restful.params_error(message="密码不能为空")
+    print(username, password)
+    hl = hashlib.md5()
+    hl.update(password.encode(encoding='utf-8'))
+    password = hl.hexdigest()
+    print(password)
+    user_obj = UserInfo.objects.filter(username=username, password=password).first()
+    print(user_obj)
+    if not user_obj:
+        return restful.params_error(message="用户名或密码错误")
+    elif user_obj.status == 0:
+        return restful.params_error(message="用户已被禁用")
+    else:  # 普通用户
+        request.session.clear()
+        request.session['is_login'] = True
+        request.session['user_id'] = user_obj.id
+        user_id = request.session['user_id']
+        if not request.session.session_key:
+            request.session.create()
+            session_id = request.session.session_key
+        else:
+            session_id = request.session.session_key
+        print('----------', session_id)
+        # token = Token.objects.create(user=user_id)
+        # print(token)
         context = {
-            "csrf_token": csrf_token
+            'expire': 86400,
+            'isCustomize': 0,
+            'userId': user_id,
+            'sessionid': session_id
         }
+        request.session.set_expiry(300)
+        # init_permission(request, user_obj)  # 调用权限初始化
         return restful.result(data=context)
-    else:
-        request.META["CSRF_COOKIE_USED"] = True
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        print(username,password)
-        hl = hashlib.md5()
-        hl.update(password.encode(encoding='utf-8'))
-        password = hl.hexdigest()
-        print(password)
-
-        user_obj = UserInfo.objects.filter(username=username, password=password).first()
-        print(user_obj)
-        if not user_obj:
-            return render(request, "cms/login.html", {'error': '用户名或密码错误！'})
-        elif user_obj.status == 0:
-            return render(request, "cms/login.html", {'error': '用户已被禁用，请联系管理员！'})
-        else:  # 普通用户
-            request.session.clear()
-            request.session['is_login'] = True
-            request.session['user_id'] = user_obj.id
-            # request.session.set_expiry(600)
-            # init_permission(request, user_obj)  # 调用权限初始化
-            print("asdlfjafjladjfal")
-            return  restful.ok(message="成功")
 
 
 @is_login
@@ -113,7 +131,6 @@ def logout(request):
     request.session.clear()
     return restful.ok(message="成功")
     # return redirect('../../login/')
-
 
 
 @is_login
@@ -363,9 +380,12 @@ def edit_permission(request):
     serialize = PermissonSerializer(permissionss)
     return restful.result(data=serialize.data)
 
+
 """
 返回用户信息
 """
+
+
 class UserInfos(View):
     def post(self, request):
         user_id = request.POST.get("user_id")
@@ -373,9 +393,12 @@ class UserInfos(View):
         serialize = UserSerializer(user)
         return restful.result(data=serialize.data)
 
+
 """
 返回角色信息
 """
+
+
 def role_info(request):
     role_id = request.POST.get('role_id')
     role = Role.objects.get(pk=role_id)
@@ -386,8 +409,10 @@ def role_info(request):
 """
 角色修改
 """
+
+
 class EditRole(View):
-    def post(self,request):
+    def post(self, request):
         role_id = request.POST.get("role_id")
         role_name = request.POST.get("role_name")
         if role_name:
@@ -397,16 +422,15 @@ class EditRole(View):
         return restful.ok(message="角色修改成功")
 
 
-
-
 def edit_Menu(request):
     menu_id = request.POST.get(2)
     menu = Menu.objects.get(pk=menu_id)
     serialize = MenuSerializer(menu)
     return restful.result(serialize.data)
 
+
 class EditUsers(View):
-    def post(self,request):
+    def post(self, request):
         form = EditUserForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data.get("username")
@@ -416,12 +440,11 @@ class EditUsers(View):
             status = form.cleaned_data.get("status")
             roles = form.cleaned_data.get("status")
             pk = form.cleaned_data.get("id")
-            UserInfo.objects.filter(pk=pk).update(username=username,phone_number=phone_number,password=password
-                                                  ,email=email,status=status,roles=roles)
+            UserInfo.objects.filter(pk=pk).update(username=username, phone_number=phone_number, password=password
+                                                  , email=email, status=status, roles=roles)
             return restful.ok(message="成功")
         else:
             return restful.params_error(form.get_errors())
-
 
 
 def delete_permission(request):
@@ -432,16 +455,19 @@ def delete_permission(request):
     except:
         return restful.params_error(message="该权限不存在")
 
+
 """
 修改账户密码
 """
+
+
 class UpdatePassword(View):
     def post(self, request):
         try:
             user_id = request.POST.get("user_id")
             old_password = request.POST.get("old_password")
             if old_password:
-                user_obj = UserInfo.objects.get(pk = user_id)
+                user_obj = UserInfo.objects.get(pk=user_id)
                 password1 = user_obj.password
                 if password1 != old_password:
                     return restful.params_error(message="原始密码输入错误")
@@ -452,9 +478,12 @@ class UpdatePassword(View):
             print(e)
         return restful.ok(message="账户密码修改成功")
 
+
 """
 获取用户权限点跟一级菜单目录
 """
+
+
 class UserMenuPermission(View):
     def get(self, request):
         user_id = request.session.get("user_id")  # 获取用户id
@@ -462,6 +491,7 @@ class UserMenuPermission(View):
         menu_obj = NewMenu.objects.filter(parentid=0)
         serialize = NewmenuSerializer(menu_obj)
         roleids = user.roles
+        print(serialize)
         permission_list = []
         for role_id in roleids:
             role = Role.objects.get(pk=1)
@@ -478,21 +508,25 @@ class UserMenuPermission(View):
         print(context)
         return restful.result(data=context)
 
+
 class GetUserPermisssion(View):
     def get(self, request):
         user_id = request.session.get("user_id")  # 获取用户id
         user = UserInfo.objects.get(pk=user_id)
+
 
 """
 分配权限
 当角色没有权限点时添加权限
 当角色有权限点时修改权限
 """
+
+
 class AllotPermissson(View):
-    def post(self,request):
+    def post(self, request):
         try:
-            menu_list = request.POST.get("menu_list")  #获取菜单id list
-            role_id = request.POST.get("role_id")     #获取角色id
+            menu_list = request.POST.get("menu_list")  # 获取菜单id list
+            role_id = request.POST.get("role_id")  # 获取角色id
             role = Role.objects.get(pk=role_id)
             obj = role.menus.all()
             if obj:
@@ -501,7 +535,7 @@ class AllotPermissson(View):
                 for menus in menu_list:
                     role.menus.add(menus)
         except Exception as e:
-            return restful.params_error("分配权限失败",data=e)
+            return restful.params_error("分配权限失败", data=e)
 
         return restful.ok(message="成功")
 
@@ -545,5 +579,3 @@ def get_pagination_data(paginator, page_obj, around_count=2):
         'right_has_more': right_has_more,
         'num_pages': num_pages
     }
-
-
