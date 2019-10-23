@@ -1,6 +1,4 @@
-#encoding：utf-8
-
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 
 
 class HttpCode(object):
@@ -17,6 +15,7 @@ def result(code=HttpCode.ok, message="", data=None, kwargs=None):
     if kwargs and isinstance(kwargs, dict) and kwargs.keys():
         json_dict.update(kwargs)
     return JsonResponse(json_dict)
+    # return HttpResponse(json.dumps(json_dict, cls=DjangoJSONEncoder), content_type="application/json")
 
 
 def ok(message=""):

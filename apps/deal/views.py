@@ -29,31 +29,32 @@ from apps.rbac.serializers import UserSerializer
 # Create your views here.
 
 
-class AccountList(generics.ListAPIView, LoginRequireMixin):
+class AccountList(LoginRequireMixin):
     """
     显示用户所有账户信息
     """
     serializer_class = AccountSerializer
 
     def get(self, request):
-        pageNum = int(request.GET.get('pageIndex', 1))
+        pageNum = request.GET.get('pageIndex', 1)
+        print(pageNum)
         pagesize = request.GET.get('pageSize')
         # user_id = request.session.get("user_id")
         user_id = 1
         if not user_id:
-            return render(request, "cms/login.html", {'error': '账户失效，请重新登陆！'})
+            return restful.params_error(message='账户失效，请重新登陆！')
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
         # 分页
         paginator = Paginator(Account.objects.filter(users__id=user_id), 2)
-        page_obj = paginator.page(pageNum)
+        page_obj = paginator.page(int(pageNum))
         # print(paginator.num_pages)
         numPerPage = len(page_obj.object_list),
         totalCount = accounts.count(),
         totalPageNum = paginator.num_pages
         context = {
             'numPerPage': numPerPage,
-            'PageNum': pageNum,
+            'PageNum': int(pageNum),
             'result': AccountSerializer(page_obj.object_list, many=True).data,
             'totalCount': totalCount,
             'totalPageNum': totalPageNum,
