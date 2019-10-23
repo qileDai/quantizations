@@ -68,7 +68,8 @@ class Login(View):
             request.session.clear()
             request.session['is_login'] = True
             request.session['user_id'] = uers.id
-            # request.session.set_expiry(600)
+            request.session.clear_expired()
+            request.session.set_expiry(10)
             # init_permission(request, uers)
 
             return restful.ok()
