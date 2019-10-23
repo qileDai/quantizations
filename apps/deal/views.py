@@ -29,7 +29,8 @@ from apps.rbac.serializers import UserSerializer
 # Create your views here.
 
 
-class AccountList(LoginRequireMixin, generics.CreateAPIView):
+# class AccountList(LoginRequireMixin, generics.CreateAPIView):
+class AccountList(generics.CreateAPIView):
     """
     显示用户所有账户信息
     """
@@ -62,7 +63,7 @@ class AccountList(LoginRequireMixin, generics.CreateAPIView):
         return restful.result(data=context)
 
 
-class GetCurrencies(LoginRequireMixin, generics.CreateAPIView):
+class GetCurrencies(generics.CreateAPIView):
     """
     获取用户所有币种
     """
@@ -80,7 +81,7 @@ class GetCurrencies(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='为获取到账户登陆信息，请检查是否登陆')
 
 
-class AddAccount(LoginRequireMixin, generics.CreateAPIView):
+class AddAccount(generics.CreateAPIView):
     """
     添加账户
     """
@@ -119,7 +120,7 @@ def accountinfo(request):
     return restful.result(data=serialize.data)
 
 
-class EditAccount(LoginRequireMixin, generics.ListCreateAPIView):
+class EditAccount(generics.ListCreateAPIView):
     """
     get:
     获取要修改账户信息.
@@ -155,7 +156,7 @@ class EditAccount(LoginRequireMixin, generics.ListCreateAPIView):
             return restful.params_error(form.get_errors())
 
 
-class DeleteAccount(LoginRequireMixin, generics.CreateAPIView):
+class DeleteAccount(generics.CreateAPIView):
     """
     删除账户
     """
@@ -170,7 +171,7 @@ class DeleteAccount(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message="该账户不存在")
 
 
-class ShowAssert(LoginRequireMixin, generics.CreateAPIView):
+class ShowAssert(generics.CreateAPIView):
     """
     显示账户资产信息
     """
@@ -192,7 +193,7 @@ class ShowAssert(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='参数为空')
 
 
-class ShowCollectAsset(LoginRequireMixin, generics.CreateAPIView):
+class ShowCollectAsset(generics.CreateAPIView):
     """
     汇总资产信息
     """
@@ -239,7 +240,7 @@ class ShowCollectAsset(LoginRequireMixin, generics.CreateAPIView):
         return restful.result(data=context_list[0])
 
 
-class ChargeAccount(LoginRequireMixin, generics.CreateAPIView):
+class ChargeAccount(generics.CreateAPIView):
     """
     增资
     """
@@ -272,7 +273,7 @@ class ChargeAccount(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='参数为空')
 
 
-class WithDraw(LoginRequireMixin, generics.CreateAPIView):
+class WithDraw(generics.CreateAPIView):
     """
     提币
     """
@@ -307,7 +308,7 @@ class WithDraw(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='参数为空')
 
 
-class ConfigCurrency(LoginRequireMixin, generics.CreateAPIView):
+class ConfigCurrency(generics.CreateAPIView):
     """
     币种新增/配置
     """
@@ -339,7 +340,7 @@ class ConfigCurrency(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='请选择账户币种')
 
 
-class SelectCurrency(LoginRequireMixin, generics.CreateAPIView):
+class SelectCurrency(generics.CreateAPIView):
     """
     勾选的币种
     """
@@ -360,7 +361,7 @@ class SelectCurrency(LoginRequireMixin, generics.CreateAPIView):
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 创建机器人
-class CreateRobot(LoginRequireMixin, generics.CreateAPIView):
+class CreateRobot(generics.CreateAPIView):
     """
     获取配置策略的参数
     """
@@ -403,7 +404,7 @@ def get_account_info(currency, market, id):
     return user_obj, service_obj, market_obj
 
 
-class GetAccountInfo(LoginRequireMixin, generics.CreateAPIView):
+class GetAccountInfo(generics.CreateAPIView):
     """
     展示交易对可用额度/当前价,计算默认值
     """
@@ -461,7 +462,7 @@ class GetAccountInfo(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='参数为空')
 
 
-class RobotProtection(LoginRequireMixin, generics.CreateAPIView):
+class RobotProtection(generics.CreateAPIView):
     """
     机器人保护
     """
@@ -480,7 +481,7 @@ class RobotProtection(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='参数为空')
 
 
-class StartRobot(LoginRequireMixin, generics.CreateAPIView):
+class StartRobot(generics.CreateAPIView):
     """
     管理机器人
     """
@@ -538,7 +539,7 @@ class StartRobot(LoginRequireMixin, generics.CreateAPIView):
         return restful.ok()
 
 
-class ShowTradeDetail(LoginRequireMixin, generics.CreateAPIView):
+class ShowTradeDetail(generics.CreateAPIView):
     """
     展示机器人交易详情
     """
@@ -653,7 +654,7 @@ class ShowTradeDetail(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='参数为空')
 
 
-class ShowConfigInfo(LoginRequireMixin, generics.CreateAPIView):
+class ShowConfigInfo(generics.CreateAPIView):
     """
     展示机器人配置信息
     """
@@ -695,7 +696,7 @@ class ShowConfigInfo(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='参数为空')
 
 
-class ShowConfig(LoginRequireMixin, generics.CreateAPIView):
+class ShowConfig(generics.CreateAPIView):
     """
     修改机器人配置信息
     """
@@ -725,7 +726,7 @@ class ShowConfig(LoginRequireMixin, generics.CreateAPIView):
         return restful.ok()
 
 
-class WarningUsers(LoginRequireMixin, generics.CreateAPIView):
+class WarningUsers(generics.CreateAPIView):
     """
     序列化预警账户
     """
@@ -742,7 +743,7 @@ class WarningUsers(LoginRequireMixin, generics.CreateAPIView):
 
 # ----------------------------------------------------------------------------------------------------------------------
 
-class RobotList(LoginRequireMixin, generics.CreateAPIView):
+class RobotList(generics.CreateAPIView):
     """
     机器人管理列表页面
     """
@@ -785,7 +786,7 @@ class RobotList(LoginRequireMixin, generics.CreateAPIView):
         return restful.result(data=context)
 
 
-class RobotYield(LoginRequireMixin, generics.CreateAPIView):
+class RobotYield(generics.CreateAPIView):
     """
     机器人收益计算更新到数据库
     """
