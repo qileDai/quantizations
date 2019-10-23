@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.conf import settings
+from utils import restful
 
 
 def is_login(func):
@@ -8,7 +9,9 @@ def is_login(func):
             res = func(request, *args, **kwargs)
             return res
         else:
-            return redirect(settings.LOGIN_URL)
+            print(request.session.session_key)
+            print(request.session)
+            return restful.params_error(message='用户未登录，请登录！')
     return wrapper
 
 

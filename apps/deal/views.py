@@ -29,31 +29,32 @@ from apps.rbac.serializers import UserSerializer
 # Create your views here.
 
 
-class AccountList(generics.ListAPIView, LoginRequireMixin):
+# class AccountList(LoginRequireMixin, generics.CreateAPIView):
+class AccountList(generics.CreateAPIView):
     """
     显示用户所有账户信息
     """
     serializer_class = AccountSerializer
 
     def get(self, request):
-        pageNum = int(request.GET.get('pageIndex', 1))
+        pageNum = request.GET.get('pageIndex', 1)
         pagesize = request.GET.get('pageSize')
         # user_id = request.session.get("user_id")
         user_id = 1
         if not user_id:
-            return render(request, "cms/login.html", {'error': '账户失效，请重新登陆！'})
+            return restful.params_error(message='账户失效，请重新登陆！')
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
         # 分页
         paginator = Paginator(Account.objects.filter(users__id=user_id), 2)
-        page_obj = paginator.page(pageNum)
+        page_obj = paginator.page(int(pageNum))
         # print(paginator.num_pages)
         numPerPage = len(page_obj.object_list),
         totalCount = accounts.count(),
         totalPageNum = paginator.num_pages
         context = {
             'numPerPage': numPerPage,
-            'PageNum': pageNum,
+            'PageNum': int(pageNum),
             'result': AccountSerializer(page_obj.object_list, many=True).data,
             'totalCount': totalCount,
             'totalPageNum': totalPageNum,
@@ -68,14 +69,13 @@ class GetCurrencies(generics.CreateAPIView):
     """
     def get(self, request):
         # 获取用户所有币种
-        user_id = request.session.get("user_id")
+        # user_id = request.session.get("user_id")
+        user_id = 1
         if user_id:
-            # user_id = 1
             currency_list = Property.objects.filter(account__users__id=user_id).values("currency",).distinct()
-            # currency_list = Property.objects.all()
-            currency_list = list(currency_list)
-            data = json.dumps(currency_list)
-
+            ret = list(currency_list)
+            # currency_list = serialize('json', currency_list)
+            data = json.dumps(ret)
             return restful.result(data=data)
         else:
             return restful.params_error(message='为获取到账户登陆信息，请检查是否登陆')
@@ -786,7 +786,6 @@ class RobotList(generics.CreateAPIView):
         return restful.result(data=context)
 
 
-
 class RobotYield(generics.CreateAPIView):
     """
     机器人收益计算更新到数据库
@@ -810,7 +809,7 @@ class RobotYield(generics.CreateAPIView):
             robots = Robot.objects.filter(trading_account_id=account.id)
             for robot in robots:
                 robot_id = robot.id  # 机器人id
-                print("机器人id:",str(robot_id))
+                print("机器人id:"+str(robot_id))
                 currency = robot.currency  # 交易币种
                 market = robot.market  # 市场币种
                 total_money = re.findall('\d+\.\d\d',robot.total_money)[0]  # 总投入
