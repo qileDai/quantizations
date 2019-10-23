@@ -73,11 +73,9 @@ class GetCurrencies(generics.CreateAPIView):
         user_id = 1
         if user_id:
             currency_list = Property.objects.filter(account__users__id=user_id).values("currency",).distinct()
-            ret = dict()
-            ret['data'] = list(currency_list)
+            ret = list(currency_list)
             # currency_list = serialize('json', currency_list)
             data = json.dumps(ret)
-            print(currency_list)
             return restful.result(data=data)
         else:
             return restful.params_error(message='为获取到账户登陆信息，请检查是否登陆')

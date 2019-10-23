@@ -22,7 +22,19 @@ from .token_module import get_token, out_token
 
 
 # Create your views here.
-
+# def getMenu(request):
+#     area_data = AreaInfo.objects.filter(pid__isnull=True).values('id', 'title')
+#     else:  # 查询市或者区县
+#         area_data = AreaInfo.objects.filter(pid_id=area_pid).values('id', 'title')
+#     area_list = []
+#     # 虽然area_data看起来像是列表内包含多个字典类型的,
+#     # 但其实返回的是django.db.models.query.ValuesListQuerySet类型,
+#     # 所以需要自己转成list类型.
+#     # 否则不能进行json序列化.
+#     for area in area_data:
+#         area_list.append({'id': area['id'], 'title': area['title']})
+#     # 然后通过jsonResponse返回给请求方, 这里是list而不是dict, 所以safe需要传入False.
+#     return JsonResponse(area_list, content_type='application/json', safe=False)
 
 # 用户登录装饰器
 def is_login(func):
