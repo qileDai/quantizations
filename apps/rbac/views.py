@@ -26,19 +26,6 @@ from django.db.models import Q
 
 
 # Create your views here.
-# def getMenu(request):
-#     area_data = AreaInfo.objects.filter(pid__isnull=True).values('id', 'title')
-#     else:  # 查询市或者区县
-#         area_data = AreaInfo.objects.filter(pid_id=area_pid).values('id', 'title')
-#     area_list = []
-#     # 虽然area_data看起来像是列表内包含多个字典类型的,
-#     # 但其实返回的是django.db.models.query.ValuesListQuerySet类型,
-#     # 所以需要自己转成list类型.
-#     # 否则不能进行json序列化.
-#     for area in area_data:
-#         area_list.append({'id': area['id'], 'title': area['title']})
-#     # 然后通过jsonResponse返回给请求方, 这里是list而不是dict, 所以safe需要传入False.
-#     return JsonResponse(area_list, content_type='application/json', safe=False)
 
 # 用户登录装饰器
 def is_login(func):
@@ -587,27 +574,19 @@ class AllotPermissson(View):
 def menu_permission(request):
     menus = {}
     try:
+        menu_data = NewMenu.objects.filter(parentid__isnull=True)
+        for obj in menu_data:
+            mu_data = NewMenu.objects.filter(parentid=obj.id)
+            menus[obj.name] = NewmenuSerializer(mu_data, many=True).data
+            for objs in mu_data:
+                try:
+                    m_data = NewMenu.objects.filter(parentid=objs.id)
+                    menus[obj.name][objs.name] = NewmenuSerializer(m_data, many=True).data
+                except:
+                    continue
 
-        # menus = NewMenu.objects.filter(Q(parentid= '') & Q(parentid=1) & Q(parentid=2))
-        # parr_id = int(request.POST.get('id'))
-        # if parr_id == 0:
-        menus = NewMenu.objects.filter(parentid__isnull=True)
-        ser = NewmenuSerializer(menus)
-        return restful.result(data=ser.data)
-    #     for menu in menus:
-    #         menuList = NewmenuSerializer(menu)
-    #         parrents = NewMenu.objects.filter(parentid=menu.id)
-    #         print(parrents)
-    #         for pattent in parrents:
-    #             pattentList = NewmenuSerializer(pattent)
-    #             menus.update(pattentList)
-    #     context = {
-    #         'menus':menuList,
-    #         'parrent':pattentList
-    #     }
-    #     # serializer = NewmenuSerializer(menus, many=True)
-    #     # print(serializer.data)
-    #     return restful.result(data=context)
+        return restful.result(data=menus)
+
     except Exception as e:
         return restful.params_error(message=u"获取菜单失败")
 
