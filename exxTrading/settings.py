@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django_crontab',       # 定时任务
     'rest_framework',
     'rest_framework_swagger',
+    'rest_framework.authtoken',
 
 ]
 
@@ -60,7 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.rbac.middleware.rbac.RbacMiddleware',  # 加入自定义的中间件到最后
+    # 'apps.rbac.middleware.rbac.RbacMiddleware',  # 加入自定义的中间件到最后
 
 ]
 
@@ -84,6 +85,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'exxTrading.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    )
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases

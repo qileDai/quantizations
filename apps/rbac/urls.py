@@ -31,6 +31,6 @@ urlpatterns = [
     path('allot_permission/', views.AllotPermissson.as_view(), name='allot_permission'),
     path('user_permission/', views.UserMenuPermission.as_view(), name='user_permission'),
     path('get_csrf/', views.get_csrf, name='get_csrf'),
-    path('looo/', views.Login.as_view(), name='looo'),
+
 
 ]
