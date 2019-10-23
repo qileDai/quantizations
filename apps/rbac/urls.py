@@ -31,6 +31,8 @@ urlpatterns = [
     path('allot_permission/', views.AllotPermissson.as_view(), name='allot_permission'),
     path('user_permission/', views.UserMenuPermission.as_view(), name='user_permission'),
     path('get_csrf/', views.get_csrf, name='get_csrf'),
+    path('all_users/', views.getAllUsers.as_view(), name='all_users'),
+    path('all_roles/', views.getAllRoles.as_view(), name='all_roles'),
 
 
 ]

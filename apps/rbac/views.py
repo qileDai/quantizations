@@ -1,6 +1,7 @@
-from django.shortcuts import render, redirect, reverse, HttpResponse
+from django.shortcuts import render, redirect, reverse,HttpResponse
 from .models import UserInfo, Role, Menu, Permission
 from django.views.generic import View
+# import  rest_framework.response  as rs
 from utils import restful
 from django.core.paginator import Paginator
 from urllib import parse
@@ -19,6 +20,9 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from rest_framework import permissions
 from .token_module import get_token, out_token
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Q
 
 
 # Create your views here.
@@ -115,7 +119,12 @@ def login(request):
             'sessionid': session_id
         }
         request.session.set_expiry(300)
+
+        # return HttpResponse(json.dumps(data, ensure_ascii=False), content_type="application/json,charset=utf-8")
+        # return HttpResponse(json.dumps(context, cls=DjangoJSONEncoder), content_type="application/json")
         # init_permission(request, user_obj)  # 调用权限初始化
+        # return  HttpResponse(context, content_type="application/json;charset=utf-8")
+         # json.dumps(result, ensure_ascii=False), content_type = "application/json,charset=utf-8"
         return restful.result(data=context)
 
 
@@ -290,6 +299,26 @@ class userListView(LoginRequireMixin, View):
         context.update(context_data)
 
         return render(request, 'cms/account.html', context=context)
+
+
+class getAllRoles(View):
+    def get(self,request):
+        roles = Role.objects.all()
+        if roles:
+            serialize = RoleSerializer(roles,many=True)
+            return restful.result(data=serialize.data)
+        else:
+            return restful.params_error(message="没有获取到角色信息")
+
+"""
+获取所有用户
+"""
+class getAllUsers(View):
+    def get(self,request):
+        users = UserInfo.objects.all()
+        serialize = UserSerializer(users,many=True)
+        print(serialize.data)
+        return restful.result(data=serialize.data)
 
 
 class PermissionListView(LoginRequireMixin, View):
@@ -528,6 +557,7 @@ class AllotPermissson(View):
             menu_list = request.POST.get("menu_list")  # 获取菜单id list
             role_id = request.POST.get("role_id")  # 获取角色id
             role = Role.objects.get(pk=role_id)
+            print("")
             obj = role.menus.all()
             if obj:
                 role.menus.set(menu_list)
@@ -542,11 +572,31 @@ class AllotPermissson(View):
 
 
 def menu_permission(request):
-    menus = NewMenu.objects.exclude(parentid=0).order_by("orderNum")
-    print(menus)
-    serializer = NewmenuSerializer(menus, many=True)
-    print(serializer.data)
-    return restful.result(data=serializer.data)
+    menus = {}
+    try:
+
+        # menus = NewMenu.objects.filter(Q(parentid= '') & Q(parentid=1) & Q(parentid=2))
+        # parr_id = int(request.POST.get('id'))
+        # if parr_id == 0:
+        menus = NewMenu.objects.filter(parentid__isnull=True)
+        ser = NewmenuSerializer(menus)
+        return restful.result(data=ser.data)
+    #     for menu in menus:
+    #         menuList = NewmenuSerializer(menu)
+    #         parrents = NewMenu.objects.filter(parentid=menu.id)
+    #         print(parrents)
+    #         for pattent in parrents:
+    #             pattentList = NewmenuSerializer(pattent)
+    #             menus.update(pattentList)
+    #     context = {
+    #         'menus':menuList,
+    #         'parrent':pattentList
+    #     }
+    #     # serializer = NewmenuSerializer(menus, many=True)
+    #     # print(serializer.data)
+    #     return restful.result(data=context)
+    except Exception as e:
+        return restful.params_error(message=u"获取菜单失败")
 
 
 def get_pagination_data(paginator, page_obj, around_count=2):

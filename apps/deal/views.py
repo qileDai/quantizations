@@ -75,6 +75,7 @@ class GetCurrencies(generics.CreateAPIView):
             # currency_list = Property.objects.all()
             currency_list = list(currency_list)
             data = json.dumps(currency_list)
+
             return restful.result(data=data)
         else:
             return restful.params_error(message='为获取到账户登陆信息，请检查是否登陆')
@@ -809,7 +810,7 @@ class RobotYield(generics.CreateAPIView):
             robots = Robot.objects.filter(trading_account_id=account.id)
             for robot in robots:
                 robot_id = robot.id  # 机器人id
-                print("机器人id:"+str(robot_id))
+                print("机器人id:",str(robot_id))
                 currency = robot.currency  # 交易币种
                 market = robot.market  # 市场币种
                 total_money = re.findall('\d+\.\d\d',robot.total_money)[0]  # 总投入

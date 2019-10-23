@@ -4,10 +4,10 @@ from .models import Role, UserInfo, Menu, Permission,NewMenu
 
 
 class RoleSerializer(serializers.ModelSerializer):
-    permission = Permission.title
+
     class Meta:
         model = Role
-        fields = ('id', 'rolename', 'permission')
+        fields ="__all__"
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -28,7 +28,18 @@ class NewmenuSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NewMenu
-        fields = "__all__"
+        fields = ('id','name','url','perms','type','orderNum','parentid')
+
+    def get_menus(self,obj):
+        title_list = [self.name]
+        p = self.parentid
+        while p:
+            title_list.insert(0, p.name)
+            p = p.parentid
+            title_list.append(p)
+        return title_list
+
+
 
 
 class MenuSerializer(serializers.ModelSerializer):

@@ -101,7 +101,7 @@ class NewMenu(models.Model):
         title_list = [self.name]
         p = self.parentid
         while p:
-            title_list.insert(0, p.title)
+            title_list.insert(0, p.name)
             p = p.parentid
         return '-'.join(title_list)
 
