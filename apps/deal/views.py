@@ -69,9 +69,9 @@ class GetCurrencies(generics.CreateAPIView):
     """
     def get(self, request):
         # 获取用户所有币种
-        user_id = request.session.get("user_id")
+        # user_id = request.session.get("user_id")
+        user_id = 1
         if user_id:
-            # user_id = 1
             currency_list = Property.objects.filter(account__users__id=user_id).values("currency",).distinct()
             # currency_list = Property.objects.all()
             currency_list = list(currency_list)
