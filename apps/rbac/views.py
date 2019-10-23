@@ -26,19 +26,6 @@ from django.db.models import Q
 
 
 # Create your views here.
-# def getMenu(request):
-#     area_data = AreaInfo.objects.filter(pid__isnull=True).values('id', 'title')
-#     else:  # 查询市或者区县
-#         area_data = AreaInfo.objects.filter(pid_id=area_pid).values('id', 'title')
-#     area_list = []
-#     # 虽然area_data看起来像是列表内包含多个字典类型的,
-#     # 但其实返回的是django.db.models.query.ValuesListQuerySet类型,
-#     # 所以需要自己转成list类型.
-#     # 否则不能进行json序列化.
-#     for area in area_data:
-#         area_list.append({'id': area['id'], 'title': area['title']})
-#     # 然后通过jsonResponse返回给请求方, 这里是list而不是dict, 所以safe需要传入False.
-#     return JsonResponse(area_list, content_type='application/json', safe=False)
 
 # 用户登录装饰器
 def is_login(func):
@@ -358,6 +345,39 @@ class PermissionListView(LoginRequireMixin, View):
         return render(request, 'cms/permission.html', context=context)
 
 
+class MenuListView(LoginRequireMixin, View):
+    def get(self, request):
+        page = int(request.GET.get('p', 1))
+        menu = request.GET.get('munu')
+        menus = Menu.objects.all()
+        if menu:
+            menus = Menu.objects.filter(title__icontains=menu)
+        paginator = Paginator(menus, 10)
+        page_obj = paginator.page(page)
+        context_data = get_pagination_data(paginator, page_obj)
+        context = {
+            'menus': page_obj.object_list,
+            'page_obj': page_obj,
+            'paginator': paginator,
+            'menu': menu,
+            'url_query': '&' + parse.urlencode({
+                'menu': menu or '',
+            })
+        }
+        context.update(context_data)
+        return render(request, 'cms/menu.html', context=context)
+
+
+def delete_menu(request):
+    pk = request.POST.get('pk')
+    print(pk)
+    try:
+        Menu.objects.filter(pk=pk).delete()
+        return restful.ok()
+    except:
+        return restful.params_error(message="该目录不存在")
+
+
 @is_login
 def delete_roles(request):
     pk = request.POST.get('role_id')
@@ -431,7 +451,11 @@ class EditRole(View):
         return restful.ok(message="角色修改成功")
 
 
-
+def edit_Menu(request):
+    menu_id = request.POST.get(2)
+    menu = Menu.objects.get(pk=menu_id)
+    serialize = MenuSerializer(menu)
+    return restful.result(serialize.data)
 
 
 class EditUsers(View):
@@ -548,30 +572,21 @@ class AllotPermissson(View):
 
 
 def menu_permission(request):
-    menu_list = {}
-    parrent_lsit = {}
+    menus = {}
     try:
+        menu_data = NewMenu.objects.filter(parentid__isnull=True)
+        for obj in menu_data:
+            mu_data = NewMenu.objects.filter(parentid=obj.id)
+            menus[obj.name] = NewmenuSerializer(mu_data, many=True).data
+            for objs in mu_data:
+                try:
+                    m_data = NewMenu.objects.filter(parentid=objs.id)
+                    menus[obj.name][objs.name] = NewmenuSerializer(m_data, many=True).data
+                except:
+                    continue
 
-        # menus = NewMenu.objects.filter(Q(parentid= '') & Q(parentid=1) & Q(parentid=2))
-        # parr_id = int(request.POST.get('id'))
-        # if parr_id == 0:
-        menus = NewMenu.objects.filter(parentid__isnull=True)
+        return restful.result(data=menus)
 
-        for menu in menus:
-            menuList = NewmenuSerializer(menu).data
-            menu_list.update(menuList)
-            parrents = NewMenu.objects.filter(parentid=menu.id)
-            print(parrents)
-            for pattent in parrents:
-                pattentList = NewmenuSerializer(pattent).data
-                parrent_lsit.update(pattentList)
-        context = {
-            'menus':menu_list,
-            'parrent':parrent_lsit
-        }
-        # serializer = NewmenuSerializer(menus, many=True)
-        # print(serializer.data)
-        return restful.result(data=context)
     except Exception as e:
         return restful.params_error(message=u"获取菜单失败")
 
