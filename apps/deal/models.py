@@ -101,7 +101,7 @@ class Robot(models.Model):
     currency = models.CharField(max_length=32)                                              # 交易币种
     market = models.CharField(max_length=32)                                                # 交易市场
     trading_strategy = models.CharField(max_length=32)                                      # 交易策略
-    total_money = models.CharField(max_length=64,null=True)          # 总投入
+    total_money = models.CharField(max_length=64,null=True)                                 # 总投入
     float_profit = models.DecimalField(max_digits=19, decimal_places=2,null=True)           # 浮动盈亏
     realized_profit = models.DecimalField(max_digits=19, decimal_places=2,null=True)        # 实现利润
     total_profit = models.DecimalField(max_digits=19, decimal_places=2,null=True)           # 总利润
@@ -124,7 +124,7 @@ class Robot(models.Model):
     warning_account = models.CharField(max_length=1024, null=True)              # 预警账户
     run_status = models.SmallIntegerField(choices=Run_Status, default=1)        # 运行状态
     running_time = models.CharField(max_length=128)                             # 运行时间
-    warning_time = models.CharField(max_length=32)                             # 运行时间
+    warning_time = models.CharField(max_length=32)                              # 运行时间
 
     class Meta:
         ordering = ['-create_time']
