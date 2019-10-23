@@ -336,7 +336,7 @@ class ConfigCurrency(generics.CreateAPIView):
             data = Property.objects.values("currency").distinct()
             return restful.result(data=list(data))
         else:
-            return restful.params_error(message='参数为空')
+            return restful.params_error(message='请选择账户币种')
 
 
 class SelectCurrency(generics.CreateAPIView):
