@@ -77,7 +77,7 @@ class GetCurrencies(generics.CreateAPIView):
             data = json.dumps(currency_list)
             return restful.result(data=data)
         else:
-            return restful.params_error(message='参数为空')
+            return restful.params_error(message='为获取到账户登陆信息，请检查是否登陆')
 
 
 class AddAccount(generics.CreateAPIView):
@@ -101,6 +101,7 @@ class AddAccount(generics.CreateAPIView):
             accounts = Account.objects.filter(Q(title=obj) & Q(platform=model_form.cleaned_data['platform']))
             currency = Property.objects.values("currency").distinct()
             print(accounts, currency)
+            # 给新账户添加币种
             for account in accounts:
                 for cur in currency:
                     LastdayAssets.objects.create(currency=cur['currency'], account=account)
