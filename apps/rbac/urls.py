@@ -29,6 +29,7 @@ urlpatterns = [
     path('get_csrf/', views.get_csrf, name='get_csrf'),
     path('all_users/', views.getAllUsers.as_view(), name='all_users'),
     path('all_roles/', views.getAllRoles.as_view(), name='all_roles'),
+    path('all_menus/', views.get_all_menus, name='all_menus'),
 
 
 ]

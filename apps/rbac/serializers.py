@@ -11,9 +11,10 @@ class RoleSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    # roles = RoleSerializer()
     class Meta:
         model = UserInfo
-        fields = ('id','username','phone_number','nickname','email','status')
+        fields = ('id','username','phone_number','nickname','email','status','create_time')
         # fields = '__all__'
 
 
