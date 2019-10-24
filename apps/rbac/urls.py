@@ -20,7 +20,7 @@ urlpatterns = [
     path('rolesList/', views.RolesListView.as_view(), name='rolesList'),
     path('edit_permission/', views.edit_permission, name='edit_permission'),
     path('edit_role/', views.EditRole.as_view, name='edit_role'),
-    path('user_info/', views.UserInfos.as_view(), name='user_info'),
+    path('user_info/', views.UserList.as_view(), name='user_info'),
     path('role_info/', views.role_info, name='role_info'),
     path('update_password/', views.UpdatePassword, name='update_password'),
     path('menu_permission/', views.menu_permission, name='menu_permission'),
@@ -30,7 +30,7 @@ urlpatterns = [
     path('all_users/', views.getAllUsers.as_view(), name='all_users'),
     path('all_roles/', views.getAllRoles.as_view(), name='all_roles'),
     path('all_menus/', views.get_all_menus, name='all_menus'),
-    path('get_menus/', views.get_menus, name='get_menus'),
+
 
 
 ]

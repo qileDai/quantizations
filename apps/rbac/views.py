@@ -418,8 +418,10 @@ def edit_permission(request):
 """
 
 
-class UserInfos(View):
+class UserList(View):
     def post(self, request):
+        pageNum = request.GET.get('pageIndex', 1)
+        pagesize = request.GET.get('pageSize')
         user_id = request.POST.get("user_id")
         user = UserInfo.objects.get(pk=user_id)
         serialize = UserSerializer(user)
@@ -558,6 +560,7 @@ class AllotPermissson(View):
     def post(self, request):
         try:
             menu_list = request.POST.get("menu_list")  # 获取菜单id list
+            print("menu_llist",menu_list)
             # menu_lsit = [1,2,5]
             role_id = request.POST.get("role_id")  # 获取角色id
             # role = Role.objects.get(pk=role_id)
@@ -567,12 +570,15 @@ class AllotPermissson(View):
             if role_obj:
                 for obj in role_obj:
                     old_menu.append(obj.menu_id)
-                    list1 = list(set(menu_list).difference(set(old_menu)))
-                    lsit2 = list(set(old_menu).difference(set(menu_list)))
-                    for i in list1:
-                        RoleMenu.objects.create(role_id=role_id,menu_id=i)
-                    for j in lsit2:
-                        RoleMenu.objects.filter(Q(role_id=role_id) & Q(menu_id=j)).delete()
+                print("old_list",old_menu)
+                add_list = list(set(menu_list).difference(set(old_menu)))
+                print("add_list",add_list)
+                dele_list = list(set(old_menu).difference(set(menu_list)))
+                print("delete",dele_list)
+                for i in add_list:
+                    RoleMenu.objects.create(role_id=role_id,menu_id=i)
+                for j in dele_list:
+                    RoleMenu.objects.filter(Q(role_id=role_id) & Q(menu_id=j)).delete()
             else:
                 for menu in menu_list:
                     RoleMenu.objects.create(role_id=role_id,menu_id=menu)
@@ -642,27 +648,6 @@ def get_all_menus(request):
     except:
         return restful.params_error(message=u"获取菜单失败")
 
-
-def get_menus(request):
-    menu_list = []
-    menu_data = NewMenu.objects.filter(parentid__isnull=True)
-    # muess = NewmenuSerializer(menu_data,many=True).data
-    # menu_list.append(muess)
-    # print(menu_list)
-    for i in menu_data:
-        data1 = NewmenuSerializer(i).data
-        menu_list.append(data1)
-        print('****'*20,menu_list)
-        i_data = NewMenu.objects.filter(parentid=i.id)
-        for j in i_data:
-            data2 = NewmenuSerializer(j).data
-            for mm in menu_list:
-                mm.update(list = data2)
-                print(menu_list)
-
-
-
-    print(menu_list)
 
 
 def get_pagination_data(paginator, page_obj, around_count=2):
