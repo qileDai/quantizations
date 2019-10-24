@@ -271,11 +271,14 @@ class ChargeAccount(generics.CreateAPIView):
                     pass
             except:
                 info = 0
-            property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
-            original_assets = float(property_obj.original_assets) + float(num) * float(info)
-            print('/-'*10, original_assets)
-            Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
-            return restful.ok()
+            try:
+                property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
+                original_assets = float(property_obj.original_assets) + float(num) * float(info)
+                print('/-'*10, original_assets)
+                Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
+                return restful.ok()
+            except:
+                return restful.params_error(message='账户没有此币种')
         else:
             return restful.params_error(message='参数为空')
 
