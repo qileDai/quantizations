@@ -30,6 +30,7 @@ urlpatterns = [
     path('all_users/', views.getAllUsers.as_view(), name='all_users'),
     path('all_roles/', views.getAllRoles.as_view(), name='all_roles'),
     path('all_menus/', views.get_all_menus, name='all_menus'),
+    path('get_menus/', views.get_menus, name='get_menus'),
 
 
 ]

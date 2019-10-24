@@ -11,6 +11,7 @@ class RoleSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    createtime = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     # roles = RoleSerializer()
     class Meta:
         model = UserInfo

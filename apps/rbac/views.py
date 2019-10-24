@@ -599,14 +599,34 @@ def get_all_menus(request):
     menu_list = []
     try:
         menu_data = NewMenu.objects.filter(parentid__isnull=True)
-        muess = NewmenuSerializer(menu_data,many=True).data
-        menu_list.append(muess)
-        for obj in menu_data:
-            mu_data = NewMenu.objects.filter(parentid=obj.id)
-            menu = NewmenuSerializer(mu_data, many=True).data
-            for menu_parrent in menu_list:
-                menu_parrent.update(list = menu )
-
+        # muess = NewmenuSerializer(menu_data,many=True).data
+        # menu_list.append(muess)
+        # print(menu_list)
+        n = 0
+        for i in menu_data:
+            data1 = NewmenuSerializer(i).data
+            menu_list.append(data1)
+            print('+-'*10)
+            print(n)
+            print(menu_list[n])
+            menu_list[n]['list'] = list()
+            i_data = NewMenu.objects.filter(parentid=i.id)
+            m = 0
+            for j in i_data:
+                data2 = NewmenuSerializer(j).data
+                menu_list[n]['list'].append(data2)
+                menu_list[n]['list'][m]['list'] = list()
+                j_data = NewMenu.objects.filter(parentid=j.id)
+                r = 0
+                for k in j_data:
+                    data3 = NewmenuSerializer(k).data
+                    menu_list[n]['list'][m]['list'].append(data3)
+                    menu_list[n]['list'][m]['list'][r]['list'] = list()
+                    # menu_list[n]['list'][m]['list'] = list()
+                    r += 1
+                m += 1
+            n = n + 1
+        print(menu_list)
 
             # for objs in menu_list:
             #     objs["list"] = menu
@@ -643,6 +663,27 @@ def get_all_menus(request):
     except:
         return restful.params_error(message=u"获取菜单失败")
 
+
+def get_menus(request):
+    menu_list = []
+    menu_data = NewMenu.objects.filter(parentid__isnull=True)
+    # muess = NewmenuSerializer(menu_data,many=True).data
+    # menu_list.append(muess)
+    # print(menu_list)
+    for i in menu_data:
+        data1 = NewmenuSerializer(i).data
+        menu_list.append(data1)
+        print('****'*20,menu_list)
+        i_data = NewMenu.objects.filter(parentid=i.id)
+        for j in i_data:
+            data2 = NewmenuSerializer(j).data
+            for mm in menu_list:
+                mm.update(list = data2)
+                print(menu_list)
+
+
+
+    print(menu_list)
 
 
 def get_pagination_data(paginator, page_obj, around_count=2):
