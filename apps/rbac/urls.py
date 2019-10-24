@@ -9,7 +9,6 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'),
     path('account_list/', views.userListView.as_view(), name='account_list'),
     path('role/', views.role, name='role'),
-    path('menu_list/', views.MenuListView.as_view(), name='menu_list'),
     path('add_roles/', views.add_roles, name='add_roles'),
     path('add_users/', views.add_users, name='add_users'),
     path('delete_users/', views.delete_users, name='delete_users'),
@@ -17,14 +16,11 @@ urlpatterns = [
     path('permission_list/', views.PermissionListView.as_view(), name='permission_list'),
     path('add_permission/', views.add_permission, name='add_permission'),
     path('user_list/', views.userListView.as_view(), name='user_list'),
-    path('delete_menu/', views.delete_menu, name='delete_menu'),
     path('delete_permission/', views.delete_permission, name='delete_permission'),
     path('rolesList/', views.RolesListView.as_view(), name='rolesList'),
     path('edit_permission/', views.edit_permission, name='edit_permission'),
     path('edit_role/', views.EditRole.as_view, name='edit_role'),
-    path('edit_menu/', views.edit_Menu, name='edit_menu'),
-    path('add_menu/', views.add_menu, name='add_menu'),
-    path('user_info/', views.UserInfos.as_view(), name='user_info'),
+    path('user_info/', views.UserList.as_view(), name='user_info'),
     path('role_info/', views.role_info, name='role_info'),
     path('update_password/', views.UpdatePassword, name='update_password'),
     path('menu_permission/', views.menu_permission, name='menu_permission'),
@@ -33,6 +29,8 @@ urlpatterns = [
     path('get_csrf/', views.get_csrf, name='get_csrf'),
     path('all_users/', views.getAllUsers.as_view(), name='all_users'),
     path('all_roles/', views.getAllRoles.as_view(), name='all_roles'),
+    path('all_menus/', views.get_all_menus, name='all_menus'),
+
 
 
 ]

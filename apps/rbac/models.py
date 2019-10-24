@@ -141,11 +141,16 @@ class Role(models.Model):
     角色：绑定权限
     """
     rolename = models.CharField(max_length=64, unique=True)
-    menus = models.ManyToManyField("NewMenu")
+    # menus = models.ManyToManyField("NewMenu")
 
     # 定义角色和权限的多对多关系
     def __str__(self):
         return self.rolename
+
+
+class RoleMenu(models.Model):
+    role = models.ForeignKey("Role", on_delete=models.CASCADE, null=True, blank=True)
+    menu = models.ForeignKey("NewMenu", on_delete=models.CASCADE, null=True, blank=True)
 
 
 class UserInfo(models.Model):
