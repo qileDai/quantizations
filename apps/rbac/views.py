@@ -1,7 +1,6 @@
-from django.shortcuts import render, redirect, reverse, HttpResponse
+from django.shortcuts import render, redirect
 from .models import UserInfo, Role, Menu, Permission
 from django.views.generic import View
-# import  rest_framework.response  as rs
 from utils import restful
 from django.core.paginator import Paginator
 from urllib import parse
@@ -10,18 +9,14 @@ from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, Permi
 import hashlib
 from django.middleware.csrf import get_token, rotate_token
 from django.conf import settings
-from .service.init_permission import init_permission
 from utils.mixin import LoginRequireMixin
 from .models import NewMenu,RoleMenu
 from .serializers import PermissonSerializer, MenuSerializer, UserSerializer, RoleSerializer, NewmenuSerializer
-from django.contrib.auth import login, logout, authenticate
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from rest_framework import permissions
 from .token_module import get_token, out_token
-import json
-from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 
 
@@ -318,9 +313,18 @@ class getAllRoles(View):
 
 class getAllUsers(View):
     def get(self, request):
+
         users = UserInfo.objects.all()
         serialize = UserSerializer(users, many=True)
         print(serialize.data)
+        data = serialize.data
+        for i in data:
+            print(i['id'])
+            user = UserInfo.objects.get(pk=i['id'])
+            print(user)
+            role_id = user.roles.all()
+            for aa in role_id:
+                pass
         return restful.result(data=serialize.data)
 
 
@@ -376,7 +380,7 @@ def delete_menu(request):
     print(pk)
     try:
         Menu.objects.filter(pk=pk).delete()
-        return restful.ok()
+        return restful.ok(message="成功")
     except:
         return restful.params_error(message="该目录不存在")
 
@@ -435,9 +439,12 @@ class UserList(View):
 
 def role_info(request):
     role_id = request.POST.get('role_id')
-    role = Role.objects.get(pk=role_id)
-    serialize = RoleSerializer(role)
-    return restful.result(data=serialize.data)
+    if role_id:
+        role = Role.objects.get(pk=role_id)
+        serialize = RoleSerializer(role)
+        return restful.result(data=serialize.data)
+    else:
+        return restful.params_error(message="角色id不存在")
 
 
 """
@@ -455,12 +462,6 @@ class EditRole(View):
             return restful.params_error(message="角色名称不能为空")
         return restful.ok(message="角色修改成功")
 
-
-def edit_Menu(request):
-    menu_id = request.POST.get(2)
-    menu = Menu.objects.get(pk=menu_id)
-    serialize = MenuSerializer(menu)
-    return restful.result(serialize.data)
 
 
 class EditUsers(View):
@@ -481,13 +482,6 @@ class EditUsers(View):
             return restful.params_error(form.get_errors())
 
 
-def delete_permission(request):
-    pk = request.POST.get('pk')
-    try:
-        Permission.objects.filter(pk=pk).delete()
-        return restful.ok()
-    except:
-        return restful.params_error(message="该权限不存在")
 
 
 """
@@ -522,25 +516,14 @@ class UserMenuPermission(View):
     def get(self, request):
         user_id = request.session.get("user_id")  # 获取用户id
         user = UserInfo.objects.get(pk=user_id)
-        menu_obj = NewMenu.objects.filter(parentid=0)
-        serialize = NewmenuSerializer(menu_obj)
         roleids = user.roles
-        print(serialize)
         permission_list = []
-        for role_id in roleids:
-            role = Role.objects.get(pk=1)
-            for menu in role.menus:
-                menu_obj = NewMenu.objects.get(pk=menu)
-                # serialize = NewmenuSerializer(menu_obj)
-                permission = menu_obj.perms
-                permission_list.append(permission)
+        for role in roleids:
+            role_obj = RoleMenu.objects.filter(role=role.id)
+            for menu in role_obj:
+                new_menu = NewMenu.objects.filter(pk = menu.menu)
 
-        context = {
-            'menu_list': serialize.data,
-            'permissions': permission_list
-        }
-        print(context)
-        return restful.result(data=context)
+        return restful.result(data="")
 
 
 class GetUserPermisssion(View):
@@ -559,23 +542,33 @@ class GetUserPermisssion(View):
 class AllotPermissson(View):
     def post(self, request):
         try:
-            menu_list = request.POST.get("menu_list")  # 获取菜单id list
-            print("menu_llist",menu_list)
-            # menu_lsit = [1,2,5]
+            print("sdf")
+            # new_menu = []
+            # menu_list =list(request.POST.get("menu_list"))   # 获取菜单id list
+            # print(type(menu_list),menu_list)
+            menu_list = [2,4]
+
+            # for i in menu_list:
+            #     print(i)
+            #     if i =='':
+            #        print("sdfasdf")
+            #        menu_list.remove(' ')
+            #
+            #     # new_menu.append(i)
+            # print(menu_list)
+
             role_id = request.POST.get("role_id")  # 获取角色id
             # role = Role.objects.get(pk=role_id)
             # print("")
             role_obj  = RoleMenu.objects.filter(role_id=role_id)
-            old_menu = []
+
             if role_obj:
+                old_menu = []
                 for obj in role_obj:
                     old_menu.append(obj.menu_id)
-                print("old_list",old_menu)
-                add_list = list(set(menu_list).difference(set(old_menu)))
-                print("add_list",add_list)
+                adds = list(set(menu_list).difference(set(old_menu)))
                 dele_list = list(set(old_menu).difference(set(menu_list)))
-                print("delete",dele_list)
-                for i in add_list:
+                for i in adds:
                     RoleMenu.objects.create(role_id=role_id,menu_id=i)
                 for j in dele_list:
                     RoleMenu.objects.filter(Q(role_id=role_id) & Q(menu_id=j)).delete()
@@ -612,6 +605,10 @@ def get_all_menus(request):
     menu_list = []
     try:
         menu_data = NewMenu.objects.filter(parentid__isnull=True)
+        permissions = NewMenu.objects.filter(parentid__isnull=False)
+        # for permission in permissions:
+        #    print(permission.objects)
+
         # muess = NewmenuSerializer(menu_data,many=True).data
         # menu_list.append(muess)
         # print(menu_list)
