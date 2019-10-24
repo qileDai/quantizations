@@ -127,11 +127,6 @@ class ExxService(object):
             print("获取多个买单或卖单失败", e)
         return result
 
-    """
-    :param:null
-    :url: https://trade.exx.com/api/getBalance?accesskey=your_access_key&nonce=当前时间毫秒数&signature=请求加密签名串
-    :return
-    """
     def get_balance(self):
         params = ""
         current_time = str(int(time.time() * 1000))
@@ -142,10 +137,6 @@ class ExxService(object):
         # print('+'*20, result)
         return result
 
-    """
-    https://trade.exx.com/api/getChargeAddress?
-    accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&signature=请求加密签名串
-    """
     def get_chargeaddress(self, currency):
         """
         获取充币地址
@@ -160,11 +151,6 @@ class ExxService(object):
         result = response.json()
         return result
 
-    """
-    https://trade.exx.com/api/getChargeRecord?
-    accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&pageIndex=页数&signature=请求加密签名串
-    
-    """
     def get_chargerecord(self, currency):
         """
         获取充值记录
@@ -179,10 +165,6 @@ class ExxService(object):
         result = response.json()
         return result
 
-    """
-    https://trade.exx.com/api/getWithdrawAddress?
-    accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&signature=请求加密签名串
-    """
     def get_withdrawaddress(self, currency):
         """
         获取提币地址
@@ -197,10 +179,6 @@ class ExxService(object):
         result = response.json()
         return result
 
-    """
-    https://trade.exx.com/api/getWithdrawRecord?
-    accesskey=your_access_key&currency=qtum&nonce=当前时间毫秒数&pageIndex=页数&signature=请求加密签名串
-    """
     def get_withdrawrecord(self, currency):
         """
         提币地址
@@ -215,11 +193,6 @@ class ExxService(object):
         result = response.json()
         return result
 
-    """
-    https://trade.exx.com/api/withdraw?
-    accesskey=your_access_key&amount=10&currency=qtum&nonce=当前时间毫秒数
-    &receiveAddr=提币地址&safePwd=提币密码&signature=请求加密签名串
-    """
     def withdraw(self, currency, amount, pwd):
         """
         提币

@@ -256,7 +256,7 @@ class ChargeAccount(generics.CreateAPIView):
         id = request.POST.get('id')
         currency = request.POST.get('currency')
         num = request.POST.get('num')
-        print(id, currency)
+        print(id, currency, num)
         if id and currency and num:
             account_obj = Account.objects.get(id=id)  # 获取账户信息
             platform = account_obj.platform  # 账户对应的平台
@@ -273,6 +273,7 @@ class ChargeAccount(generics.CreateAPIView):
                 info = 0
             property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
             original_assets = float(property_obj.original_assets) + float(num) * float(info)
+            print('/-'*10, original_assets)
             Property.objects.filter(Q(account_id=id) & Q(currency=currency)).update(original_assets=original_assets)
             return restful.ok()
         else:
@@ -321,7 +322,9 @@ class ConfigCurrency(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def post(self, request):
-        currency_list = request.POST.get('currency')
+        currency = request.POST.get('currency')
+        currency_list = list()
+        currency_list.append(currency)
         if currency_list:
             # user_id = request.session.get("user_id")
             user_id = 1
