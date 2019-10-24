@@ -563,9 +563,16 @@ class AllotPermissson(View):
             # role = Role.objects.get(pk=role_id)
             # print("")
             role_obj  = RoleMenu.objects.filter(role_id=role_id)
+            old_menu = []
             if role_obj:
-                for menu in menu_list:
-                    RoleMenu.objects.filter(role=role_id).update(menu=menu)
+                for obj in role_obj:
+                    old_menu.append(obj.menu_id)
+                    list1 = list(set(menu_list).difference(set(old_menu)))
+                    lsit2 = list(set(old_menu).difference(set(menu_list)))
+                    for i in list1:
+                        RoleMenu.objects.create(role_id=role_id,menu_id=i)
+                    for j in lsit2:
+                        RoleMenu.objects.filter(Q(role_id=role_id) & Q(menu_id=j)).delete()
             else:
                 for menu in menu_list:
                     RoleMenu.objects.create(role_id=role_id,menu_id=menu)
@@ -627,39 +634,11 @@ def get_all_menus(request):
                 m += 1
             n = n + 1
         print(menu_list)
+        context = {
+            "menuList":menu_list
+        }
 
-            # for objs in menu_list:
-            #     objs["list"] = menu
-            # menu_list.append(menu)
-            # print(menu_list)
-        # context = {
-        #     'ad':menu_list,
-        #     'ds':meee
-        # }
-        return restful.result(data=menu_list)
-
-            # menu_list.a
-            # for objs in mu_data:
-            #     try:
-            #         m_data = NewMenu.objects.filter(parentid=objs.id)
-            #         pattents_data = NewmenuSerializer(m_data, many=True).data
-            #         for dt in menu_list:
-            #             dt.update(list = pattents_data)
-            #
-            #         # for parrent in m_data:
-            #         #     try:
-            #         #         print(m_data.index(parrent))
-            #         #         parrent_data = NewMenu.objects.filter(parentid=parrent.id)
-            #         #         menus[m_data.index(parrent)][objs.name][parrent.name] = NewmenuSerializer(parrent_data,many=True).data
-            #         #         print(menus)
-            #         #     except:
-            #         #         continue
-            #     except:
-            #         continue
-
-
-
-
+        return restful.result(data=context)
     except:
         return restful.params_error(message=u"获取菜单失败")
 
