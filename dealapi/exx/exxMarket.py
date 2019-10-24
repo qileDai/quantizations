@@ -132,8 +132,9 @@ class MarketCondition(object):
 
 if __name__ == "__main__":
     market = MarketCondition('btc_usdt')
-    result = market.get_ticker()
-    print(result)
+    # result = market.get_ticker()
+    # result = market.get_markets()
+    # print(result)
 
 
 

@@ -185,7 +185,7 @@ class ShowAssert(generics.CreateAPIView):
 
     def post(self, request):
         id = request.POST.get('id')
-        print(id)
+        print('+-'*10, id)
         if id:
             # 获取账户信息
             account_obj = Account.objects.get(id=id)
@@ -207,7 +207,7 @@ class ShowCollectAsset(generics.CreateAPIView):
 
     def post(self, request):
 
-        account_list = request.POST.getlist('account_list')
+        account_list = request.POST.getlist('id')
         print(account_list)
         if account_list:
             accounts = account_list
