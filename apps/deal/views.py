@@ -23,7 +23,7 @@ from utils import restful
 from utils.mixin import LoginRequireMixin
 from rest_framework import generics
 from django.core.serializers import serialize
-from apps.deal.serializers import AccountSerializer, RobotSerializer, OrderInfoSerializer, LastdayAssetsSerializer, PropertySerializer
+from apps.deal.serializers import AccountSerializer, RobotSerializer, OrderInfoSerializer, LastdayAssetsSerializer, PropertySerializer, PlatformSerializer
 from apps.rbac.serializers import UserSerializer
 
 # Create your views here.
@@ -88,6 +88,11 @@ class AddAccount(generics.CreateAPIView):
     # queryset = Account.objects.get_queryset().order_by('id')
     serializer_class = AccountSerializer
 
+    def get(self, request):
+        platform = TradingPlatform.objects.all()
+        data = PlatformSerializer(platform, many=True).data
+        return restful.result(message=data)
+
     def post(self, request):
         model_form = AccountModelForm(request.POST)
         if model_form.is_valid():
@@ -101,6 +106,7 @@ class AddAccount(generics.CreateAPIView):
             obj.save()
             accounts = Account.objects.filter(Q(title=obj) & Q(platform=model_form.cleaned_data['platform']))
             currency = Property.objects.values("currency").distinct()
+
             print(accounts, currency)
             # 给新账户添加币种
             for account in accounts:
@@ -179,7 +185,7 @@ class ShowAssert(generics.CreateAPIView):
 
     def post(self, request):
         id = request.POST.get('id')
-        print(id)
+        print('+-'*10, id)
         if id:
             # 获取账户信息
             account_obj = Account.objects.get(id=id)
@@ -201,7 +207,7 @@ class ShowCollectAsset(generics.CreateAPIView):
 
     def post(self, request):
 
-        account_list = request.POST.getlist('account_list')
+        account_list = request.POST.getlist('id')
         print(account_list)
         if account_list:
             accounts = account_list

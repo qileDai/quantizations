@@ -27,13 +27,14 @@ class GetAssets(object):
                                          self.account_obj.accesskey)
                 # 获取用户的资产信息
                 balance_info = service_api.get_balance()
+                print('------', self.account_obj.secretkey, self.account_obj.accesskey)
                 balance_info = balance_info['funds']
                 print("用户信息", balance_info)
                 # 获取所有行情信息
                 market_api = MarketCondition()
                 market_info = market_api.get_tickers()
             except:
-                print('获取接口失败或获取返回值key失败')
+                print('调用平台接口失败或获取返回值key失败')
         elif self.platform.Platform_name == 'HUOBI':
             # 返回数据格式需要统一
             pass
