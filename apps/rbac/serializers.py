@@ -12,12 +12,12 @@ class RoleSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     create_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
-
+    roles = serializers.SlugRelatedField (many=True, read_only=True,slug_field='rolename')
 
     # roles = RoleSerializer()
     class Meta:
         model = UserInfo
-        fields = ('id','username','phone_number','nickname','email','status','create_time')
+        fields = ('id','username','phone_number','nickname','email','status','create_time','roles')
         # fields = '__all__'
 
 
@@ -47,6 +47,7 @@ class NewmenuSerializer(serializers.ModelSerializer):
 
 
 class MenuSerializer(serializers.ModelSerializer):
+    parent = serializers.SlugRelatedField (many=True, read_only=True,slug_field='parent')
     class Meta:
         model = Menu
         fields = ('id', 'title', 'url', 'parent')

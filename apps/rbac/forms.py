@@ -133,6 +133,6 @@ class EditUserForm(forms.ModelForm,FormMixin):
     pk = forms.IntegerField()
     class Meta:
         model = UserInfo
-        fields = ('username', 'password', 'phone_number', 'email', 'roles', 'status')
+        fields = ('username', 'phone_number', 'email', 'roles', 'status')
 
 # class EditRoleForm(forms)

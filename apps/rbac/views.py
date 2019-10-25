@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 from urllib import parse
 from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, PermissionModelForm, MenuModelForm, \
     EditUserForm
-import hashlib
+import hashlib,re
 from django.middleware.csrf import get_token, rotate_token
 from django.conf import settings
 from utils.mixin import LoginRequireMixin
@@ -494,30 +494,51 @@ class EditRole(View):
         role_id = request.POST.get("role_id")
         role_name = request.POST.get("role_name")
         description = request.POST.get('description')
-        print(role_id,role_name,description)
-        if role_name:
-            Role.objects.filter(pk=role_id).update(rolename=role_name,description=description)
-        else:
+        if role_name =='':
             return restful.params_error(message="角色名称不能为空")
+        elif role_id == '':
+            return restful.params_error(message="角色id不能为空")
+        # elif role_name:
+        #     obj = Role.objects.get(pk=role_id)
+        #     if obj.rolename == role_name:
+        #         return restful.params_error(message="角色名不能跟原角色名一样")
+        else:
+            Role.objects.filter(pk=role_id).update(rolename=role_name,description=description)
         return restful.ok(message="角色修改成功")
 
 
 class EditUsers(View):
+    """
+    编辑用户
+    """
     def post(self, request):
-        form = EditUserForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get("username")
-            phone_number = form.cleaned_data.get("phone_number")
-            password = form.cleaned_data.get("password")
-            email = form.cleaned_data.get("email")
-            status = form.cleaned_data.get("status")
-            roles = form.cleaned_data.get("roles")
-            pk = form.cleaned_data.get("id")
-            UserInfo.objects.filter(pk=pk).update(username=username, phone_number=phone_number, password=password
-                                                  , email=email, status=status, roles=roles)
-            return restful.ok(message="成功")
+        # form  = EditUserForm(request.POST)
+        # phone_number = form.cleaned_data.get("phone_number")
+        # email = form.cleaned_data.get("email")
+        # roles = form.cleaned_data.get("roles")
+        # status = form.cleaned_data.get("status")
+        username = request.POST.get("username")
+        phone_number = request.POST.get("phone_number")
+        email = request.POST.get("email")
+        status = request.POST.get("status")
+        roles = request.POST.get("roles")
+        pk = request.POST.get("user_id")
+        if len(phone_number) != 11:
+            return restful.params_error(message="手机号长度不是11位，请重新输入")
+        # elif email:
+        #     pattern = r'^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}$'
+        #     if re.search(pattern, email):
+        #         pass
+        #     else:
+        #         raise restful.params_error(message='邮箱格式错误!')  # 指定的邮箱格式
         else:
-            return restful.params_error(form.get_errors())
+            user_obj = UserInfo.objects.get(pk=pk)
+            UserInfo.objects.filter(pk=pk).update(username=username, phone_number=phone_number
+                                                  , email=email, status=status)
+            user_obj.roles.remove()
+            user_obj.roles.set(roles)
+            return restful.ok(message="成功")
+
 
 
 """
@@ -536,6 +557,14 @@ class UpdatePassword(View):
                 if password1 != old_password:
                     return restful.params_error(message="原始密码输入错误")
             new_password = request.POST.get('password')
+            if new_password.isdecimal() or new_password.isalpha():
+                return restful.params_error(message='密码为数字加字母')
+            elif len(new_password) < 6:
+                return restful.params_error(message='密码长度需大于6位')
+            else:
+                hl = hashlib.md5()
+                hl.update(new_password.encode(encoding='utf-8'))
+                new_password = hl.hexdigest()
             # password2 = request.POST.get("")
             UserInfo.objects.filter(pk=user_id).update(password=new_password)
         except Exception as e:
@@ -681,6 +710,7 @@ def get_all_menus(request):
         return restful.result(data=context)
     except:
         return restful.params_error(message=u"获取菜单失败")
+
 
 
 def get_pagination_data(paginator, page_obj, around_count=2):
