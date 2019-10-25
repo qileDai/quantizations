@@ -142,8 +142,12 @@ class Role(models.Model):
     """
     rolename = models.CharField(max_length=64, unique=True)
     # menus = models.ManyToManyField("NewMenu")
+    description = models.CharField(max_length=1000,null=True)
+    create_time = models.DateTimeField(auto_now_add=True)
 
     # 定义角色和权限的多对多关系
+    class Meta:
+        ordering = ['-create_time']
     def __str__(self):
         return self.rolename
 

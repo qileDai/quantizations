@@ -313,19 +313,22 @@ class getAllRoles(View):
 
 class getAllUsers(View):
     def get(self, request):
-
+        userList = []
         users = UserInfo.objects.all()
         serialize = UserSerializer(users, many=True)
         print(serialize.data)
-        data = serialize.data
-        for i in data:
-            print(i['id'])
-            user = UserInfo.objects.get(pk=i['id'])
+        datas = serialize.data
+        for  user_data in datas:
+            user = UserInfo.objects.get(pk=user_data['id'])
+            print(type(user_data))
             print(user)
-            role_id = user.roles.all()
-            for aa in role_id:
-                pass
-        return restful.result(data=serialize.data)
+            roles = user.roles.all()
+            for role in roles:
+                print(role.rolename)
+                user_data['role'] = role.rolename
+                userList.append(user_data)
+
+        return restful.result(data=userList)
 
 
 class PermissionListView(LoginRequireMixin, View):
@@ -544,7 +547,13 @@ class AllotPermissson(View):
         try:
             print("sdf")
             # new_menu = []
-            # menu_list =list(request.POST.get("menu_list"))   # 获取菜单id list
+            # menu_list =list(request.POST.getlist("menu_list"))   # 获取菜单id list
+            # print(menu_list)
+            # print(type(menu_list))
+            # for menu in menu_list:
+            #     print(type(list(menu)))
+            #     for m in menu:
+            #         print(m)
             # print(type(menu_list),menu_list)
             menu_list = [2,4]
 
@@ -603,22 +612,16 @@ def menu_permission(request):
 
 def get_all_menus(request):
     menu_list = []
+    permission_list = []
     try:
         menu_data = NewMenu.objects.filter(parentid__isnull=True)
-        permissions = NewMenu.objects.filter(parentid__isnull=False)
-        # for permission in permissions:
-        #    print(permission.objects)
-
-        # muess = NewmenuSerializer(menu_data,many=True).data
-        # menu_list.append(muess)
-        # print(menu_list)
+        permissions = NewMenu.objects.all().values().order_by('orderNum')
+        for permission in permissions:
+           permission_list.append(permission['perms'])
         n = 0
         for i in menu_data:
             data1 = NewmenuSerializer(i).data
             menu_list.append(data1)
-            print('+-'*10)
-            print(n)
-            print(menu_list[n])
             menu_list[n]['list'] = list()
             i_data = NewMenu.objects.filter(parentid=i.id)
             m = 0
@@ -638,7 +641,8 @@ def get_all_menus(request):
             n = n + 1
         print(menu_list)
         context = {
-            "menuList":menu_list
+            "menuList":menu_list,
+            'permission':permission_list
         }
 
         return restful.result(data=context)
