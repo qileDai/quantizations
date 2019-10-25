@@ -492,8 +492,9 @@ class EditRole(View):
     def post(self, request):
         role_id = request.POST.get("role_id")
         role_name = request.POST.get("role_name")
+        description = request.POST.get('description')
         if role_name:
-            Role.objects.filter(pk=role_id).update(rolename=role_name)
+            Role.objects.filter(pk=role_id).update(rolename=role_name,description=description)
         else:
             return restful.params_error(message="角色名称不能为空")
         return restful.ok(message="角色修改成功")
