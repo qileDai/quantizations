@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import UserInfo, Role, Menu, Permission
 from django.views.generic import View
-from utils import restful
+from utils import restful,decrypt
 from django.core.paginator import Paginator
 from urllib import parse
 from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, PermissionModelForm, MenuModelForm, \
@@ -528,14 +528,16 @@ class EditUsers(View):
         # elif email:
         #     pattern = r'^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}$'
         #     if re.search(pattern, email):
-        #         pass
+        #         print("sfasdf")
+        #         return
         #     else:
         #         raise restful.params_error(message='邮箱格式错误!')  # 指定的邮箱格式
         else:
+            print("sdfasdfsdfadsfasd")
             user_obj = UserInfo.objects.get(pk=pk)
             UserInfo.objects.filter(pk=pk).update(username=username, phone_number=phone_number
                                                   , email=email, status=status)
-            user_obj.roles.remove()
+            # user_obj.roles.remove()
             user_obj.roles.set(roles)
             return restful.ok(message="成功")
 
@@ -544,8 +546,6 @@ class EditUsers(View):
 """
 修改账户密码
 """
-
-
 class UpdatePassword(View):
     def post(self, request):
         try:
@@ -710,6 +710,15 @@ def get_all_menus(request):
         return restful.result(data=context)
     except:
         return restful.params_error(message=u"获取菜单失败")
+
+class SelectMenu(View):
+    def get(self,request):
+        try:
+            allmenu_list = NewMenu.objects.all()
+            serialize = NewmenuSerializer(allmenu_list,many=True)
+            return restful.result(data=serialize.data)
+        except:
+            return restful.params_error(message="获取菜单详情失败")
 
 
 
