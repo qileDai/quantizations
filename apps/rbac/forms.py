@@ -108,17 +108,7 @@ class RoleModelForm(forms.ModelForm, FormMixin):
 
     class Meta:
         model = Role
-        fields = '__all__'
-        labels = {
-            'rolename': '角色',
-            'permissions': '权限',
-        }
-class NewRoleForm(forms.ModelForm,FormMixin):
-
-    class Meta:
-        model = Role
-        fields = '__all__'
-
+        fields = ('rolename','description')
 
 
 
@@ -139,15 +129,8 @@ class MenuModelForm(ModelForm, FormMixin):
             'parent': '父级菜单',
         }
 
-
-# class EditRoleForm(forms.ModelForm,FormMixin):
-#     pk = forms.IntegerField()
-#     class Meta:
-#         model = Role
-#         fields = ("rolename")
-
 class EditUserForm(forms.ModelForm,FormMixin):
-
+    pk = forms.IntegerField()
     class Meta:
         model = UserInfo
-        fields = ("username","phone_number","password","nickname","email","status","roles")
+        fields = ('username', 'password', 'phone_number', 'email', 'roles', 'status','confirm_password')

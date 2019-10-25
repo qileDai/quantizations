@@ -10,6 +10,8 @@ urlpatterns = [
     path('account_list/', views.userListView.as_view(), name='account_list'),
     path('role/', views.role, name='role'),
     path('add_roles/', views.add_roles, name='add_roles'),
+    path('edit_users/', views.EditUsers.as_view(), name='edit_users'),
+
     path('add_users/', views.add_users, name='add_users'),
     path('delete_users/', views.delete_users, name='delete_users'),
     path('delete_roles/', views.delete_roles, name='delete_roles'),
@@ -27,7 +29,7 @@ urlpatterns = [
     path('user_permission/', views.UserMenuPermission.as_view(), name='user_permission'),
     path('get_csrf/', views.get_csrf, name='get_csrf'),
     path('all_users/', views.getAllUsers.as_view(), name='all_users'),
-    path('all_roles/', views.getAllRoles.as_view(), name='all_roles'),
+    path('all_roles/', views.RoleList.as_view(), name='all_roles'),
     path('all_menus/', views.get_all_menus, name='all_menus'),
 
 
