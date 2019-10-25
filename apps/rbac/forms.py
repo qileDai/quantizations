@@ -134,3 +134,5 @@ class EditUserForm(forms.ModelForm,FormMixin):
     class Meta:
         model = UserInfo
         fields = ('username', 'password', 'phone_number', 'email', 'roles', 'status')
+
+# class EditRoleForm(forms)

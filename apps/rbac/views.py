@@ -318,21 +318,21 @@ class userListView(LoginRequireMixin, View):
 class RoleList(View):
     def get(self, request):
         roles = Role.objects.all()
-        pageNum = request.GET.get('pageIndex', 1)
-        pagesize = request.GET.get('pageSize')
-        rolename = request.GET.get('rolename')
+        # pageNum = request.GET.get('pageIndex', 1)
+        # pagesize = request.GET.get('pageSize')
+        # rolename = request.GET.get('rolename')
         roles = Role.objects.all()
         if roles:
             serialize = RoleSerializer(roles, many=True)
             roles_data = serialize.data
-        else:
-            return restful.params_error(message="no roles data")
-        if rolename:
-            roles = Role.objects.filter(rolename__icontains=rolename)
-            serialize = RoleSerializer(roles, many=True)
-            roles_data = serialize.data
+        # else:
+        #     return restful.params_error(message="no roles data")
+        # if rolename:
+        #     roles = Role.objects.filter(rolename__icontains=rolename)
+        #     serialize = RoleSerializer(roles, many=True)
+        #     roles_data = serialize.data
 
-        return restful.result(data=serialize.roles_data)
+        return restful.result(data=roles_data)
 
 
 """
@@ -344,13 +344,14 @@ class getAllUsers(View):
     def get(self, request):
         userList = []
         users = UserInfo.objects.all()
-        for user in users:
-            user_data = UserSerializer(user, many=True).data
-            userList.append(user_data)
+        # for user in users:
+        #     user_data = UserSerializer(user, many=True).data
+        #     userList.append(user_data)
+        #     print(userList)
 
-        # serialize = UserSerializer(users, many=True)
-        # print(serialize.data)
-        # datas = serialize.data
+        serialize = UserSerializer(users, many=True)
+        print(serialize.data)
+        datas = serialize.data
         # for  user_data in datas:
         #     user = UserInfo.objects.get(pk=user_data['id'])
         #     print(type(user_data))
@@ -361,7 +362,7 @@ class getAllUsers(View):
         #         user_data['role'] = role.rolename
         #         userList.append(user_data)
 
-        return restful.result(data=userList)
+        return restful.result(data=datas)
 
 
 class PermissionListView(LoginRequireMixin, View):
@@ -493,6 +494,7 @@ class EditRole(View):
         role_id = request.POST.get("role_id")
         role_name = request.POST.get("role_name")
         description = request.POST.get('description')
+        print(role_id,role_name,description)
         if role_name:
             Role.objects.filter(pk=role_id).update(rolename=role_name,description=description)
         else:
