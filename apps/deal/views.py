@@ -359,9 +359,10 @@ class SelectCurrency(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def post(self, request):
-        currency_list = request.POST.get('currency')
-        print(type(currency_list))
-        print(currency_list)
+        data = request.body.decode("utf-8")
+        print(data)
+        currency_data = json.loads(data)
+        currency_list = currency_data.get('currency')
         if currency_list:
             Property.objects.values("currency").update(currency_status='0')
             LastdayAssets.objects.values("currency").update(currency_status='0')

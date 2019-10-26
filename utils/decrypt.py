@@ -12,10 +12,11 @@ def decrypt_md5(md5_value):
     for k in range(5,10):
         for item in permutations(all_letters,k):
             item=''.join(item)
-            print('.',end='')
+            # print('.',end='')
             if md5(item.encode()).hexdigest()==md5_value:
                 return item
 md5_value  ='e7d057704ea5206d8cb61280741238f5'
+# md5_value = 'dbc9bbf04951e4322dcf5fe6f23fb551'
 start=time()
 result=decrypt_md5(md5_value)
 if result:
