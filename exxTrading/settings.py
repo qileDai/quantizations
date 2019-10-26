@@ -180,7 +180,10 @@ SAFE_URL = [
 LOGIN = 'is_login'
 
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.AutoSchema'
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.AutoSchema',
+    # 分页
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  # LimitOffsetPagination 分页风格
+    'PAGE_SIZE': 20,  # 每页多少条记录
 }
 
 # 分钟(0-59) 小时(0-23) 每个月的哪一天(1-31) 月份(1-12) 周几(0-6) shell脚本或者命令

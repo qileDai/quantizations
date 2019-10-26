@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect
 from .models import UserInfo, Role, Menu, Permission
 from django.views.generic import View
-from utils import restful,decrypt
+from utils import restful, decrypt
 from django.core.paginator import Paginator
 from urllib import parse
 from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, PermissionModelForm, MenuModelForm, \
     EditUserForm
-import hashlib,re
+import hashlib, re
 from django.middleware.csrf import get_token, rotate_token
 from django.conf import settings
 from utils.mixin import LoginRequireMixin
@@ -19,6 +19,8 @@ from rest_framework import permissions
 from .token_module import get_token, out_token
 from django.db.models import Q
 from rest_framework import generics
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
+from rest_framework.views import APIView
 
 
 # Create your views here.
@@ -35,13 +37,6 @@ def is_login(func):
     return wrapper
 
 
-def get_csrf(request):
-    csrf_token = get_token(request)
-    print(csrf_token)
-    context = {
-        "csrf_token": csrf_token
-    }
-    return restful.result(data=context)
 
 
 class Login(View):
@@ -124,7 +119,6 @@ def login(request):
         return restful.result(data=context)
 
 
-
 def index(request):
     if 'is_login' in request.session:
         return render(request, 'cms/index.html')
@@ -138,7 +132,6 @@ def logout(request):
     # return redirect('../../login/')
 
 
-
 def account(request):
     roles = Role.objects.all()
     users = UserInfo.objects.all()
@@ -149,14 +142,12 @@ def account(request):
     return render(request, 'cms/account.html', context=context)
 
 
-
 def menu(request):
     menus = Menu.objects.all()
     context = {
         'menus': menus
     }
     return render(request, 'cms/menu.html', context=context)
-
 
 
 def permission(request):
@@ -170,16 +161,6 @@ def permission(request):
 
 
 
-def role(request):
-    roles = Role.objects.all()
-    permissions = Permission.objects.all()
-    # print(permissions)
-    context = {
-        'roles': roles,
-        'permissions': permissions
-    }
-    return render(request, 'cms/role.html', context=context)
-
 
 
 def users_list(request):
@@ -190,10 +171,10 @@ def users_list(request):
     return render(request, 'cms/account.html', context=context)
 
 
-
 class AddRoles(generics.CreateAPIView):
     serializer_class = RoleSerializer
-    def post(self,request):
+
+    def post(self, request):
         form = RoleModelForm(request.POST)
         if form.is_valid():
             rolename = form.cleaned_data.get("rolename")
@@ -203,10 +184,11 @@ class AddRoles(generics.CreateAPIView):
         else:
             return restful.params_error(message=form.get_errors())
 
-# class AddRole(View):
-#     serializer_class = UserSerializer
 
 
+"""
+添加用户
+"""
 def add_roles(request):
     form = RoleModelForm(request.POST)
     if form.is_valid():
@@ -216,7 +198,6 @@ def add_roles(request):
         return restful.ok()
     else:
         return restful.params_error(message=form.get_errors())
-
 
 
 def add_users(request):
@@ -236,14 +217,19 @@ def add_menu(request):
     else:
         return restful.params_error(message=form.get_errors())
 
-
-
+"""
+删除用户
+"""
 def delete_users(request):
     pk = request.POST.get('user_id')
+    print(pk)
     # print(pk)
     try:
-        UserInfo.objects.filter(pk=pk).delete()
-        return restful.ok(message="成功")
+        if pk:
+            UserInfo.objects.filter(pk=pk).delete()
+            return restful.ok(message="成功")
+        else:
+            return restful.params_error(message="user_id为空")
     except:
         return restful.params_error(message="该用户不存在")
 
@@ -281,58 +267,80 @@ class RolesListView(LoginRequireMixin, View):
         return render(request, 'cms/role.html', context=context)
 
 
-class userListView(LoginRequireMixin, View):
+class userListView(generics.ListCreateAPIView):
     def get(self, request):
-        page = int(request.GET.get('p', 1))
-        print(page)
+        pageNum = request.GET.get('pageIndex', 1)
+        pagesize = request.GET.get('pageSize')
         username = request.GET.get('username')
         status = request.GET.get('status')
+        paginator = Paginator(UserInfo.objects.all(),20)
+        print("ss",paginator)
         users = UserInfo.objects.all()
-
+        print("aaa",users)
         if username:
-            users = UserInfo.objects.filter(username__icontains=username)
-        if status:
-            users = UserInfo.objects.filter(status__icontains=status)
-
-        paginator = Paginator(users, 10)
-        page_obj = paginator.page(page)
-        context_data = get_pagination_data(paginator, page_obj)
+            paginator = Paginator(UserInfo.objects.filter(username=username), 20)
+            users = UserInfo.objects.filter(username=username)
+        elif status:
+            paginator = Paginator(UserInfo.objects.filter(status=status), 20)
+            users = UserInfo.objects.filter(status=status)
+        elif username & status:
+            paginator = Paginator(UserInfo.objects.filter(Q(status=status) & Q(username=username)), 20)
+            users = UserInfo.objects.filter(Q(status=status) & Q(username=username))
+        page_obj = paginator.page(int(pageNum))
+        numPerPage = len(page_obj.object_list),
+        totalCount = users.count(),
+        totalPageNum = paginator.num_pages
+        # context_data = get_pagination_data(paginator, page_obj)
         context = {
-            'users': page_obj.object_list,
-            'username': username,
-            'status': status,
-            'page_obj': page_obj,
-            'paginator': paginator,
-            'roles': Role.objects.all(),
-            'url_query': '&' + parse.urlencode({
-                'username': username or '',
-                'status': status or '',
-            })
+            'numPerPage': numPerPage,
+            'PageNum': int(pageNum),
+            'result': UserSerializer(page_obj.object_list, many=True).data,
+            'totalCount': totalCount,
+            'totalPageNum': totalPageNum,
         }
-        # 更新context数据
-        context.update(context_data)
 
-        return render(request, 'cms/account.html', context=context)
+        return restful.result(data=context)
 
 
 class RoleList(View):
     def get(self, request):
+        roleList = []
         roles = Role.objects.all()
         # pageNum = request.GET.get('pageIndex', 1)
         # pagesize = request.GET.get('pageSize')
         # rolename = request.GET.get('rolename')
         roles = Role.objects.all()
-        if roles:
-            serialize = RoleSerializer(roles, many=True)
-            roles_data = serialize.data
-        # else:
+        m = 0
+        for role in roles:
+            role_data = RoleSerializer(role).data
+            roleList.append(role_data)
+            roleList[m]['menuIdList'] = list()
+            print(roleList)
+            menus = RoleMenu.objects.filter(role=role.id)
+            n= 0
+            for menu in menus:
+                roleList[m]['menuIdList'].append(menu.menu_id)
+                n += 1
+            m += 1
+        # context = {
+        #     "rolelist":roleList,
+        #     "menu_lsit":menu_list
+        # }
+        #
+        #         roleList['menuIdList'] = menu.id
+        # print(roleList)
+
+        # if roles:
+        #     serialize = RoleSerializer(roles, many=True)
+        #     roles_data = serialize.data
+        # # else:
         #     return restful.params_error(message="no roles data")
         # if rolename:
         #     roles = Role.objects.filter(rolename__icontains=rolename)
         #     serialize = RoleSerializer(roles, many=True)
         #     roles_data = serialize.data
 
-        return restful.result(data=roles_data)
+        return restful.result(data=roleList)
 
 
 """
@@ -342,116 +350,49 @@ class RoleList(View):
 
 class getAllUsers(View):
     def get(self, request):
-        userList = []
+        # username = request.GET.get('username')
+        # status = request.GET.get('status')
+        # if username:
+        #     users_list = UserInfo.objects.filter(username__icontains=username)
+        #     print(1)
+        #     print(users_list)
+        # elif status:
+        #     users_list = UserInfo.objects.filter(status=status)
+        #     print(2)
+        #     print(users_list)
+        # elif username & status:
+        #     users_list = UserInfo.objects.filter(Q(status=status) & Q(username__icontains=username))
+        #     print(3)
+        #     print(users_list)
+        # else:
+        #     users_list = UserInfo.objects.all()
+        #     # 根据url参数 获取分页数据
+        # obj = StandardResultSetPagination()
+        # page_user_list = obj.paginate_queryset(users_list, request, self)
+        #
+        # # 对数据序列化 普通序列化 显示的只是数据
+        # ser = UserSerializer(instance=page_user_list, many=True)  # 多个many=True # instance：把对象序列化
+        # data = obj.get_paginated_response(ser.data)
         users = UserInfo.objects.all()
-        # for user in users:
-        #     user_data = UserSerializer(user, many=True).data
-        #     userList.append(user_data)
-        #     print(userList)
-
-        serialize = UserSerializer(users, many=True)
-        print(serialize.data)
-        datas = serialize.data
-        # for  user_data in datas:
-        #     user = UserInfo.objects.get(pk=user_data['id'])
-        #     print(type(user_data))
-        #     print(user)
-        #     roles = user.roles.all()
-        #     for role in roles:
-        #         print(role.rolename)
-        #         user_data['role'] = role.rolename
-        #         userList.append(user_data)
-
-        return restful.result(data=datas)
-
-
-class PermissionListView(LoginRequireMixin, View):
-    def get(self, request):
-        page = int(request.GET.get('p', 1))
-        permission = request.GET.get('permission-seach')
-        permissions = Permission.objects.all()
-        if permission:
-            permissions = Permission.objects.filter(title__icontains=permission)
-        paginator = Paginator(permissions, 2)
-        page_obj = paginator.page(page)
-        context_data = get_pagination_data(paginator, page_obj)
-        context = {
-            'permissions': page_obj.object_list,
-            'page_obj': page_obj,
-            'paginator': paginator,
-            'permission': permission,
-            'menus': Menu.objects.all(),
-            'url_query': '&' + parse.urlencode({
-                'permission': permission or '',
-            })
-        }
-        context.update(context_data)
-        return render(request, 'cms/permission.html', context=context)
-
-
-class MenuListView(LoginRequireMixin, View):
-    def get(self, request):
-        page = int(request.GET.get('p', 1))
-        menu = request.GET.get('munu')
-        menus = Menu.objects.all()
-        if menu:
-            menus = Menu.objects.filter(title__icontains=menu)
-        paginator = Paginator(menus, 10)
-        page_obj = paginator.page(page)
-        context_data = get_pagination_data(paginator, page_obj)
-        context = {
-            'menus': page_obj.object_list,
-            'page_obj': page_obj,
-            'paginator': paginator,
-            'menu': menu,
-            'url_query': '&' + parse.urlencode({
-                'menu': menu or '',
-            })
-        }
-        context.update(context_data)
-        return render(request, 'cms/menu.html', context=context)
-
-
-def delete_menu(request):
-    pk = request.POST.get('pk')
-    print(pk)
-    try:
-        Menu.objects.filter(pk=pk).delete()
-        return restful.ok(message="成功")
-    except:
-        return restful.params_error(message="该目录不存在")
+        ser = UserSerializer(users,many=True)
+        return restful.result(data=ser.data)
 
 
 
+"""
+删除角色
+"""
 def delete_roles(request):
     pk = request.POST.get('role_id')
     try:
-        Role.objects.filter(pk=pk).delete()
-        return restful.ok(message="成功")
+        if pk:
+            Role.objects.filter(pk=pk).delete()
+            return restful.ok(message="成功")
+        else:
+            return restful.params_error(message="role_id is null")
     except:
         return restful.params_error(message='该角色不存在')
 
-
-
-def add_permission(request):
-    form = PermissionModelForm(request.POST)
-    print('*' * 20)
-    if form.is_valid():
-        title = form.cleaned_data.get('title')
-        url = form.cleaned_data.get('url')
-        menu_id = form.cleaned_data.get('menu')
-        menu = Menu.objects.get(pk=menu_id)
-        Permission.objects.create(title=title, url=url, menu=menu)
-        return restful.ok()
-    else:
-        return restful.params_error(form.get_errors())
-
-
-def edit_permission(request):
-    permission_id = request.POST.get('permission_id')
-    permissionss = Permission.objects.get(pk=permission_id)
-    serialize = PermissonSerializer(permissionss)
-    return restful.result(data=serialize.data)
 
 
 """
@@ -494,7 +435,7 @@ class EditRole(View):
         role_id = request.POST.get("role_id")
         role_name = request.POST.get("role_name")
         description = request.POST.get('description')
-        if role_name =='':
+        if role_name == '':
             return restful.params_error(message="角色名称不能为空")
         elif role_id == '':
             return restful.params_error(message="角色id不能为空")
@@ -503,7 +444,7 @@ class EditRole(View):
         #     if obj.rolename == role_name:
         #         return restful.params_error(message="角色名不能跟原角色名一样")
         else:
-            Role.objects.filter(pk=role_id).update(rolename=role_name,description=description)
+            Role.objects.filter(pk=role_id).update(rolename=role_name, description=description)
         return restful.ok(message="角色修改成功")
 
 
@@ -531,8 +472,7 @@ class EditUsers(View):
         #         print("sfasdf")
         #         return
         #     else:
-        #         raise restful.params_error(message='邮箱格式错误!')  # 指定的邮箱格式
-        else:
+        #         raise restful.params_error(message='邮箱格式错误!')  # 指定的邮箱格式                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           else:
             print("sdfasdfsdfadsfasd")
             user_obj = UserInfo.objects.get(pk=pk)
             UserInfo.objects.filter(pk=pk).update(username=username, phone_number=phone_number
@@ -542,10 +482,11 @@ class EditUsers(View):
             return restful.ok(message="成功")
 
 
-
 """
 修改账户密码
 """
+
+
 class UpdatePassword(View):
     def post(self, request):
         try:
@@ -711,15 +652,15 @@ def get_all_menus(request):
     except:
         return restful.params_error(message=u"获取菜单失败")
 
+
 class SelectMenu(View):
-    def get(self,request):
+    def get(self, request):
         try:
             allmenu_list = NewMenu.objects.all()
-            serialize = NewmenuSerializer(allmenu_list,many=True)
+            serialize = NewmenuSerializer(allmenu_list, many=True)
             return restful.result(data=serialize.data)
         except:
             return restful.params_error(message="获取菜单详情失败")
-
 
 
 def get_pagination_data(paginator, page_obj, around_count=2):
@@ -752,3 +693,23 @@ def get_pagination_data(paginator, page_obj, around_count=2):
         'right_has_more': right_has_more,
         'num_pages': num_pages
     }
+
+
+class ArticlePagination(PageNumberPagination):
+    page_size = 20  # 表示每页的默认显示数量
+    page_size_query_param = 'page_size'  # 表示url中每页数量参数
+    page_query_param = 'p'  # 表示url中的页码参数
+    max_page_size = 100  # 表示每页最大显示数量，做限制使用，避免突然大量的查询数据，数据库崩溃
+
+"""
+分页配置
+"""
+class StandardResultSetPagination(LimitOffsetPagination):
+    #默认每页显示的条数
+    default_limit = 10
+    #url 中传入的显示数据条数的参数
+    limit_query_param = 'pageSize'
+    #url中传入的数据位置的参数
+    offset_query_param = 'pageIndex'
+    #最大每页显示条数
+    max_limit = None

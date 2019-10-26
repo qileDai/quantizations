@@ -181,7 +181,9 @@ class UserInfo(models.Model):
     def __str__(self):
         return self.username
 
-
+class teacher(models.Model):
+    name = models.CharField(max_length=100,null=True)
+    user = models.ManyToManyField('Role',null=True)
 ''' 继承自带的用户表
 
 settings.py:

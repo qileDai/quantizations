@@ -5,6 +5,7 @@ from .models import Role, UserInfo, Menu, Permission,NewMenu
 
 class RoleSerializer(serializers.ModelSerializer):
     create_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    # roles = serializers.SlugRelatedField(many=True, read_only=True, slug_field='menu')
     class Meta:
         model = Role
         fields ="__all__"
