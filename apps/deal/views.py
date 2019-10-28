@@ -46,8 +46,11 @@ class AccountList(generics.CreateAPIView):
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
         # 分页
-        paginator = Paginator(Account.objects.filter(users__id=user_id), 3)
-        page_obj = paginator.page(int(pageNum))
+        try:
+            paginator = Paginator(Account.objects.filter(users__id=user_id), 3)
+            page_obj = paginator.page(int(pageNum))
+        except:
+            return restful.params_error(message='页码错误')
         # 获取勾选币种
         currency_list = Property.objects.filter(currency_status='1').values("currency", ).distinct()
         ret = list(currency_list)
@@ -220,12 +223,13 @@ class ShowCollectAsset(generics.CreateAPIView):
         if account_list:
             accounts = account_list
         else:
+            return restful.result(data='')
             # user_id = request.session.get("user_id")
-            user_id = 1
-            account_lists = Account.objects.filter(users=user_id)
-            for account in account_lists:
-                accounts = list()
-                accounts.append(account.id)
+            # user_id = 1
+            # account_lists = Account.objects.filter(users=user_id)
+            # for account in account_lists:
+            #     accounts = list()
+            #     accounts.append(account.id)
 
         flag = True
         context_list = list()
@@ -792,10 +796,13 @@ class RobotList(generics.CreateAPIView):
         if status:
             robots = Robot.objects.filter(status=status)
 
-        paginator = Paginator(robots, 10)
-        page_obj = paginator.page(pageNum)
-        numPerPage = len(page_obj.object_list),
-        totalCount = robots.count(),
+        try:
+            paginator = Paginator(robots, 10)
+            page_obj = paginator.page(pageNum)
+        except:
+            return restful.params_error(message='页码错误')
+        numPerPage = len(page_obj.object_list)
+        totalCount = robots.count()
         totalPageNum = paginator.num_pages
 
         context = {
