@@ -56,8 +56,9 @@ class AccountList(generics.CreateAPIView):
         numPerPage = len(page_obj.object_list),
         totalCount = accounts.count(),
         totalPageNum = paginator.num_pages
+        print(numPerPage)
         context = {
-            'numPerPage': numPerPage,
+            'numPerPage': numPerPage[0],
             'PageNum': int(pageNum),
             'result': AccountSerializer(page_obj.object_list, many=True).data,
             'totalCount': totalCount,
@@ -275,7 +276,8 @@ class ChargeAccount(generics.CreateAPIView):
                 elif str(platform) == 'HUOBI':
                     pass
             except:
-                info = 0
+                print('未获取到该币种当前价')
+                info = 1
             try:
                 property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
                 original_assets = float(property_obj.original_assets) + float(num) * float(info)
@@ -311,7 +313,7 @@ class WithDraw(generics.CreateAPIView):
                 elif str(platform) == 'HUOBI':
                     pass
             except:
-                print('未获取到当前价')
+                print('未获取到该币种当前价')
                 last = 1
             if currency:
                 # 提币折合成usdt
