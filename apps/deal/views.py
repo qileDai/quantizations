@@ -53,8 +53,8 @@ class AccountList(generics.CreateAPIView):
         ret = list(currency_list)
         data = json.dumps(ret)
         # print(paginator.num_pages)
-        numPerPage = len(page_obj.object_list),
-        totalCount = accounts.count(),
+        numPerPage = len(page_obj.object_list)
+        totalCount = accounts.count()
         totalPageNum = paginator.num_pages
         print(totalCount)
         context = {
@@ -212,8 +212,11 @@ class ShowCollectAsset(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def post(self, request):
-
-        account_list = request.POST.getlist('id')
+        data = request.body.decode("utf-8")
+        print(data)
+        currency_data = json.loads(data)
+        account_list = currency_data.get('id')
+        # account_list = request.POST.getlist('id')
         print(account_list)
         if account_list:
             accounts = account_list
