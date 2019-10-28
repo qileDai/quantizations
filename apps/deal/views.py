@@ -56,12 +56,12 @@ class AccountList(generics.CreateAPIView):
         numPerPage = len(page_obj.object_list),
         totalCount = accounts.count(),
         totalPageNum = paginator.num_pages
-        print(numPerPage)
+        print(totalCount)
         context = {
             'numPerPage': numPerPage[0],
             'PageNum': int(pageNum),
             'result': AccountSerializer(page_obj.object_list, many=True).data,
-            'totalCount': totalCount,
+            'totalCount': totalCount[0],
             'totalPageNum': totalPageNum,
             'currency_list': data,
         }
