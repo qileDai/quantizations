@@ -59,17 +59,17 @@ class AccountList(generics.CreateAPIView):
         numPerPage = len(page_obj.object_list)
         totalCount = accounts.count()
         totalPageNum = paginator.num_pages
-        print(type(numPerPage), type(totalCount))
         context = {
             'numPerPage': numPerPage,
             'PageNum': int(pageNum),
             'result': AccountSerializer(page_obj.object_list, many=True).data,
+            # 'result': AccountSerializer(page_obj.object_list, fields=('id', 'title'), many=True).data,
             'totalCount': totalCount,
             'totalPageNum': totalPageNum,
             'currency_list': data,
         }
         # print(context)
-        return restful.result(data=context)
+        return restful.result(data=context['result'])
 
 
 class GetCurrencies(generics.CreateAPIView):
@@ -216,10 +216,8 @@ class ShowCollectAsset(generics.CreateAPIView):
 
     def post(self, request):
         data = request.body.decode("utf-8")
-        print(data)
-        currency_data = json.loads(data)
+        currency_data = json.loads(data)    # 反序列化
         account_list = currency_data.get('id')
-        print(account_list)
         if account_list:
             accounts = account_list
         else:
@@ -247,11 +245,24 @@ class ShowCollectAsset(generics.CreateAPIView):
         for key in context_list[0]['assets_dict']:
             for elem in context_list[1:]:
                 for key1, value1 in elem['assets_dict'][key].items():
-                    if key1 in context_list[0]['assets_dict'][key]:
-                        context_list[0]['assets_dict'][key][key1] = float(context_list[0]['assets_dict'][key][key1]) \
-                                                                    + float(value1)
+                    if key1 is 'last':
+                        continue
+                    elif key1 in context_list[0]['assets_dict'][key]:
+                        context_list[0]['assets_dict'][key][key1] = \
+                            float(context_list[0]['assets_dict'][key][key1]) + float(value1)
                     else:
                         context_list[0]['assets_dict'][key][key1] = value1
+        # 损益表汇总数据
+        for key in context_list[0]['profit_loss_dict']:
+            for elem in context_list[1:]:
+                for key1, value1 in elem['profit_loss_dict'][key].items():
+                    if key1 is 'last':
+                        continue
+                    elif key1 in context_list[0]['profit_loss_dict'][key]:
+                        context_list[0]['profit_loss_dict'][key][key1] = \
+                            float(context_list[0]['profit_loss_dict'][key][key1]) + float(value1)
+                    else:
+                        context_list[0]['profit_loss_dict'][key][key1] = value1
         # 汇总资产变化/初始总资产/历史盈亏/
         print('资产汇总', '-' * 20)
         print(context_list[0])
@@ -763,9 +774,9 @@ class WarningUsers(generics.CreateAPIView):
         users = UserInfo.objects.filter(status=1)
         print(users)
         # data = serialize('json', users)
-        serialize = UserSerializer(users, many=True)
+        usr = UserSerializer(users, many=True)
 
-        return restful.result(data=serialize.data)
+        return restful.result(data=usr.data)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -778,9 +789,9 @@ class RobotList(generics.CreateAPIView):
 
     def get(self, request):
         pageNum = int(request.GET.get('pageIndex', 1))
+        pagesize = request.GET.get('pageSize')
         if pageNum is None:
             return restful.params_error(message='参数为空')
-        pagesize = request.GET.get('pageSize')
         # 拿到下拉框交易币种值
         curry = request.GET.get('deal-curry')
         # 拿到下拉框交易市场值
