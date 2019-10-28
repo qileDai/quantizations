@@ -27,9 +27,8 @@ class GetAssets(object):
                                          self.account_obj.accesskey)
                 # 获取用户的资产信息
                 balance_info = service_api.get_balance()
-                print('------', self.account_obj.secretkey, self.account_obj.accesskey)
                 balance_info = balance_info['funds']
-                print("用户信息", balance_info)
+                # print("用户信息", balance_info)
                 # 获取所有行情信息
                 market_api = MarketCondition()
                 market_info = market_api.get_tickers()
@@ -59,7 +58,6 @@ class GetAssets(object):
         for lastday_asset in lastday_obj:
             # print(lastday_asset.lastday_assets)
             lastday_assets += float(lastday_asset.lastday_assets)*float(lastday_asset.last)
-
         # 计算账户总初始资产/总提币，获取币种初始资产
         for queryset in show_currency:
             currency = queryset.currency
