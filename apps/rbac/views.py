@@ -305,42 +305,42 @@ class userListView(generics.ListCreateAPIView):
 
 class RoleList(View):
     def get(self, request):
-        roleList = []
-        roles = Role.objects.all()
-        # pageNum = request.GET.get('pageIndex', 1)
-        # pagesize = request.GET.get('pageSize')
-        # rolename = request.GET.get('rolename')
-        roles = Role.objects.all()
-        m = 0
-        for role in roles:
-            role_data = RoleSerializer(role).data
-            roleList.append(role_data)
-            roleList[m]['menuIdList'] = list()
-            menus = RoleMenu.objects.filter(role=role.id)
-            n= 0
-            for menu in menus:
-                roleList[m]['menuIdList'].append(menu.menu_id)
-                n += 1
-            m += 1
-        # context = {
-        #     "rolelist":roleList,
-        #     "menu_lsit":menu_list
-        # }
-        #
-        #         roleList['menuIdList'] = menu.id
-        # print(roleList)
+        try:
+            roleList = []
+            pageIndex = request.GET.get('pageIndex', 1)
+            # print(pageIndex)
+            # pageSize = request.GET.get('pageSize',20)
+            # print(pageSize)
+            rolename = request.GET.get('rolename')
+            if rolename:
+                roles = Role.objects.filter(rolename__icontains=rolename)
+            else:
+                roles = Role.objects.all()
+            m = 0
+            for role in roles:
+                role_data = RoleSerializer(role).data
+                roleList.append(role_data)
+                roleList[m]['menuIdList'] = list()
+                menus = RoleMenu.objects.filter(role=role.id)
+                n= 0
+                for menu in menus:
+                    roleList[m]['menuIdList'].append(menu.menu_id)
+                    n += 1
+                m += 1
+            pg = PageNumberPagination()
+            totalCount = roles.count()
+            totalPageNum = int(totalCount) / int(pg.page_size)
+            context = {
+                'numPerPage': pageIndex,
+                'PageNum': pg.page_size,
+                'result': roleList,
+                'totalCount': totalCount,
+                'totalPageNum': ''
 
-        # if roles:
-        #     serialize = RoleSerializer(roles, many=True)
-        #     roles_data = serialize.data
-        # # else:
-        #     return restful.params_error(message="no roles data")
-        # if rolename:
-        #     roles = Role.objects.filter(rolename__icontains=rolename)
-        #     serialize = RoleSerializer(roles, many=True)
-        #     roles_data = serialize.data
-
-        return restful.result(data=roleList)
+            }
+        except Exception:
+            return restful.params_error(message="获取角色列表失败")
+        return restful.result(data=context)
 
 
 """
@@ -350,51 +350,43 @@ class RoleList(View):
 
 class getAllUsers(APIView):
     def get(self, request,*args,**kwargs):
-        username = request.GET.get('username')
-        status = request.GET.get('status')
-        pageIndex = request.GET.get('pageIndex')
-        pageSize = request.GET.get("pageSize")
-        # print(pageIndex,pageSize)
-        if username:
-            users_list = UserInfo.objects.filter(username__icontains=username)
-            print(1)
-            print(users_list)
-        elif status:
-            users_list = UserInfo.objects.filter(status=status)
-            print(2)
-            print(users_list)
-        # elif username & status:
-        #     users_list = UserInfo.objects.filter(Q(status=status) & Q(username__icontains=username))
-        #     print(3)
-        #     print(users_list)
-        else:
-            users_list = UserInfo.objects.all()
-        # 根据url参数 获取分页数据
-        # obj = StandardResultSetPagination()
-        pg = PageNumberPagination()
-        print(pg)
-        page_user_list = pg.paginate_queryset(queryset=users_list, request=request, view=self)
-        print('page',page_user_list)
+        try:
+            username = request.GET.get('username')
+            status = request.GET.get('status')
+            pageIndex = request.GET.get('pageIndex',1)
+            # pageSize = request.GET.get("pageSize")
+            # print(pageIndex,pageSize)
+            if username:
+                users_list = UserInfo.objects.filter(username__icontains=username)
+            elif status:
+                users_list = UserInfo.objects.filter(status=status)
+            else:
+                users_list = UserInfo.objects.all()
+            # 根据url参数 获取分页数据
+            # obj = StandardResultSetPagination()
+            pg = PageNumberPagination()
+            page_user_list = pg.paginate_queryset(queryset=users_list, request=request, view=self)
+            print('page',page_user_list)
 
-        # 对数据序列化 普通序列化 显示的只是数据
-        ser = UserSerializer(instance=page_user_list, many=True)  # 多个many=True # instance：把对象序列化
-        print(ser.data)
-        # data = obj.get_paginated_response(ser.data)
-        # users = UserInfo.objects.all()
-        # ser = UserSerializer(users,many=True)
-        totalCount = users_list.count()
-        totalPageNum = int(totalCount)/ int(pageSize)
-        print(totalPageNum)
-        print(pg.page_size)
-        context = {
-            'numPerPage': pageIndex,
-            'PageNum': pageSize,
-            'result': ser.data,
-            'totalCount': totalCount,
-            'totalPageNum':''
+            # 对数据序列化 普通序列化 显示的只是数据
+            ser = UserSerializer(instance=page_user_list, many=True)  # 多个many=True # instance：把对象序列化
+            totalCount = users_list.count()
+            totalPageNum = int(totalCount)/ int(pg.page_size)
+            print(pg.page_size)
+            print(totalPageNum)
+            print(pg.page_size)
+            context = {
+                'numPerPage': pageIndex,
+                'PageNum': pg.page_size,
+                'result': ser.data,
+                'totalCount': totalCount,
+                'totalPageNum':''
 
-        }
+            }
+        except Exception:
+            return restful.params_error(message="获取用户列表信息错误")
         return restful.result(data=context)
+
 
 
 
