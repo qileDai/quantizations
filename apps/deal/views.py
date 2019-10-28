@@ -56,12 +56,12 @@ class AccountList(generics.CreateAPIView):
         numPerPage = len(page_obj.object_list)
         totalCount = accounts.count()
         totalPageNum = paginator.num_pages
-        print(totalCount)
+        print(numPerPage)
         context = {
-            'numPerPage': numPerPage[0],
+            'numPerPage': numPerPage,
             'PageNum': int(pageNum),
             'result': AccountSerializer(page_obj.object_list, many=True).data,
-            'totalCount': totalCount[0],
+            'totalCount': totalCount,
             'totalPageNum': totalPageNum,
             'currency_list': data,
         }
@@ -216,7 +216,6 @@ class ShowCollectAsset(generics.CreateAPIView):
         print(data)
         currency_data = json.loads(data)
         account_list = currency_data.get('id')
-        # account_list = request.POST.getlist('id')
         print(account_list)
         if account_list:
             accounts = account_list
