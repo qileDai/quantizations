@@ -312,7 +312,7 @@ class WithDraw(generics.CreateAPIView):
                     pass
             except:
                 print('未获取到当前价')
-                last = 0
+                last = 1
             if currency:
                 # 提币折合成usdt
                 property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
