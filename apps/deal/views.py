@@ -46,7 +46,7 @@ class AccountList(generics.CreateAPIView):
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
         # 分页
-        paginator = Paginator(Account.objects.filter(users__id=user_id), 2)
+        paginator = Paginator(Account.objects.filter(users__id=user_id), 3)
         page_obj = paginator.page(int(pageNum))
         # 获取勾选币种
         currency_list = Property.objects.filter(currency_status='1').values("currency", ).distinct()

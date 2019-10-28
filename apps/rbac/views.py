@@ -348,34 +348,53 @@ class RoleList(View):
 """
 
 
-class getAllUsers(View):
-    def get(self, request):
-        # username = request.GET.get('username')
-        # status = request.GET.get('status')
-        # if username:
-        #     users_list = UserInfo.objects.filter(username__icontains=username)
-        #     print(1)
-        #     print(users_list)
-        # elif status:
-        #     users_list = UserInfo.objects.filter(status=status)
-        #     print(2)
-        #     print(users_list)
+class getAllUsers(APIView):
+    def get(self, request,*args,**kwargs):
+        username = request.GET.get('username')
+        status = request.GET.get('status')
+        pageIndex = request.GET.get('pageIndex')
+        pageSize = request.GET.get("pageSize")
+        # print(pageIndex,pageSize)
+        if username:
+            users_list = UserInfo.objects.filter(username__icontains=username)
+            print(1)
+            print(users_list)
+        elif status:
+            users_list = UserInfo.objects.filter(status=status)
+            print(2)
+            print(users_list)
         # elif username & status:
         #     users_list = UserInfo.objects.filter(Q(status=status) & Q(username__icontains=username))
         #     print(3)
         #     print(users_list)
-        # else:
-        #     users_list = UserInfo.objects.all()
-        #     # 根据url参数 获取分页数据
+        else:
+            users_list = UserInfo.objects.all()
+        # 根据url参数 获取分页数据
         # obj = StandardResultSetPagination()
-        # page_user_list = obj.paginate_queryset(users_list, request, self)
-        #
-        # # 对数据序列化 普通序列化 显示的只是数据
-        # ser = UserSerializer(instance=page_user_list, many=True)  # 多个many=True # instance：把对象序列化
+        pg = PageNumberPagination()
+        print(pg)
+        page_user_list = pg.paginate_queryset(queryset=users_list, request=request, view=self)
+        print('page',page_user_list)
+
+        # 对数据序列化 普通序列化 显示的只是数据
+        ser = UserSerializer(instance=page_user_list, many=True)  # 多个many=True # instance：把对象序列化
+        print(ser.data)
         # data = obj.get_paginated_response(ser.data)
-        users = UserInfo.objects.all()
-        ser = UserSerializer(users,many=True)
-        return restful.result(data=ser.data)
+        # users = UserInfo.objects.all()
+        # ser = UserSerializer(users,many=True)
+        totalCount = users_list.count()
+        totalPageNum = int(totalCount)/ int(pageSize)
+        print(totalPageNum)
+        print(pg.page_size)
+        context = {
+            'numPerPage': pageIndex,
+            'PageNum': pageSize,
+            'result': ser.data,
+            'totalCount': totalCount,
+            'totalPageNum':''
+
+        }
+        return restful.result(data=context)
 
 
 
@@ -490,9 +509,7 @@ def edit_users(request):
 class UpdatePassword(generics.CreateAPIView):
     def post(self, request):
         try:
-            print("asasd")
             user_id = request.POST.get("user_id")
-            print(user_id)
             old_password = request.POST.get("old_password")
             print(old_password)
             if old_password:
@@ -541,29 +558,28 @@ class UserMenuPermission(View):
 class AllotPermissson(View):
     def post(self, request):
         try:
-            print("sdf")
-            # new_menu = []
-            # menu_list =list(request.POST.body("menu_list"))   # 获取菜单id list
             data = request.body.decode("utf-8")
             print(data)
             menu_data = json.loads(data)
             role_id = menu_data.get("role_id")
-            menu_lsit = menu_data.get("menu_list")
-            print(type(menu_lsit))
-            role_obj = RoleMenu.objects.filter(role_id=role_id)
-            if role_obj:
-                old_menu = []
-                for obj in role_obj:
-                    old_menu.append(obj.menu_id)
-                add_list = list(set(menu_lsit).difference(set(old_menu)))
-                dele_list = list(set(old_menu).difference(set(menu_lsit)))
-                for add_name in add_list:
-                    RoleMenu.objects.create(role_id=role_id, menu_id=add_name)
-                for dele_name in dele_list:
-                    RoleMenu.objects.filter(Q(role_id=role_id) & Q(menu_id=dele_name)).delete()
+            if role_id:
+                menu_lsit = menu_data.get("menu_list")
+                role_obj = RoleMenu.objects.filter(role_id=role_id)
+                if role_obj:
+                    old_menu = []
+                    for obj in role_obj:
+                        old_menu.append(obj.menu_id)
+                    add_list = list(set(menu_lsit).difference(set(old_menu)))
+                    dele_list = list(set(old_menu).difference(set(menu_lsit)))
+                    for add_name in add_list:
+                        RoleMenu.objects.create(role_id=role_id, menu_id=add_name)
+                    for dele_name in dele_list:
+                        RoleMenu.objects.filter(Q(role_id=role_id) & Q(menu_id=dele_name)).delete()
+                else:
+                    for menu in menu_lsit:
+                        RoleMenu.objects.create(role_id=role_id, menu_id=menu)
             else:
-                for menu in menu_lsit:
-                    RoleMenu.objects.create(role_id=role_id, menu_id=menu)
+                return restful.params_error(message="角色id不能为空")
         except Exception as e:
             return restful.params_error("分配权限失败", data=e)
         return restful.ok(message="成功")
