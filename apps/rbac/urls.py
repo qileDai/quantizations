@@ -31,4 +31,5 @@ urlpatterns = [
     path('all_menus/', views.get_all_menus, name='all_menus'),
     path('selectmenu/', views.SelectMenu.as_view(), name='selectmenu'),
 
+
 ]
