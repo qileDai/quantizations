@@ -52,13 +52,14 @@ class AccountList(generics.CreateAPIView):
         except:
             return restful.params_error(message='页码错误')
         # 获取勾选币种
-        currency_list = Property.objects.filter(currency_status='1').values("currency", ).distinct()
+        currency_list = Property.objects.filter(currency_status='1').values("currency",).distinct()
         ret = list(currency_list)
         data = json.dumps(ret)
-        # print(paginator.num_pages)
+
         numPerPage = len(page_obj.object_list)
         totalCount = accounts.count()
         totalPageNum = paginator.num_pages
+        print(AccountSerializer(page_obj.object_list, many=True).data)
         context = {
             'numPerPage': numPerPage,
             'PageNum': int(pageNum),
