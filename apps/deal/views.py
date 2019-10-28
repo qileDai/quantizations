@@ -46,7 +46,7 @@ class AccountList(generics.CreateAPIView):
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
         # 分页
-        paginator = Paginator(Account.objects.filter(users__id=user_id), 2)
+        paginator = Paginator(Account.objects.filter(users__id=user_id), 3)
         page_obj = paginator.page(int(pageNum))
         # print(paginator.num_pages)
         numPerPage = len(page_obj.object_list),
