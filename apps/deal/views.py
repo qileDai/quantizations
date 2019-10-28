@@ -69,7 +69,7 @@ class AccountList(generics.CreateAPIView):
             'currency_list': data,
         }
         # print(context)
-        return restful.result(data=context['result'])
+        return restful.result(data=context)
 
 
 class GetCurrencies(generics.CreateAPIView):
