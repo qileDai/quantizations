@@ -56,7 +56,7 @@ class AccountList(generics.CreateAPIView):
         numPerPage = len(page_obj.object_list)
         totalCount = accounts.count()
         totalPageNum = paginator.num_pages
-        print(numPerPage)
+        print(type(numPerPage), type(totalCount))
         context = {
             'numPerPage': numPerPage,
             'PageNum': int(pageNum),
