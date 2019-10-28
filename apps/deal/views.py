@@ -48,6 +48,10 @@ class AccountList(generics.CreateAPIView):
         # 分页
         paginator = Paginator(Account.objects.filter(users__id=user_id), 3)
         page_obj = paginator.page(int(pageNum))
+        # 获取勾选币种
+        currency_list = Property.objects.filter(currency_status='1').values("currency", ).distinct()
+        ret = list(currency_list)
+        data = json.dumps(ret)
         # print(paginator.num_pages)
         numPerPage = len(page_obj.object_list),
         totalCount = accounts.count(),
@@ -58,6 +62,7 @@ class AccountList(generics.CreateAPIView):
             'result': AccountSerializer(page_obj.object_list, many=True).data,
             'totalCount': totalCount,
             'totalPageNum': totalPageNum,
+            'currency_list': data,
         }
         # print(context)
         return restful.result(data=context)
@@ -78,7 +83,7 @@ class GetCurrencies(generics.CreateAPIView):
             data = json.dumps(ret)
             return restful.result(data=data)
         else:
-            return restful.params_error(message='为获取到账户登陆信息，请检查是否登陆')
+            return restful.params_error(message='未获取到账户登陆信息，请检查是否登陆')
 
 
 class AddAccount(generics.CreateAPIView):
@@ -185,13 +190,13 @@ class ShowAssert(generics.CreateAPIView):
 
     def post(self, request):
         id = request.POST.get('id')
-        print('+-'*10, id)
         if id:
             # 获取账户信息
             account_obj = Account.objects.get(id=id)
             # 账户对应的平台
             platform = account_obj.platform
             # 创建对象
+            print(id, platform)
             con = GetAssets(id, account_obj, platform)
             data = con.showassets()
             return restful.result(data=data)
@@ -333,7 +338,6 @@ class ConfigCurrency(generics.CreateAPIView):
             user_id = 1
             accounts = Account.objects.filter(users=user_id)
             for account in accounts:
-                print(account.id, '-' * 30)
                 for currency in currency_list:
                     if currency:
                         # 账户存在此币种则不添加
