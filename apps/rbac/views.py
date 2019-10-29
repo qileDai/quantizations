@@ -1,22 +1,23 @@
 from django.shortcuts import render, redirect
-from .models import UserInfo, Role, Menu, Permission
+from .models import UserInfo, Role, Permission
 from django.views.generic import View
 from utils import restful, decrypt
 from django.core.paginator import Paginator
 from urllib import parse
 from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, PermissionModelForm, MenuModelForm, \
-    EditUserForm
+    EditUserForm,LoginForm
 import hashlib, re
-from django.middleware.csrf import get_token, rotate_token
+# from django.middleware.csrf import get_token, rotate_token
 from django.conf import settings
 from utils.mixin import LoginRequireMixin
+from django.contrib.sessions.models import Session
 from .models import NewMenu, RoleMenu
 from .serializers import PermissonSerializer, MenuSerializer, UserSerializer, RoleSerializer, NewmenuSerializer
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authtoken.models import Token
-from django.contrib.auth.models import User
 from rest_framework import permissions
 from .token_module import get_token, out_token
+from django.contrib.auth import login,logout,authenticate
 from django.db.models import Q
 from rest_framework import generics
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
@@ -40,35 +41,15 @@ def is_login(func):
 
 
 
-
-class Login(View):
-    def get(self, request):
-        csrf_token = get_token(request)
-        print(csrf_token)
-        context = {
-            "csrf_token": csrf_token
-        }
-        return restful.result(data=context)
-
+class Login(generics.CreateAPIView):
     def post(self, request):
-        request.META["CSRF_COOKIE_USED"] = True
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        # hl = hashlib.md5()
-        # hl.update(password.encode(encoding='utf-8'))
-        # password = hl.hexdigest()
-        uers = UserInfo.objects.filter(username=username, password=password).first()
-        if uers:
-            request.session.clear()
-            request.session['is_login'] = True
-            request.session['user_id'] = uers.id
-            request.session.clear_expired()
-            request.session.set_expiry(10)
-            # init_permission(request, uers)
+        form = LoginForm(request.Post)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            remember = form.cleaned_data.get('remember')
+            user = authenticate(request,username=username,password=password)
 
-            return restful.ok()
-        else:
-            return restful.result(message="用户名或密码错误！")
 
 
 @csrf_exempt
@@ -79,7 +60,6 @@ def login(request):
         return restful.params_error(message="用户名不能为空")
     if password == '':
         return restful.params_error(message="密码不能为空")
-    print(username, password)
     # hl = hashlib.md5()
     # hl.update(password.encode(encoding='utf-8'))
     # password = hl.hexdigest()
@@ -100,7 +80,6 @@ def login(request):
             session_id = request.session.session_key
         else:
             session_id = request.session.session_key
-        print('----------', session_id)
         # token = Token.objects.create(user=user_id)
         # print(token)
         context = {
@@ -625,10 +604,14 @@ def get_all_menus11(request):
 class getAllMenus(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
+            sessionid = request.META.get("HTTP_SESSIONID")
+            session_data = Session.objects.get(session_key = sessionid)
+            user_id = session_data.get_decoded().get('user_id')
+            print('uid',user_id)
             datas_list = []
             menu_list = []
             permission_list = []
-            user_id = request.session.get('user_id')
+            # user_id = request.session.get('user_id')
             if user_id:
                 print(user_id)
                 user = UserInfo.objects.get(id=user_id)
@@ -666,7 +649,6 @@ class getAllMenus(generics.ListAPIView):
                                         r += 1
                                 m +=1
                         n += 1
-
                 context = {
                     'menuList':datas_list,
                     'mnues':menu_list,

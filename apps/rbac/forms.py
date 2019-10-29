@@ -136,3 +136,9 @@ class EditUserForm(forms.ModelForm,FormMixin):
         fields = ('username', 'phone_number', 'email', 'roles', 'status')
 
 # class EditRoleForm(forms)
+
+class LoginForm(forms.ModelForm,FormMixin):
+    username = forms.CharField(max_length=24)
+    password = forms.CharField(max_length=20, min_length=6,
+                               error_messages={"max_length": "密码最多不能超过20个字符！", "min_length": "密码最少不能少于6个字符！"})
+    remember = forms.IntegerField(required=False)
