@@ -18,6 +18,7 @@ urlpatterns = [
     path('selectcurrency/', views.SelectCurrency.as_view(), name='selectcurrency'),
 
     path('robotList/', views.RobotList.as_view(), name='robotList'),
+    path('searchrobot/', views.SearchRobot.as_view(), name='searchrobot'),
     path('startrobot/', views.StartRobot.as_view(), name='startrobot'),
     path('showtradedetail/', views.ShowTradeDetail.as_view(), name='showtradedetail'),
     path('getaccountinfo/', views.GetAccountInfo.as_view(), name='getaccountinfo'),

@@ -71,8 +71,12 @@ class AccountSerializer(DynamicFieldsModelSerializer):
         fields = ('id', 'title', 'accesskey', 'secretkey', 'users_id', 'createtime', 'platform_name', 'platform_id')
 
 
-class RobotSerializer(serializers.ModelSerializer):
-    trading_account = AccountSerializer()
+class RobotSerializer(DynamicFieldsModelSerializer):
+    # 序列化外键
+    # account = AccountSerializer()
+    account_title = serializers.CharField(source='trading_account.title')
+    account_id = serializers.IntegerField(source='trading_account.id')
+    create_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
 
     class Meta:
         model = Robot
@@ -87,8 +91,11 @@ class OrderInfoSerializer(serializers.ModelSerializer):
         fields = ('id', 'order_type', 'closing_price', 'total_price', 'closing_time', 'robot', 'currency_pair', 'order_id')
 
 
-class PropertySerializer(serializers.ModelSerializer):
-    account = AccountSerializer()
+class PropertySerializer(DynamicFieldsModelSerializer):
+    # 序列化外键
+    account_name = serializers.CharField(source='account.title')
+    account_id = serializers.IntegerField()
+    updatetime = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
 
     class Meta:
         model = Property

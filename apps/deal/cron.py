@@ -62,7 +62,7 @@ def exx_scheduled_job():
                     params2 = (float(data['funds'][key]['total']), float(last.get('last')), key, accountid)
                     main(sql, params2)
                 else:
-                    params2 = (float(data['funds'][key]['total']), 0.0, key, accountid)
+                    params2 = (float(data['funds'][key]['total']), 1, key, accountid)
                     main(sql, params2)
             except Exception as e:
                 print('该币种不存在，请添加', e)
