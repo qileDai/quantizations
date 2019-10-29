@@ -55,11 +55,12 @@ class AccountList(generics.CreateAPIView):
         currency_list = Property.objects.filter(currency_status='1').values("currency",).distinct()
         ret = list(currency_list)
         data = json.dumps(ret)
-
+        # data = PropertySerializer(currency_list, fields=('currency',), many=True).data
+        print(data)
         numPerPage = len(page_obj.object_list)
         totalCount = accounts.count()
         totalPageNum = paginator.num_pages
-        print(AccountSerializer(page_obj.object_list, many=True).data)
+
         context = {
             'numPerPage': numPerPage,
             'PageNum': int(pageNum),
@@ -242,6 +243,7 @@ class ShowCollectAsset(generics.CreateAPIView):
             con = GetAssets(id, account_obj, platform, flag)
             context = con.showassets()
             context_list.append(context)
+        print('******', context_list)
         # 汇总资产表数据
         for key in context_list[0]['assets_dict']:
             for elem in context_list[1:]:
@@ -443,6 +445,19 @@ def get_account_info(currency, market, id):
     return user_obj, service_obj, market_obj
 
 
+class SearchRobot(generics.CreateAPIView):
+    """
+    机器人搜索
+    """
+    def post(self, request):
+        t_currency = request.POST.get('t_currency')
+        t_market = request.POST.get('t_market')
+        t_status = request.POST.get('t_status')
+        t_data = Robot.objects.filter(Q(currency=t_currency) & Q(market=t_market) & Q(status=t_status))
+        # 序列化
+        return restful.result(RobotSerializer(t_data, many=True).data)
+
+
 class GetAccountInfo(generics.CreateAPIView):
     """
     展示交易对可用额度/当前价,计算默认值
@@ -454,8 +469,8 @@ class GetAccountInfo(generics.CreateAPIView):
         return data
 
     def post(self, request):
-        currency = request.POST.get('curry-title')
-        market = request.POST.get('market-title')
+        currency = request.POST.get('curry_title')
+        market = request.POST.get('market_title')
         # 获取账户id
         id = request.POST.get('account_id')
         if currency and market and id:
@@ -794,7 +809,7 @@ class RobotList(generics.CreateAPIView):
         if pageNum is None:
             return restful.params_error(message='参数为空')
         # 拿到下拉框交易币种值
-        curry = request.GET.get('deal-curry')
+        curry = request.GET.get('deal_curry')
         # 拿到下拉框交易市场值
         marke_id = request.GET.get('deal_market')
         # 拿到交易状态
