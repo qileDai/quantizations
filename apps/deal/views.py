@@ -808,23 +808,10 @@ class RobotList(generics.CreateAPIView):
         pagesize = request.GET.get('pageSize')
         if pageNum is None:
             return restful.params_error(message='参数为空')
-        # 拿到下拉框交易币种值
-        curry = request.GET.get('deal_curry')
-        # 拿到下拉框交易市场值
-        marke_id = request.GET.get('deal_market')
-        # 拿到交易状态
-        status = request.GET.get('deal_status')
 
         robots = Robot.objects.all()
-        if curry:
-            robots = Robot.objects.filter(currency__icontains=curry)
-        if marke_id:
-            robots = Robot.objects.filter(market=marke_id)
-        if status:
-            robots = Robot.objects.filter(status=status)
-
         try:
-            paginator = Paginator(robots, 10)
+            paginator = Paginator(robots, 2)
             page_obj = paginator.page(pageNum)
         except:
             return restful.params_error(message='页码错误')

@@ -73,8 +73,9 @@ class AccountSerializer(DynamicFieldsModelSerializer):
 
 class RobotSerializer(DynamicFieldsModelSerializer):
     # 序列化外键
-    account_name = serializers.CharField(source='account.title')
-    account_id = serializers.IntegerField()
+    # account = AccountSerializer()
+    account_title = serializers.CharField(source='trading_account.title')
+    account_id = serializers.IntegerField(source='trading_account.id')
 
     class Meta:
         model = Robot
