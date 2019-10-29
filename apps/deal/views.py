@@ -46,20 +46,25 @@ class AccountList(generics.CreateAPIView):
         # 获取账户信息
         accounts = Account.objects.filter(users__id=user_id)
         # 分页
-        paginator = Paginator(Account.objects.filter(users__id=user_id), 3)
-        page_obj = paginator.page(int(pageNum))
+        try:
+            paginator = Paginator(Account.objects.filter(users__id=user_id), 3)
+            page_obj = paginator.page(int(pageNum))
+        except:
+            return restful.params_error(message='页码错误')
         # 获取勾选币种
-        currency_list = Property.objects.filter(currency_status='1').values("currency", ).distinct()
+        currency_list = Property.objects.filter(currency_status='1').values("currency",).distinct()
         ret = list(currency_list)
         data = json.dumps(ret)
-        # print(paginator.num_pages)
-        numPerPage = len(page_obj.object_list),
-        totalCount = accounts.count(),
+
+        numPerPage = len(page_obj.object_list)
+        totalCount = accounts.count()
         totalPageNum = paginator.num_pages
+        print(AccountSerializer(page_obj.object_list, many=True).data)
         context = {
             'numPerPage': numPerPage,
             'PageNum': int(pageNum),
             'result': AccountSerializer(page_obj.object_list, many=True).data,
+            # 'result': AccountSerializer(page_obj.object_list, fields=('id', 'title'), many=True).data,
             'totalCount': totalCount,
             'totalPageNum': totalPageNum,
             'currency_list': data,
@@ -211,18 +216,19 @@ class ShowCollectAsset(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def post(self, request):
-
-        account_list = request.POST.getlist('id')
-        print(account_list)
+        data = request.body.decode("utf-8")
+        currency_data = json.loads(data)    # 反序列化
+        account_list = currency_data.get('id')
         if account_list:
             accounts = account_list
         else:
+            return restful.result(data='')
             # user_id = request.session.get("user_id")
-            user_id = 1
-            account_lists = Account.objects.filter(users=user_id)
-            for account in account_lists:
-                accounts = list()
-                accounts.append(account.id)
+            # user_id = 1
+            # account_lists = Account.objects.filter(users=user_id)
+            # for account in account_lists:
+            #     accounts = list()
+            #     accounts.append(account.id)
 
         flag = True
         context_list = list()
@@ -240,11 +246,24 @@ class ShowCollectAsset(generics.CreateAPIView):
         for key in context_list[0]['assets_dict']:
             for elem in context_list[1:]:
                 for key1, value1 in elem['assets_dict'][key].items():
-                    if key1 in context_list[0]['assets_dict'][key]:
-                        context_list[0]['assets_dict'][key][key1] = float(context_list[0]['assets_dict'][key][key1]) \
-                                                                    + float(value1)
+                    if key1 is 'last':
+                        continue
+                    elif key1 in context_list[0]['assets_dict'][key]:
+                        context_list[0]['assets_dict'][key][key1] = \
+                            float(context_list[0]['assets_dict'][key][key1]) + float(value1)
                     else:
                         context_list[0]['assets_dict'][key][key1] = value1
+        # 损益表汇总数据
+        for key in context_list[0]['profit_loss_dict']:
+            for elem in context_list[1:]:
+                for key1, value1 in elem['profit_loss_dict'][key].items():
+                    if key1 is 'last':
+                        continue
+                    elif key1 in context_list[0]['profit_loss_dict'][key]:
+                        context_list[0]['profit_loss_dict'][key][key1] = \
+                            float(context_list[0]['profit_loss_dict'][key][key1]) + float(value1)
+                    else:
+                        context_list[0]['profit_loss_dict'][key][key1] = value1
         # 汇总资产变化/初始总资产/历史盈亏/
         print('资产汇总', '-' * 20)
         print(context_list[0])
@@ -275,7 +294,8 @@ class ChargeAccount(generics.CreateAPIView):
                 elif str(platform) == 'HUOBI':
                     pass
             except:
-                info = 0
+                print('未获取到该币种当前价')
+                info = 1
             try:
                 property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
                 original_assets = float(property_obj.original_assets) + float(num) * float(info)
@@ -311,8 +331,8 @@ class WithDraw(generics.CreateAPIView):
                 elif str(platform) == 'HUOBI':
                     pass
             except:
-                print('未获取到当前价')
-                last = 0
+                print('未获取到该币种当前价')
+                last = 1
             if currency:
                 # 提币折合成usdt
                 property_obj = Property.objects.get(Q(account_id=id) & Q(currency=currency))
@@ -755,9 +775,9 @@ class WarningUsers(generics.CreateAPIView):
         users = UserInfo.objects.filter(status=1)
         print(users)
         # data = serialize('json', users)
-        serialize = UserSerializer(users, many=True)
+        usr = UserSerializer(users, many=True)
 
-        return restful.result(data=serialize.data)
+        return restful.result(data=usr.data)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -770,9 +790,9 @@ class RobotList(generics.CreateAPIView):
 
     def get(self, request):
         pageNum = int(request.GET.get('pageIndex', 1))
+        pagesize = request.GET.get('pageSize')
         if pageNum is None:
             return restful.params_error(message='参数为空')
-        pagesize = request.GET.get('pageSize')
         # 拿到下拉框交易币种值
         curry = request.GET.get('deal-curry')
         # 拿到下拉框交易市场值
@@ -788,10 +808,13 @@ class RobotList(generics.CreateAPIView):
         if status:
             robots = Robot.objects.filter(status=status)
 
-        paginator = Paginator(robots, 10)
-        page_obj = paginator.page(pageNum)
-        numPerPage = len(page_obj.object_list),
-        totalCount = robots.count(),
+        try:
+            paginator = Paginator(robots, 10)
+            page_obj = paginator.page(pageNum)
+        except:
+            return restful.params_error(message='页码错误')
+        numPerPage = len(page_obj.object_list)
+        totalCount = robots.count()
         totalPageNum = paginator.num_pages
 
         context = {
