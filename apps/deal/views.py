@@ -453,6 +453,7 @@ class SearchRobot(generics.CreateAPIView):
         t_currency = request.POST.get('t_currency')
         t_market = request.POST.get('t_market')
         t_status = request.POST.get('t_status')
+        print(t_currency, t_market, t_status)
         t_data = Robot.objects.filter(Q(currency=t_currency) & Q(market=t_market) & Q(status=t_status))
         # 序列化
         return restful.result(RobotSerializer(t_data, many=True).data)
@@ -825,6 +826,7 @@ class RobotList(generics.CreateAPIView):
             'result': RobotSerializer(page_obj.object_list, many=True).data,
             'totalCount': totalCount,
             'totalPageNum': totalPageNum,
+            'account': RobotSerializer(robots, fields=('account_id', 'account_title'), many=True).data
         }
 
         return restful.result(data=context)

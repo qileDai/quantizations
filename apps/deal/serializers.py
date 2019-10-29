@@ -76,6 +76,7 @@ class RobotSerializer(DynamicFieldsModelSerializer):
     # account = AccountSerializer()
     account_title = serializers.CharField(source='trading_account.title')
     account_id = serializers.IntegerField(source='trading_account.id')
+    create_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
 
     class Meta:
         model = Robot
