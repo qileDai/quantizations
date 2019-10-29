@@ -453,8 +453,15 @@ class SearchRobot(generics.CreateAPIView):
         t_currency = request.POST.get('t_currency')
         t_market = request.POST.get('t_market')
         t_status = request.POST.get('t_status')
-        print(t_currency, t_market, t_status)
-        t_data = Robot.objects.filter(Q(currency=t_currency) & Q(market=t_market) & Q(status=t_status))
+        search_dict = dict()
+        if t_currency:
+            search_dict['currency'] = t_currency
+        if t_market:
+            search_dict['market'] = t_market
+        if t_status:
+            search_dict['status'] = t_status
+
+        t_data = Robot.objects.filter(**search_dict)
         # 序列化
         return restful.result(RobotSerializer(t_data, many=True).data)
 
@@ -474,19 +481,20 @@ class GetAccountInfo(generics.CreateAPIView):
         market = request.POST.get('market_title')
         # 获取账户id
         id = request.POST.get('account_id')
+
         if currency and market and id:
             # 调用get_account_info函数
             user_obj, service_obj, market_obj = get_account_info(currency, market, id)
             try:
                 info = service_obj.get_balance()
-                info = info.get('funds')
+                info = info['funds']
                 info1 = market_obj.get_ticker()
                 info1 = info1['ticker']
                 info2 = market_obj.get_klines('1day', '30')
                 info2 = info2.get('datas')
             except:
-                return restful.params_error(message='币种错误，请核对！')
-
+                print(info)
+                return restful.params_error(message='币种错误或者调用接口失败，请核对！')
             # 计算阻力位/支撑位的默认值
             if int(info2.get('limit', 0)) <= 30:
                 max = 0
