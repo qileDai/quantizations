@@ -12,24 +12,22 @@ urlpatterns = [
     path('add_users/', views.add_users, name='add_users'),
     path('delete_users/', views.delete_users, name='delete_users'),
     path('user_list/', views.userListView.as_view(), name='user_list'),
-    path('update_password/', views.UpdatePassword.as_view(), name='update_password'),
-
+    path('updatepw/', views.UpdatePasssword.as_view(), name='updatepw'),
     path('add_roles/', views.add_roles, name='add_roles'),
     path('delete_roles/', views.delete_roles, name='delete_roles'),
     path('rolesList/', views.RolesListView.as_view(), name='rolesList'),
     path('edit_role/', views.EditRole.as_view(), name='edit_role'),
-
     path('user_info/', views.UserList.as_view(), name='user_info'),
     path('role_info/', views.role_info, name='role_info'),
 
     path('menu_permission/', views.menu_permission, name='menu_permission'),
     path('allot_permission/', views.AllotPermissson.as_view(), name='allot_permission'),
-    path('user_permission/', views.UserMenuPermission.as_view(), name='user_permission'),
-
     path('all_users/', views.getAllUsers.as_view(), name='all_users'),
     path('all_roles/', views.RoleList.as_view(), name='all_roles'),
-    path('all_menus/', views.get_all_menus, name='all_menus'),
+    path('all_menus/', views.getAllMenus.as_view(), name='all_menus'),
     path('selectmenu/', views.SelectMenu.as_view(), name='selectmenu'),
+    path('sfsdf/', views.get_all_menus11, name='sfsdf'),
+
 
 
 ]
