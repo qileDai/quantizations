@@ -15,6 +15,7 @@ from apps.deal.asset.get_assets import GetAssets
 from dealapi.exx.exxMarket import MarketCondition
 from dealapi.exx.exxService import ExxService
 from apps.deal.Strategy.Grid import GridStrategy
+from django.contrib.sessions.models import Session
 
 from django.core.exceptions import ValidationError
 from rest_framework.response import Response
@@ -39,7 +40,9 @@ class AccountList(generics.CreateAPIView):
     def get(self, request):
         pageNum = request.GET.get('pageIndex', 1)
         pagesize = request.GET.get('pageSize')
-        # user_id = request.session.get("user_id")
+        # sessionid = request.META.get("HTTP_SESSIONID")
+        # session_data = Session.objects.get(session_key=sessionid)
+        # user_id = session_data.get_decoded().get('user_id')
         user_id = 1
         if not user_id:
             return restful.params_error(message='账户失效，请重新登陆！')
@@ -80,7 +83,9 @@ class GetCurrencies(generics.CreateAPIView):
     """
     def get(self, request):
         # 获取用户所有币种
-        # user_id = request.session.get("user_id")
+        # sessionid = request.META.get("HTTP_SESSIONID")
+        # session_data = Session.objects.get(session_key=sessionid)
+        # user_id = session_data.get_decoded().get('user_id')
         user_id = 1
         if user_id:
             currency_list = Property.objects.filter(account__users__id=user_id).values("currency",).distinct()
@@ -109,7 +114,9 @@ class AddAccount(generics.CreateAPIView):
         if model_form.is_valid():
             # save()返回一个还未保存至数据库的对象,用这个对象添加一些额外的数据，然后在用save()保存到数据库
             obj = model_form.save(commit=False)
-            # user_id = request.session.get("user_id")
+            # sessionid = request.META.get("HTTP_SESSIONID")
+            # session_data = Session.objects.get(session_key=sessionid)
+            # user_id = session_data.get_decoded().get('user_id')
             user_id = 1
             user_obj = UserInfo.objects.get(id=user_id)
             # 添加数据需为模型类对象
@@ -163,7 +170,9 @@ class EditAccount(generics.ListCreateAPIView):
             secretkey = form.cleaned_data.get('secretkey')
             platform = form.cleaned_data.get('platform')
             pk = form.cleaned_data.get('id')
-            # user_id = request.session.get("user_id")
+            # sessionid = request.META.get("HTTP_SESSIONID")
+            # session_data = Session.objects.get(session_key=sessionid)
+            # user_id = session_data.get_decoded().get('user_id')
             user_id = 1
             print(title, accesskey, secretkey, platform, pk, user_id)
             Account.objects.filter(pk=pk).update(title=title, accesskey=accesskey, secretkey=secretkey,
@@ -356,7 +365,9 @@ class ConfigCurrency(generics.CreateAPIView):
         currency_list = list()
         currency_list.append(currency)
         if currency_list:
-            # user_id = request.session.get("user_id")
+            # sessionid = request.META.get("HTTP_SESSIONID")
+            # session_data = Session.objects.get(session_key=sessionid)
+            # user_id = session_data.get_decoded().get('user_id')
             user_id = 1
             accounts = Account.objects.filter(users=user_id)
             for account in accounts:
@@ -406,7 +417,7 @@ class CreateRobot(generics.CreateAPIView):
     """
     获取配置策略的参数
     """
-    # serializer_class = AccountSerializer
+    serializer_class = AccountSerializer
 
     def post(self, request):
         try:
@@ -569,7 +580,7 @@ class StartRobot(generics.CreateAPIView):
         # Flag为1启动，为0停止
         Flag = data_dict.get('flag')
         if Flag is None:
-            return restful.params_error(message='参数为空')
+            return restful.params_error(message='参数flag为空')
         if ids:
             robots = Robot.objects.filter(id=ids)
         elif Flag == 1:
@@ -753,6 +764,9 @@ class ShowConfigInfo(generics.CreateAPIView):
             serialize = RobotSerializer(account)
             user_obj, service_obj, market_obj = get_account_info(robot_obj.currency, robot_obj.market,
                                                                  robot_obj.trading_account.id)
+            robot_warning = Robot.objects.get(id=id)
+            accounts = UserInfo.objects.filter(id__in=robot_warning.warning_account[1:-1].split(","))
+            print(accounts)
             try:
                 info = service_obj.get_balance()
                 info = info.get('funds')
@@ -768,6 +782,8 @@ class ShowConfigInfo(generics.CreateAPIView):
                 'account_name': str(account_obj.title),
                 # 机器人信息
                 'robot': serialize.data,
+                # 已勾选的预警用户
+                'warning_account': UserSerializer(accounts, many=True).data
             }
             print(context)
             return restful.result(data=context)
@@ -782,21 +798,24 @@ class ShowConfig(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def post(self, request):
-        data = request.body.decode("utf-8")
-        data_dict = json.loads(data)
-        # 获取机器人id
-        id = data_dict.get('robot_id')
-        # 获取挂单频率
-        orders_frequency = data_dict.get('orders_frequency')
-        # 获取挂单最小数量
-        min_num = data_dict.get('min_num')
-        # 获取挂单最大数量
-        max_num = data_dict.get('max_num')
-        # 获取止损价
-        stop_price = data_dict.get('stop_price')
-        # 获取预警价
-        warning_price = data_dict.get('warning_price')
-
+        try:
+            data = request.body.decode("utf-8")
+            data_dict = json.loads(data)
+            # 获取机器人id
+            id = data_dict.get('robot_id')
+            # 获取挂单频率
+            orders_frequency = data_dict.get('orders_frequency')
+            # 获取挂单最小数量
+            min_num = data_dict.get('min_num')
+            # 获取挂单最大数量
+            max_num = data_dict.get('max_num')
+            # 获取止损价
+            stop_price = data_dict.get('stop_price')
+            # 获取预警价
+            warning_price = data_dict.get('warning_price')
+        except:
+            import traceback
+            traceback.print_exc()
         Robot.objects.filter(id=id).update(
             orders_frequency=orders_frequency,
             min_num=min_num,
@@ -815,10 +834,7 @@ class WarningUsers(generics.CreateAPIView):
 
     def get(self, request):
         try:
-            print('--------')
             users = UserInfo.objects.filter(status=1)
-            print(UserInfo.objects.all())
-            # data = serialize('json', users)
             usr = UserSerializer(users, many=True)
         except Exception as e:
             import traceback
@@ -879,7 +895,9 @@ class RobotYield(generics.CreateAPIView):
 
     def post(self, request):
         # 获取用户id
-        # user_id = request.session.get("user_id")
+        # sessionid = request.META.get("HTTP_SESSIONID")
+        # session_data = Session.objects.get(session_key=sessionid)
+        # user_id = session_data.get_decoded().get('user_id')
         user_id = 1
         accounts = Account.objects.filter(users=user_id)
         print(accounts)
