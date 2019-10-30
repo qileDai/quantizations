@@ -8,6 +8,7 @@ from threading import Thread
 from dealapi.exx.exxService import ExxService
 from dealapi.exx.exxMarket import MarketCondition
 from apps.deal.models import Account, Property, LastdayAssets, Robot
+from apps.rbac.models import UserInfo
 from .WarningAccount import WarningAccount
 
 
@@ -553,8 +554,7 @@ class GridStrategy(Thread):
                 warning_time = self.connect_db(sql, (self.robot_obj.id,))
                 # 获取机器人的预警账户
                 warning_account = self.robot_obj.warning_account
-                acc_list = list()
-                acc_list.append(warning_account)
+                acc_list = UserInfo.objects.filter(id__in=warning_account[1:-1].split(","))
                 warn = WarningAccount(acc_list, '网格', self.currency_type)
                 warn.send_msg()
                 print('---------预警', warning_time)

@@ -40,10 +40,14 @@ class AccountList(generics.CreateAPIView):
     def get(self, request):
         pageNum = request.GET.get('pageIndex', 1)
         pagesize = request.GET.get('pageSize')
-        # sessionid = request.META.get("HTTP_SESSIONID")
-        # session_data = Session.objects.get(session_key=sessionid)
-        # user_id = session_data.get_decoded().get('user_id')
-        user_id = 1
+        # 获取用户id
+        try:
+            sessionid = request.META.get("HTTP_SESSIONID")
+            session_data = Session.objects.get(session_key=sessionid)
+            user_id = session_data.get_decoded().get('user_id')
+        except Exception as e:
+            print(e)
+        # user_id = 1
         if not user_id:
             return restful.params_error(message='账户失效，请重新登陆！')
         # 获取账户信息
