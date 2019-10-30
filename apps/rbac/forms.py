@@ -22,7 +22,7 @@ class UserInfoModelForm(forms.ModelForm, FormMixin):
         }
 
 
-class UserInfoAddModelForm(ModelForm):
+class UserInfoAddModelForm(ModelForm,FormMixin):
 
     confirm_password = fields.CharField(label="确认密码", max_length=64)
 

@@ -1,18 +1,15 @@
 from django.shortcuts import render, redirect
 from .models import UserInfo, Role, Permission
 from django.views.generic import View
-from utils import restful, decrypt
+from utils import restful
 from django.core.paginator import Paginator
 from urllib import parse
-from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, PermissionModelForm, MenuModelForm, \
-    EditUserForm,LoginForm
-import hashlib, re
-# from django.middleware.csrf import get_token, rotate_token
+from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, EditUserForm,LoginForm
 from django.conf import settings
 from utils.mixin import LoginRequireMixin
 from django.contrib.sessions.models import Session
 from .models import NewMenu, RoleMenu
-from .serializers import PermissonSerializer, MenuSerializer, UserSerializer, RoleSerializer, NewmenuSerializer
+from .serializers import  UserSerializer, RoleSerializer, NewmenuSerializer
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authtoken.models import Token
 from rest_framework import permissions
@@ -20,6 +17,7 @@ from .token_module import get_token, out_token
 from django.contrib.auth import login,logout,authenticate
 from django.db.models import Q
 from rest_framework import generics
+from utils.mixin import LoginRequireMixin
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework.views import APIView
 import json
@@ -49,6 +47,8 @@ class Login(generics.CreateAPIView):
             password = form.cleaned_data.get('password')
             remember = form.cleaned_data.get('remember')
             user = authenticate(request,username=username,password=password)
+            pass
+
 
 
 
@@ -67,7 +67,7 @@ def login(request):
     user_obj = UserInfo.objects.filter(username=username, password=password).first()
     print(user_obj)
     if not user_obj:
-        return restful.params_error(message="用户名或密码错误")
+        return restful.params_error(message="用户名或密码错误,请重新登录")
     elif user_obj.status == 0:
         return restful.params_error(message="用户已被禁用")
     else:  # 普通用户
@@ -88,7 +88,7 @@ def login(request):
             'userId': user_id,
             'sessionid': session_id
         }
-        request.session.set_expiry(300)
+        request.session.set_expiry(30)
         return restful.result(data=context)
 
 
@@ -108,6 +108,7 @@ def logout(request):
 """"
 添加角色
 """
+@is_login
 class AddRoles(generics.CreateAPIView):
     serializer_class = RoleSerializer
 
@@ -115,6 +116,8 @@ class AddRoles(generics.CreateAPIView):
         form = RoleModelForm(request.POST)
         if form.is_valid():
             rolename = form.cleaned_data.get("rolename")
+            if not rolename:
+                return restful.params_error(message="rolename is null")
             description = form.cleaned_data.get("description")
             Role.objects.create(rolename=rolename, description=description)
             return restful.ok()
@@ -124,8 +127,9 @@ class AddRoles(generics.CreateAPIView):
 
 
 """
-添加用户
+添加角色
 """
+@is_login
 def add_roles(request):
     form = RoleModelForm(request.POST)
     if form.is_valid():
@@ -136,27 +140,23 @@ def add_roles(request):
     else:
         return restful.params_error(message=form.get_errors())
 
-
+"""
+添加用户
+"""
+@is_login
 def add_users(request):
     form = UserInfoAddModelForm(request.POST)
     if form.is_valid():
         form.save()
         return restful.ok(message="成功")
     else:
-        return restful.params_error(message=form.errors)
-
-
-def add_menu(request):
-    form = MenuModelForm(request.POST)
-    if form.is_valid():
-        form.save()
-        return restful.ok()
-    else:
         return restful.params_error(message=form.get_errors())
+
 
 """
 删除用户
 """
+@is_login
 def delete_users(request):
     pk = request.POST.get('user_id')
     print(pk)
@@ -316,6 +316,7 @@ class getAllUsers(APIView):
             # print(pageIndex,pageSize)
             if username:
                 users_list = UserInfo.objects.filter(username__icontains=username)
+
             elif status:
                 users_list = UserInfo.objects.filter(status=status)
             else:
@@ -351,6 +352,7 @@ class getAllUsers(APIView):
 """
 删除角色
 """
+@is_login
 def delete_roles(request):
     pk = request.POST.get('id')
     try:
@@ -398,8 +400,7 @@ def role_info(request):
 角色修改
 """
 
-
-class EditRole(View):
+class EditRole(LoginRequireMixin,View):
     def post(self, request):
         role_id = request.POST.get("id")
         role_name = request.POST.get("rolename")
@@ -418,6 +419,7 @@ class EditRole(View):
         return restful.ok(message="角色修改成功")
 
 
+@is_login
 def edit_users(request):
     """
     编辑用户
@@ -462,7 +464,7 @@ def edit_users(request):
 """
 修改账户密码
 """
-class UpdatePasssword(generics.CreateAPIView):
+class UpdatePasssword(LoginRequireMixin,generics.CreateAPIView):
     serializer_class = UserSerializer
     def post(self, request, *args, **kwargs):
         try:
@@ -501,7 +503,7 @@ class UpdatePasssword(generics.CreateAPIView):
 当角色没有权限点时添加权限
 当角色有权限点时修改权限
 """
-class AllotPermissson(View):
+class AllotPermissson(LoginRequireMixin,View):
     def post(self, request):
         try:
             data = request.body.decode("utf-8")
@@ -601,59 +603,61 @@ def get_all_menus11(request):
 根据用户角色获取
 """
 
-class getAllMenus(generics.ListAPIView):
+class getAllMenus(LoginRequireMixin,generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
             sessionid = request.META.get("HTTP_SESSIONID")
             session_data = Session.objects.get(session_key = sessionid)
             user_id = session_data.get_decoded().get('user_id')
-            print('uid',user_id)
             datas_list = []
             menu_list = []
             permission_list = []
             # user_id = request.session.get('user_id')
             if user_id:
-                print(user_id)
                 user = UserInfo.objects.get(id=user_id)
                 roles = user.roles.all()
                 for role in roles:
                     role_id = role.id
                 menus = RoleMenu.objects.filter(role_id=role_id)
-                for menu in menus:
-                    menu_list.append(menu.menu_id)
-                    perm = NewMenu.objects.get(pk=menu.menu_id)
-                    permission_list.append(perm.perms)
-                menu_data = NewMenu.objects.filter(parentid__isnull=True)
-                n = 0
-                for i in menu_data:
-                    if i.id in menu_list:
-                        data1 = NewmenuSerializer(i).data
-                        datas_list.append(data1)
-                        datas_list[n]['list'] = list()
-                        i_data = NewMenu.objects.filter(parentid=i.id)
-                        m= 0
-                        for j in i_data:
-                            if j.id in menu_list:
-                                data2 = NewmenuSerializer(j).data
-                                datas_list[n]['list'].append(data2)
-                                try:
-                                    datas_list[n]['list'][m]['list'] = list()
-                                except Exception as e:
-                                    print(e)
-                                j_data = NewMenu.objects.filter(parentid=j.id)
-                                r = 0
-                                for k in j_data:
-                                    if k.id in menu_list:
-                                        data3 = NewmenuSerializer(k).data
-                                        datas_list[n]['list'][m]['list'].append(data3)
-                                        r += 1
-                                m +=1
-                        n += 1
-                context = {
-                    'menuList':datas_list,
-                    'mnues':menu_list,
-                    'permissions':permission_list
-                }
+                length = len(menus)
+                if length > 0:
+                    for menu in menus:
+                        menu_list.append(menu.menu_id)
+                        perm = NewMenu.objects.get(pk=menu.menu_id)
+                        permission_list.append(perm.perms)
+                    menu_data = NewMenu.objects.filter(parentid__isnull=True)
+                    n = 0
+                    for i in menu_data:
+                        if i.id in menu_list:
+                            data1 = NewmenuSerializer(i).data
+                            datas_list.append(data1)
+                            datas_list[n]['list'] = list()
+                            i_data = NewMenu.objects.filter(parentid=i.id)
+                            m= 0
+                            for j in i_data:
+                                if j.id in menu_list:
+                                    data2 = NewmenuSerializer(j).data
+                                    datas_list[n]['list'].append(data2)
+                                    try:
+                                        datas_list[n]['list'][m]['list'] = list()
+                                    except Exception as e:
+                                        print(e)
+                                    j_data = NewMenu.objects.filter(parentid=j.id)
+                                    r = 0
+                                    for k in j_data:
+                                        if k.id in menu_list:
+                                            data3 = NewmenuSerializer(k).data
+                                            datas_list[n]['list'][m]['list'].append(data3)
+                                            r += 1
+                                    m +=1
+                            n += 1
+                    context = {
+                        'menuList':datas_list,
+                        'mnues':menu_list,
+                        'permissions':permission_list
+                    }
+                else:
+                    return restful.params_error(message="权限为空")
             else:
                 return restful.params_error(message="user_id is null")
         except Exception as e:
@@ -662,7 +666,7 @@ class getAllMenus(generics.ListAPIView):
 """
 获取所有的菜单信息
 """
-class SelectMenu(View):
+class SelectMenu(LoginRequireMixin,View):
     def get(self, request):
         try:
             allmenu_list = NewMenu.objects.all()
