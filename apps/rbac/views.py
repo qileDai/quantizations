@@ -603,7 +603,7 @@ def get_all_menus11(request):
 根据用户角色获取
 """
 
-class getAllMenus(LoginRequireMixin,generics.ListAPIView):
+class getAllMenus(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
             sessionid = request.META.get("HTTP_SESSIONID")
