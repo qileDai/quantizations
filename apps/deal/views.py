@@ -765,8 +765,8 @@ class ShowConfigInfo(generics.CreateAPIView):
             user_obj, service_obj, market_obj = get_account_info(robot_obj.currency, robot_obj.market,
                                                                  robot_obj.trading_account.id)
             robot_warning = Robot.objects.get(id=id)
-            accounts = UserInfo.objects.filter(id__in=robot_warning.warning_account[1:-1].split(","))
-            print(accounts)
+            # accounts = UserInfo.objects.filter(id__in=robot_warning.warning_account[1:-1].split(","))
+            accounts = robot_warning.warning_account
             try:
                 info = service_obj.get_balance()
                 info = info.get('funds')
@@ -783,7 +783,7 @@ class ShowConfigInfo(generics.CreateAPIView):
                 # 机器人信息
                 'robot': serialize.data,
                 # 已勾选的预警用户
-                'warning_account': UserSerializer(accounts, many=True).data
+                'warning_account': accounts
             }
             print(context)
             return restful.result(data=context)
