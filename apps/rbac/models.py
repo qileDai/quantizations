@@ -193,6 +193,7 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     """
+    
     用户：划分角色
     """
     username = models.CharField(verbose_name='用户', max_length=32, unique=True)

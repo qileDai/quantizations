@@ -783,6 +783,7 @@ class ShowConfig(generics.CreateAPIView):
 
     def post(self, request):
         data = request.body.decode("utf-8")
+        print(type(data), data)
         data_dict = json.loads(data)
         # 获取机器人id
         id = data_dict.get('robot_id')

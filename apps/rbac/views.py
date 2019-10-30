@@ -56,9 +56,9 @@ class Login(generics.CreateAPIView):
 def login(request):
     username = request.POST.get('username')
     password = request.POST.get('password')
-    if username == '':
+    if username is None:
         return restful.params_error(message="用户名不能为空")
-    if password == '':
+    if password is None:
         return restful.params_error(message="密码不能为空")
     # hl = hashlib.md5()
     # hl.update(password.encode(encoding='utf-8'))
@@ -108,7 +108,7 @@ def logout(request):
 """"
 添加角色
 """
-@is_login
+
 class AddRoles(generics.CreateAPIView):
     serializer_class = RoleSerializer
 
@@ -129,7 +129,7 @@ class AddRoles(generics.CreateAPIView):
 """
 添加角色
 """
-@is_login
+
 def add_roles(request):
     form = RoleModelForm(request.POST)
     if form.is_valid():
@@ -143,7 +143,7 @@ def add_roles(request):
 """
 添加用户
 """
-@is_login
+
 def add_users(request):
     form = UserInfoAddModelForm(request.POST)
     if form.is_valid():
@@ -156,7 +156,7 @@ def add_users(request):
 """
 删除用户
 """
-@is_login
+
 def delete_users(request):
     pk = request.POST.get('user_id')
     print(pk)
@@ -264,6 +264,7 @@ class RoleList(View):
         try:
             roleList = []
             pageIndex = request.GET.get('pageIndex', 1)
+            pageSize = request.GET.get("pageSize", 20)
             # print(pageIndex)
             # pageSize = request.GET.get('pageSize',20)
             # print(pageSize)
@@ -283,12 +284,12 @@ class RoleList(View):
                     roleList[m]['menuIdList'].append(menu.menu_id)
                     n += 1
                 m += 1
-            pg = PageNumberPagination()
+            pg = StandardResultSetPagination()
             totalCount = roles.count()
-            totalPageNum = int(totalCount) / int(pg.page_size)
+            # totalPageNum = int(totalCount) / int(pg.page_size)
             context = {
                 'numPerPage': pageIndex,
-                'PageNum': pg.page_size,
+                'PageNum': pageSize,
                 'result': roleList,
                 'totalCount': totalCount,
                 'totalPageNum': ''
@@ -308,12 +309,10 @@ class getAllUsers(APIView):
     def get(self, request,*args,**kwargs):
         try:
             token = django.middleware.csrf.get_token(request)
-            print(token)
             username = request.GET.get('username')
             status = request.GET.get('status')
             pageIndex = request.GET.get('pageIndex',1)
-            # pageSize = request.GET.get("pageSize")
-            # print(pageIndex,pageSize)
+            pageSize = request.GET.get("pageSize",20)
             if username:
                 users_list = UserInfo.objects.filter(username__icontains=username)
 
@@ -323,22 +322,16 @@ class getAllUsers(APIView):
                 users_list = UserInfo.objects.all()
             # 根据url参数 获取分页数据
             # obj = StandardResultSetPagination()
-            pg = PageNumberPagination()
+            pg = StandardResultSetPagination()
             page_user_list = pg.paginate_queryset(queryset=users_list, request=request, view=self)
-            print('page',page_user_list)
-
             # 对数据序列化 普通序列化 显示的只是数据
             ser = UserSerializer(instance=page_user_list, many=True)  # 多个many=True # instance：把对象序列化
-            totalCount = users_list.count()
-            totalPageNum = int(totalCount)/ int(pg.page_size)
-            print(pg.page_size)
-            print(totalPageNum)
-            print(pg.page_size)
+            # totalPageNum = int(totalCount)/ int(pg.page_size)
             context = {
                 'numPerPage': pageIndex,
-                'PageNum': pg.page_size,
+                'PageNum':pageSize,
                 'result': ser.data,
-                'totalCount': totalCount,
+                'totalCount': pg.count,
                 'totalPageNum':'',
                 'token':token
             }
@@ -352,12 +345,20 @@ class getAllUsers(APIView):
 """
 删除角色
 """
-@is_login
+
 def delete_roles(request):
     pk = request.POST.get('id')
+
     try:
         if pk:
-            Role.objects.filter(pk=pk).delete()
+            users = UserInfo.objects.all()
+            for user in users:
+                user_roles = user.roles.all()
+                for usr_role in user_roles:
+                    if int(pk) == usr_role.id:
+                        return restful.params_error(message="该角色已被用户关联，不能删除！")
+                    else:
+                        Role.objects.filter(pk=pk).delete()
             return restful.ok(message="成功")
         else:
             return restful.params_error(message="role_id is null")
@@ -419,7 +420,7 @@ class EditRole(LoginRequireMixin,View):
         return restful.ok(message="角色修改成功")
 
 
-@is_login
+
 def edit_users(request):
     """
     编辑用户
@@ -507,11 +508,8 @@ class AllotPermissson(LoginRequireMixin,View):
     def post(self, request):
         try:
             data = request.body.decode("utf-8")
-            print(data)
             menu_data = json.loads(data)
-            print(menu_data)
             role_id = menu_data.get("role_id")
-            print(role_id)
             if role_id:
                 menu_lsit = menu_data.get("menu_list")
                 role_obj = RoleMenu.objects.filter(role_id=role_id)
@@ -721,7 +719,7 @@ class ArticlePagination(PageNumberPagination):
 """
 class StandardResultSetPagination(LimitOffsetPagination):
     #默认每页显示的条数
-    default_limit = 10
+    default_limit = 20
     #url 中传入的显示数据条数的参数
     limit_query_param = 'pageSize'
     #url中传入的数据位置的参数
