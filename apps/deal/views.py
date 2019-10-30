@@ -406,26 +406,20 @@ class CreateRobot(generics.CreateAPIView):
     """
     获取配置策略的参数
     """
-    serializer_class = AccountSerializer
+    # serializer_class = AccountSerializer
 
     def post(self, request):
         try:
-            trading_account = request.body.decode("utf-8")
-            currency_data = json.loads(trading_account)
+            robot_data = request.body.decode("utf-8")
+            currency_data = json.loads(robot_data)
+            id = currency_data.get('trading_account')
+            account_obj = Account.objects.get(id=id)
+            del currency_data['trading_account']
             # Robot.objects.filter(id=5).update(**currency_data)
-            Robot.objects.create(**currency_data)
-            print(currency_data)
+            Robot.objects.create(**currency_data, trading_account=account_obj)
             return restful.ok()
         except Exception as e:
             print(e)
-
-        # form = RobotFrom(request.POST)
-        # # is_valid()方法会根据model字段的类型以及自定义方法来验证提交的数据
-        # if form.is_valid():
-        #     form.save()
-        #     return restful.ok()
-        # else:
-        #     return restful.params_error(message=form.get_errors())
 
 
 def get_account_info(currency, market, id):
