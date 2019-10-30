@@ -88,7 +88,7 @@ def login(request):
             'userId': user_id,
             'sessionid': session_id
         }
-        request.session.set_expiry(30)
+        request.session.set_expiry(600)
         return restful.result(data=context)
 
 
@@ -603,7 +603,7 @@ def get_all_menus11(request):
 根据用户角色获取
 """
 
-class getAllMenus(LoginRequireMixin,generics.ListAPIView):
+class getAllMenus(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
             sessionid = request.META.get("HTTP_SESSIONID")
