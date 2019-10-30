@@ -802,8 +802,10 @@ class ShowConfig(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def post(self, request):
+        print('-----------------')
         try:
             data = request.body.decode("utf-8")
+            print(data)
             data_dict = json.loads(data)
             # 获取机器人id
             id = data_dict.get('robot_id')
