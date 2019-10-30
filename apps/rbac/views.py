@@ -88,7 +88,7 @@ def login(request):
             'userId': user_id,
             'sessionid': session_id
         }
-        request.session.set_expiry(30)
+        request.session.set_expiry(600)
         return restful.result(data=context)
 
 
