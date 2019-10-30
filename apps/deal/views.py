@@ -409,13 +409,23 @@ class CreateRobot(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def post(self, request):
-        form = RobotFrom(request.POST)
-        # is_valid()方法会根据model字段的类型以及自定义方法来验证提交的数据
-        if form.is_valid():
-            form.save()
+        try:
+            trading_account = request.body.decode("utf-8")
+            currency_data = json.loads(trading_account)
+            # Robot.objects.filter(id=5).update(**currency_data)
+            Robot.objects.create(**currency_data)
+            print(currency_data)
             return restful.ok()
-        else:
-            return restful.params_error(message=form.get_errors())
+        except Exception as e:
+            print(e)
+
+        # form = RobotFrom(request.POST)
+        # # is_valid()方法会根据model字段的类型以及自定义方法来验证提交的数据
+        # if form.is_valid():
+        #     form.save()
+        #     return restful.ok()
+        # else:
+        #     return restful.params_error(message=form.get_errors())
 
 
 def get_account_info(currency, market, id):
