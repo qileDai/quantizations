@@ -454,9 +454,11 @@ class SearchRobot(generics.CreateAPIView):
     机器人搜索
     """
     def post(self, request):
-        t_currency = request.POST.get('t_currency')
-        t_market = request.POST.get('t_market')
-        t_status = request.POST.get('t_status')
+        search = request.body.decode("utf-8")
+        search_data = json.loads(search)
+        t_currency = search_data.get('t_currency')
+        t_market = search_data.get('t_market')
+        t_status = search_data.get('t_status')
         search_dict = dict()
         if t_currency:
             search_dict['currency'] = t_currency
@@ -481,10 +483,12 @@ class GetAccountInfo(generics.CreateAPIView):
         return data
 
     def post(self, request):
-        currency = request.POST.get('curry_title')
-        market = request.POST.get('market_title')
+        data = request.body.decode('utf-8')
+        tdata = json.loads(data)
+        currency = tdata.get('curry_title')
+        market = tdata.get('market_title')
         # 获取账户id
-        id = request.POST.get('account_id')
+        id = tdata.get('account_id')
 
         if currency and market and id:
             # 调用get_account_info函数
@@ -536,9 +540,11 @@ class RobotProtection(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def post(self, request):
-        id = request.POST.get('robot_id')
-        flag = request.POST.get('flag')
-        protect = request.POST.get('protect')
+        data = request.body.decode('utf-8')
+        data_dict = json.loads(data)
+        id = data_dict.get('robot_id')
+        flag = data_dict.get('flag')
+        protect = data_dict.get('protect')
         if id and flag and protect:
             Robot.objects.filter(id=id).update(status=flag)
             Robot.objects.filter(id=id).update(protection=protect)
@@ -556,10 +562,12 @@ class StartRobot(generics.CreateAPIView):
     order_list = ""
 
     def post(self, request):
+        data = request.body.decode("utf-8")
+        data_dict = json.loads(data)
         # 多个和一个
-        ids = request.POST.get('robot_id')
+        ids = data_dict.get('robot_id')
         # Flag为1启动，为0停止
-        Flag = request.POST.get('flag')
+        Flag = data_dict.get('flag')
         if Flag is None:
             return restful.params_error(message='参数为空')
         if ids:
@@ -645,8 +653,10 @@ class ShowTradeDetail(generics.CreateAPIView):
         return dict(sells), dict(buys)
 
     def post(self, request):
+        data = request.body.decode("utf-8")
+        data_dict = json.loads(data)
         # 获取机器人id
-        id = request.POST.get('robot_id')
+        id = data_dict.get('robot_id')
         if id:
             robot_obj = Robot.objects.get(id=id)
             currency = robot_obj.currency
@@ -732,7 +742,9 @@ class ShowConfigInfo(generics.CreateAPIView):
         return data
 
     def post(self, request):
-        id = request.POST.get('robot_id')
+        data = request.body.decode("utf-8")
+        data_dict = json.loads(data)
+        id = data_dict.get('robot_id')
         if id:
             robot_obj = Robot.objects.get(id=id)
             account_obj = Account.objects.filter(id=robot_obj.trading_account.id).first()
@@ -770,18 +782,20 @@ class ShowConfig(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def post(self, request):
+        data = request.body.decode("utf-8")
+        data_dict = json.loads(data)
         # 获取机器人id
-        id = request.POST.get('robot_id')
+        id = data_dict.get('robot_id')
         # 获取挂单频率
-        orders_frequency = request.POST.get('orders_frequency')
+        orders_frequency = data_dict.get('orders_frequency')
         # 获取挂单最小数量
-        min_num = request.POST.get('min_num')
+        min_num = data_dict.get('min_num')
         # 获取挂单最大数量
-        max_num = request.POST.get('max_num')
+        max_num = data_dict.get('max_num')
         # 获取止损价
-        stop_price = request.POST.get('stop_price')
+        stop_price = data_dict.get('stop_price')
         # 获取预警价
-        warning_price = request.POST.get('warning_price')
+        warning_price = data_dict.get('warning_price')
 
         Robot.objects.filter(id=id).update(
             orders_frequency=orders_frequency,
@@ -817,8 +831,10 @@ class RobotList(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def get(self, request):
-        pageNum = int(request.GET.get('pageIndex', 1))
-        pagesize = request.GET.get('pageSize')
+        data = request.body.decode("utf-8")
+        data_dict = json.loads(data)
+        pageNum = int(data_dict.get('pageIndex', 1))
+        pagesize = data_dict.get('pageSize')
         if pageNum is None:
             return restful.params_error(message='参数为空')
 
