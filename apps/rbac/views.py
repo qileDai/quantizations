@@ -167,8 +167,8 @@ def delete_users(request):
             return restful.ok(message="成功")
         else:
             return restful.params_error(message="user_id为空")
-    except:
-        return restful.params_error(message="该用户不存在")
+    except Exception as e:
+        return restful.params_error(message=e)
 
 """
 角色列表
