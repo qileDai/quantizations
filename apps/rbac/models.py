@@ -179,7 +179,7 @@ class UserInfo(models.Model):
         ordering = ['-create_time']
 
     def __str__(self):
-        return self.usernamef
+        return self.username
 
 class teacher(models.Model):
     name = models.CharField(max_length=100,null=True)

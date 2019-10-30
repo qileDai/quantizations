@@ -814,11 +814,16 @@ class WarningUsers(generics.CreateAPIView):
     serializer_class = AccountSerializer
 
     def get(self, request):
-        users = UserInfo.objects.filter(status=1)
-        print(users)
-        # data = serialize('json', users)
-        usr = UserSerializer(users, many=True)
-
+        try:
+            print('--------')
+            users = UserInfo.objects.filter(status=1)
+            print(UserInfo.objects.all())
+            # data = serialize('json', users)
+            usr = UserSerializer(users, many=True)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            print(e)
         return restful.result(data=usr.data)
 
 
@@ -830,7 +835,7 @@ class RobotList(generics.CreateAPIView):
     """
     serializer_class = AccountSerializer
 
-    def get(self, request):
+    def post(self, request):
         data = request.body.decode("utf-8")
         data_dict = json.loads(data)
         pageNum = int(data_dict.get('pageIndex', 1))
