@@ -29,7 +29,7 @@ class WarningAccount(object):
         email_pattern = r'^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}$'
         phone_pattern = r'^1[34578]\d{9}$'
         for item in self.warning_account:
-            if re.match(phone_pattern, item):
+            if re.match(phone_pattern, item.phone_number):
                 msg = dict()
                 msg['contact'] = '+86 ' + item
                 msg['ip'] = self.ip
@@ -42,7 +42,7 @@ class WarningAccount(object):
                 # res = self.conn.lrange("sms", 0, -1)
                 # print(res)
                 print(msg, '发送成功！')
-            elif re.match(email_pattern, item):
+            elif re.match(email_pattern, item.email):
                 msg = dict()
                 msg['contact'] = item
                 msg['ip'] = self.ip
