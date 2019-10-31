@@ -20,7 +20,7 @@ from rest_framework import generics
 from utils.mixin import LoginRequireMixin
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework.views import APIView
-import json
+import json,re
 import django
 
 
@@ -151,6 +151,56 @@ def add_users(request):
         return restful.ok(message="成功")
     else:
         return restful.params_error(message=form.get_errors())
+
+
+"""
+添加用户
+"""
+class AddUsers(generics.CreateAPIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            username = request.POST.get("username")
+            email =  request.POST.get("email")
+            phone_number =  request.POST.get("phone_number")
+            password =  request.POST.get("password")
+            confirm_password =  request.POST.get("confirm_password")
+            status =  request.POST.get("status")
+            roles =  request.POST.get("roles")
+
+            #验证数据库中用户是否存在
+            user_info = UserInfo.objects.filter(username=username)
+            if user_info:
+                return restful.params_error(message="该用户名已经存在,请换个名字!")
+            #验证数据库是否存在phone
+            user_phone = UserInfo.objects.filter(phone_number=phone_number)
+            if user_phone:
+                return restful.params_error(message="该手机号已被注册")
+            elif len(phone_number) != 11:
+                return restful.params_error(message="手机号长度不是11位，请重新输入！")
+
+            pattern = r'^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}$'
+            if re.search(pattern, email) is None:
+                return restful.params_error(message='邮箱格式错误!')
+            #密码验证
+            if password.isdecimal() or password.isalpha():
+                return restful.params_error('密码为数字加字母')
+            elif len(password) < 6:
+                return restful.params_error(message="密码长度需大于6位")
+
+            #密码跟确认密码验证
+            if password != confirm_password:
+                return restful.params_error(message="两次密码输入不一致!")
+
+            #保存用户信息到userinfo表中
+            UserInfo.objects.create(username=username,password=password,email=email,
+                                    phone_number=phone_number,status=status)
+            #查询数据库userinfo信息
+            user = UserInfo.objects.get(Q(username=username) & Q(phone_number=phone_number))
+            user.roles.add(roles)
+            return restful.ok(message="成功")
+        except Exception as e:
+            return restful.params_error(message=e)
+
 
 
 """
