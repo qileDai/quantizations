@@ -1,6 +1,7 @@
 import time
 from dealapi.exx.exxService import ExxService
 from dealapi.exx.exxMarket import MarketCondition
+from utils import restful
 from pymysql import *
 
 
@@ -9,12 +10,13 @@ def main(sql, params=None):
         # 创建Connection连接
         conn = connect(host='192.168.4.201',
                        port=3306,
-                       database='exx_quantitative_admin',
+                       database='exx_quantitvate_streagety',
                        user='root',
                        password='password',
                        charset='utf8')
     except Exception as e:
         print('数据库连接错误', e)
+        return restful.result(message='数据库连接错误')
     else:
         # 获取cursor ------执行sql语句的对象
         cur = conn.cursor()
@@ -29,7 +31,7 @@ def main(sql, params=None):
 
 
 def exx_scheduled_job():
-    print('启动定时任务', "当前时间::"+time.strftime("%H:%M:%S", time.localtime(time.time())))
+    print('启动定时任务', "当前时间:"+time.strftime("%H:%M:%S", time.localtime(time.time())))
     # 获取所有用户的EXX账户信息
     sql = "select acc.id,accesskey,secretkey from deal_account as acc INNER JOIN deal_tradingplatform as tr " \
           "on acc.platform_id = tr.id where Platform_name = 'EXX';"
@@ -43,11 +45,11 @@ def exx_scheduled_job():
     for accountid, accesskey, secretkey in ret:
         try:
             # 调用接口，获取账户信息
-            service_api = ExxService('EXX', secretkey, accesskey)
+            service_api = ExxService(secretkey, accesskey)
             data = service_api.get_balance()
             print(data)
         except:
-            return '调用接口失败'
+            return restful.result(message='调用接口失败')
         # 更新24时资产信息
         sql = "select * from deal_lastdayassets where account_id=%s"
         params1 = (accountid,)
@@ -61,15 +63,20 @@ def exx_scheduled_job():
                 if last:
                     params2 = (float(data['funds'][key]['total']), float(last.get('last')), key, accountid)
                     main(sql, params2)
-                else:
+                elif key.lower() == 'usdt':
                     params2 = (float(data['funds'][key]['total']), 1, key, accountid)
+                    main(sql, params2)
+                else:
+                    params2 = (float(data['funds'][key]['total']), 0, key, accountid)
                     main(sql, params2)
             except Exception as e:
                 print('该币种不存在，请添加', e)
+                return restful.result(message='该币种不存在，请添加')
 
 
 def huobi_scheduled_job():
     print('huobi-------------------------')
+
 
 # exx_scheduled_job()
 

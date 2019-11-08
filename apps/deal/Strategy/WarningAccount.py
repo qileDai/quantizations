@@ -31,11 +31,11 @@ class WarningAccount(object):
         for item in self.warning_account:
             if re.match(phone_pattern, item.phone_number):
                 msg = dict()
-                msg['contact'] = '+86 ' + item
+                msg['contact'] = '+86 ' + item.phone_number
                 msg['ip'] = self.ip
                 # "yyyy/MM/dd HH:mm:ss"
                 msg['date'] = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
-                msg['userName'] = '+86 ' + item
+                msg['userName'] = '+86 ' + item.phone_number
                 msg['sendNum'] = 1
                 msg['cont'] = '%s策略的%s交易对当前价格已低于您的预警价，请即时前往处理!' % (self.strategy, self.transaction_pair)
                 self.conn.lpush("sms", json.dumps(msg))
@@ -44,11 +44,11 @@ class WarningAccount(object):
                 print(msg, '发送成功！')
             elif re.match(email_pattern, item.email):
                 msg = dict()
-                msg['contact'] = item
+                msg['contact'] = item.email
                 msg['ip'] = self.ip
                 # "yyyy/MM/dd HH:mm:ss"
                 msg['date'] = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
-                msg['userName'] = item
+                msg['userName'] = item.email
                 msg['sendNum'] = 1
                 msg['cont'] = '%s策略的%s交易对当前价格已低于您的预警价，请即时前往处理!' % (self.strategy, self.transaction_pair)
                 self.conn.lpush("sms", json.dumps(msg))

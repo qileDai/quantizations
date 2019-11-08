@@ -11,51 +11,55 @@ from django.contrib.sessions.models import Session
 from .models import NewMenu, RoleMenu
 from .serializers import  UserSerializer, RoleSerializer, NewmenuSerializer
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.authtoken.models import Token
-from rest_framework import permissions
-from .token_module import get_token, out_token
-from django.contrib.auth import login,logout,authenticate
 from django.db.models import Q
 from rest_framework import generics
 from utils.mixin import LoginRequireMixin
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework.views import APIView
 import json,re
-import django
+from utils import RsaUtil
+from django_redis import get_redis_connection
 
 
 # Create your views here.
 
 # 用户登录装饰器
 def is_login(func):
-    def wrapper(request, *args, **kwargs):
-        if 'is_login' in request.session:
-            res = func(request, *args, **kwargs)
-            return res
-        else:
-            return redirect(settings.LOGIN_URL)
 
+    def wrapper(request, *args, **kwargs):
+        try:
+            sessionid = request.META.get("HTTP_SESSIONID")
+            session_data = Session.objects.get(session_key=sessionid)
+
+            is_login = session_data.get_decoded().get('is_login')
+            if is_login is True:
+                res = func(request, *args, **kwargs)
+                return res
+            else:
+                return restful.server_error(message="session失效，请重新登录！")
+        except:
+            return restful.unauth(message="session失效，请重新登录！")
     return wrapper
 
-
-
-class Login(generics.CreateAPIView):
-    def post(self, request):
-        form = LoginForm(request.Post)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            remember = form.cleaned_data.get('remember')
-            user = authenticate(request,username=username,password=password)
-            pass
-
-
+"""
+生成公钥返回给前端
+"""
+def setKey(request):
+    RsaUtil.create_keys()
+    conn = get_redis_connection()
+    public_key = conn.get('pubkey').decode('utf-8')
+    print(public_key)
+    context = {
+        'publicKey':public_key
+    }
+    return restful.result(data=context)
 
 
 @csrf_exempt
 def login(request):
     username = request.POST.get('username')
     password = request.POST.get('password')
+
     if username is None:
         return restful.params_error(message="用户名不能为空")
     if password is None:
@@ -65,16 +69,17 @@ def login(request):
     # password = hl.hexdigest()
     # print(password)
     user_obj = UserInfo.objects.filter(username=username, password=password).first()
-    print(user_obj)
     if not user_obj:
         return restful.params_error(message="用户名或密码错误,请重新登录")
     elif user_obj.status == 0:
         return restful.params_error(message="用户已被禁用")
     else:  # 普通用户
+
         request.session.clear()
         request.session['is_login'] = True
         request.session['user_id'] = user_obj.id
         user_id = request.session['user_id']
+        request.session.set_expiry(600)
         if not request.session.session_key:
             request.session.create()
             session_id = request.session.session_key
@@ -86,9 +91,10 @@ def login(request):
             'expire': 86400,
             'isCustomize': 0,
             'userId': user_id,
-            'sessionid': session_id
+            'sessionid': session_id,
+
         }
-        request.session.set_expiry(600)
+
         return restful.result(data=context)
 
 
@@ -109,54 +115,26 @@ def logout(request):
 添加角色
 """
 
-class AddRoles(generics.CreateAPIView):
+class AddRoles(LoginRequireMixin,generics.CreateAPIView):
     serializer_class = RoleSerializer
 
     def post(self, request):
-        form = RoleModelForm(request.POST)
-        if form.is_valid():
-            rolename = form.cleaned_data.get("rolename")
-            if not rolename:
-                return restful.params_error(message="rolename is null")
-            description = form.cleaned_data.get("description")
+        try:
+            rolename = request.POST.get("rolename")
+            role = Role.objects.filter(rolename=rolename)
+            if role:
+                return restful.params_error(message="角色已存在，请重新输入")
+            description = request.POST.get("description")
             Role.objects.create(rolename=rolename, description=description)
-            return restful.ok()
-        else:
-            return restful.params_error(message=form.get_errors())
-
-
-
-"""
-添加角色
-"""
-
-def add_roles(request):
-    form = RoleModelForm(request.POST)
-    if form.is_valid():
-        rolename = form.cleaned_data.get("rolename")
-        description = form.cleaned_data.get("description")
-        Role.objects.create(rolename=rolename, description=description)
-        return restful.ok(message="成功")
-    else:
-        return restful.params_error(message=form.get_errors())
-
-"""
-添加用户
-"""
-
-def add_users(request):
-    form = UserInfoAddModelForm(request.POST)
-    if form.is_valid():
-        form.save()
-        return restful.ok(message="成功")
-    else:
-        return restful.params_error(message=form.get_errors())
+            return restful.ok(message="成功")
+        except Exception as e:
+            return restful.params_error(message=e)
 
 
 """
 添加用户
 """
-class AddUsers(generics.CreateAPIView):
+class AddUsers(LoginRequireMixin,generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         try:
             username = request.POST.get("username")
@@ -206,11 +184,9 @@ class AddUsers(generics.CreateAPIView):
 """
 删除用户
 """
-
+@is_login
 def delete_users(request):
     pk = request.POST.get('user_id')
-    print(pk)
-    # print(pk)
     try:
         if pk:
             UserInfo.objects.filter(pk=pk).delete()
@@ -267,7 +243,7 @@ class RolesListView(LoginRequireMixin, View):
 @:param  pageIndex
 @:param pageSize 
 """
-class userListView(generics.ListCreateAPIView):
+class userListView(LoginRequireMixin,generics.ListCreateAPIView):
     def get(self, request):
         pageNum = request.GET.get('pageIndex', 1)
         pagesize = request.GET.get('pageSize')
@@ -309,12 +285,14 @@ class userListView(generics.ListCreateAPIView):
 @:param  pageIndex
 @:param pageSize 
 """
-class RoleList(View):
+class RoleList(LoginRequireMixin,View):
     def get(self, request):
         try:
             roleList = []
-            pageIndex = request.GET.get('pageIndex', 1)
+            pageIndex = request.GET.get('pegeIndex', 1)
+            print(pageIndex)
             pageSize = request.GET.get("pageSize", 20)
+            print(pageSize)
             # print(pageIndex)
             # pageSize = request.GET.get('pageSize',20)
             # print(pageSize)
@@ -334,15 +312,18 @@ class RoleList(View):
                     roleList[m]['menuIdList'].append(menu.menu_id)
                     n += 1
                 m += 1
-            pg = StandardResultSetPagination()
+            paginator = Paginator(roleList,pageSize)
+            page_obj = paginator.page(int(pageIndex))
+            print(page_obj)
             totalCount = roles.count()
-            # totalPageNum = int(totalCount) / int(pg.page_size)
+            numPerPage = len(page_obj.object_list)
+            totalPageNum = paginator.num_pages
             context = {
-                'numPerPage': pageIndex,
-                'PageNum': pageSize,
-                'result': roleList,
+                'numPerPage': numPerPage,
+                'PageNum': int(pageSize),
+                'result': page_obj.object_list,
                 'totalCount': totalCount,
-                'totalPageNum': ''
+                'totalPageNum':totalPageNum,
 
             }
         except Exception:
@@ -355,14 +336,16 @@ class RoleList(View):
 """
 
 
-class getAllUsers(APIView):
+class getAllUsers(LoginRequireMixin,APIView):
     def get(self, request,*args,**kwargs):
         try:
-            token = django.middleware.csrf.get_token(request)
+            # token = django.middleware.csrf.get_token(request)
             username = request.GET.get('username')
             status = request.GET.get('status')
-            pageIndex = request.GET.get('pageIndex',1)
+            pageIndex = request.GET.get('pegeIndex',1)
+            print(pageIndex)
             pageSize = request.GET.get("pageSize",20)
+            print(pageSize)
             if username:
                 users_list = UserInfo.objects.filter(username__icontains=username)
 
@@ -371,22 +354,28 @@ class getAllUsers(APIView):
             else:
                 users_list = UserInfo.objects.all()
             # 根据url参数 获取分页数据
+            paginator = Paginator(users_list, pageSize)
+            page_obj = paginator.page(int(pageIndex))
             # obj = StandardResultSetPagination()
-            pg = StandardResultSetPagination()
-            page_user_list = pg.paginate_queryset(queryset=users_list, request=request, view=self)
+            # pg = StandardResultSetPagination()
+            # page_user_list = pg.paginate_queryset(queryset=users_list, request=request, view=self)
             # 对数据序列化 普通序列化 显示的只是数据
-            ser = UserSerializer(instance=page_user_list, many=True)  # 多个many=True # instance：把对象序列化
+            # ser = UserSerializer(instance=page_user_list, many=True)  # 多个many=True # instance：把对象序列化
             # totalPageNum = int(totalCount)/ int(pg.page_size)
+            numPerPage = len(page_obj.object_list)
+            totalCount = users_list.count()
+            totalPageNum = paginator.num_pages
             context = {
-                'numPerPage': pageIndex,
+                'numPerPage':numPerPage,
                 'PageNum':pageSize,
-                'result': ser.data,
-                'totalCount': pg.count,
-                'totalPageNum':'',
-                'token':token
+                'result':UserSerializer(page_obj.object_list,many=True).data ,
+                'totalCount': totalCount,
+                'totalPageNum':totalPageNum,
+                # 'token':token
             }
         except Exception:
             return restful.params_error(message="获取用户列表信息错误")
+        # return restful.result(data=context)
         return restful.result(data=context)
 
 
@@ -395,10 +384,9 @@ class getAllUsers(APIView):
 """
 删除角色
 """
-
+@is_login
 def delete_roles(request):
     pk = request.POST.get('id')
-
     try:
         if pk:
             users = UserInfo.objects.all()
@@ -415,36 +403,6 @@ def delete_roles(request):
     except:
         return restful.params_error(message='该角色不存在')
 
-
-
-"""
-返回用户信息
-"""
-
-
-class UserList(View):
-    def post(self, request):
-        pageNum = request.GET.get('pageIndex', 1)
-        pagesize = request.GET.get('pageSize')
-        user_id = request.POST.get("user_id")
-        user = UserInfo.objects.get(pk=user_id)
-        serialize = UserSerializer(user)
-        return restful.result(data=serialize.data)
-
-
-"""
-返回角色信息
-"""
-
-
-def role_info(request):
-    role_id = request.POST.get('role_id')
-    if role_id:
-        role = Role.objects.get(pk=role_id)
-        serialize = RoleSerializer(role)
-        return restful.result(data=serialize.data)
-    else:
-        return restful.params_error(message="角色id不存在")
 
 
 """
@@ -470,34 +428,26 @@ class EditRole(LoginRequireMixin,View):
         return restful.ok(message="角色修改成功")
 
 
-
+@is_login
 def edit_users(request):
     """
     编辑用户
     """
     try:
         username = request.POST.get("username")
-        print(username)
         phone_number = request.POST.get("phone_number")
         email = request.POST.get("email")
         status = request.POST.get("status")
         roles = request.POST.get("roles")
         pk = request.POST.get("user_id")
-        print(phone_number)
         if pk:
             user = UserInfo.objects.filter(pk=pk)
-            print(user)
             if user:
                 if len(phone_number) != 11:
                     return restful.params_error(message="手机号长度不是11位，请重新输入")
-                # elif email:
-                #     pattern = r'^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}$'
-                #     if re.search(pattern, email):
-                #         print("sfasdf")
-                #         return
-                #     else:
-                #         raise restful.params_error(message='邮箱格式错误!')  # 指定的邮箱格式                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           else:
-
+                pattern = r'^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}$'
+                if re.search(pattern, email) is None:
+                    return restful.params_error(message='邮箱格式错误!')
                 user_obj = UserInfo.objects.get(pk=pk)
                 UserInfo.objects.filter(pk=pk).update(username=username, phone_number=phone_number
                                                       , email=email, status=status)
@@ -651,16 +601,18 @@ def get_all_menus11(request):
 根据用户角色获取
 """
 
-class getAllMenus(generics.ListAPIView):
+class getAllMenus(LoginRequireMixin,generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
             sessionid = request.META.get("HTTP_SESSIONID")
             session_data = Session.objects.get(session_key = sessionid)
+            dateTime= session_data.expire_date
             user_id = session_data.get_decoded().get('user_id')
-            datas_list = []
-            menu_list = []
-            permission_list = []
-            # user_id = request.session.get('user_id')
+            log = session_data.get_decoded().get('is_login')
+
+            datas_list = []           #菜单详情关系 list
+            menu_list = []            #菜单id list
+            permission_list = []      #权限码list
             if user_id:
                 user = UserInfo.objects.get(id=user_id)
                 roles = user.roles.all()
@@ -702,7 +654,8 @@ class getAllMenus(generics.ListAPIView):
                     context = {
                         'menuList':datas_list,
                         'mnues':menu_list,
-                        'permissions':permission_list
+                        'permissions':permission_list,
+
                     }
                 else:
                     return restful.params_error(message="权限为空")
@@ -711,6 +664,7 @@ class getAllMenus(generics.ListAPIView):
         except Exception as e:
             return restful.params_error(message=e)
         return restful.result(data=context)
+
 """
 获取所有的菜单信息
 """
@@ -722,6 +676,7 @@ class SelectMenu(LoginRequireMixin,View):
             return restful.result(data=serialize.data)
         except:
             return restful.params_error(message="获取菜单详情失败")
+
 
 """
 分页函数
@@ -773,6 +728,6 @@ class StandardResultSetPagination(LimitOffsetPagination):
     #url 中传入的显示数据条数的参数
     limit_query_param = 'pageSize'
     #url中传入的数据位置的参数
-    offset_query_param = 'pageIndex'
+    offset_query_param = 'pegeIndex'
     #最大每页显示条数
     max_limit = None

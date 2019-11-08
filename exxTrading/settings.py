@@ -84,7 +84,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'exxTrading.wsgi.application'
-
+# token失效时间，设置为1天，开发可自行配置
+AUTH_TOKEN_AGE = 60 * 60 * 24
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
@@ -100,7 +101,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'exx_quantitvate_streagety',
-        'HOST': '192.168.4.201',
+            'HOST': '192.168.4.201',
         'PORT': 3306,
         'USER': 'root',
         'PASSWORD': 'password'
@@ -126,6 +127,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://192.168.4.179:6379",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": {"max_connections": 100},
+            "PASSWORD": "sHZQ4zLB6LasF8ox",
+        }
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -188,8 +201,7 @@ REST_FRAMEWORK = {
 
 # 分钟(0-59) 小时(0-23) 每个月的哪一天(1-31) 月份(1-12) 周几(0-6) shell脚本或者命令
 CRONJOBS = [
-    ('*/30 * * * *', 'apps.deal.cron.exx_scheduled_job', '>>../deal/crontab/run.log'),
-    ('*/30 * * * *', 'apps.deal.cron.huobi_scheduled_job', '>>../deal/crontab/run.log')
+    ('*/30 * * * *', 'apps.deal.cron.exx_scheduled_job', '>>/home/lee.log'),
 ]
 
 # 跨域

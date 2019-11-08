@@ -26,7 +26,6 @@ class AccountModelForm(forms.ModelForm, FormMixin):
 
 
 class EditAccountFrom(forms.ModelForm, FormMixin):
-    pk = forms.IntegerField()
     platform = forms.IntegerField()
 
     class Meta:
@@ -41,7 +40,7 @@ class RobotFrom(forms.ModelForm, FormMixin):
         fields = [
             'trading_account', 'currency', 'market', 'trading_strategy',  'current_price', 'orders_frequency',
             'resistance', 'support_level', 'girding_num', 'procudere_fee', 'min_num', 'max_num', 'girding_profit',
-            'stop_price', 'warning_price',
+            'stop_price', 'warning_price','currency_num','market_num'
         ]
 
     # def clean_resistance(self):

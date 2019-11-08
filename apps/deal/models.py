@@ -51,6 +51,8 @@ class Property(models.Model):
     currency = models.CharField(max_length=32)
     # 初始资产
     original_assets = models.DecimalField(max_digits=18, decimal_places=8, default=0)
+    # 创建时当前价
+    last = models.DecimalField(max_digits=18, decimal_places=8, default=0)
     # 增资记录
     charge_record = models.DecimalField(max_digits=18, decimal_places=8, default=0)
     # 提币记录
@@ -102,15 +104,17 @@ class Robot(models.Model):
     market = models.CharField(max_length=32)                                                # 交易市场
     trading_strategy = models.CharField(max_length=32)                                      # 交易策略
     total_money = models.CharField(max_length=64,null=True)                                 # 总投入
-    float_profit = models.DecimalField(max_digits=19, decimal_places=2,null=True)           # 浮动盈亏
-    realized_profit = models.DecimalField(max_digits=19, decimal_places=2,null=True)        # 实现利润
-    total_profit = models.DecimalField(max_digits=19, decimal_places=2,null=True)           # 总利润
-    annual_yield = models.DecimalField(max_digits=5, decimal_places=2,null=True)            # 年化收益率
+    float_profit = models.CharField(max_length=64,null=True)                                # 浮动盈亏
+    realized_profit = models.CharField(max_length=64,null=True)                              # 实现利润
+    total_profit = models.CharField(max_length=64,null=True)                                # 总利润
+    annual_yield = models.CharField(max_length=64,null=True)                                # 年化收益率
     create_time = models.DateTimeField(auto_now_add=True)                                   # 创建时间
     status = models.SmallIntegerField(choices=Robot_Status, default=0)                      # 状态
     protection = models.SmallIntegerField(choices=Robot_Protect, default=0)                 # 机器人保护状态
 
-    current_price = models.DecimalField(max_digits=10, decimal_places=2)        # 当前价
+    current_price = models.CharField(max_length=32,null=True)                      # 当前价
+    currency_num = models.CharField(max_length=32,null=True)                     #交易币种数量
+    market_num = models.CharField(max_length=32,null=True)                      #交易市场币种数量
     orders_frequency = models.IntegerField()                                    # 挂单频率
     resistance = models.DecimalField(max_digits=10, decimal_places=2)           # 阻力位
     support_level = models.DecimalField(max_digits=10, decimal_places=2)        # 支撑位
@@ -124,6 +128,8 @@ class Robot(models.Model):
     warning_account = models.CharField(max_length=1024, null=True)              # 预警账户
     run_status = models.SmallIntegerField(choices=Run_Status, default=1)        # 运行状态
     running_time = models.CharField(max_length=128)                             # 运行时间
+    end_time = models.CharField(max_length=128,default=0)                                 #结束时间
+    total_time = models.CharField(max_length=128,default=0)                               #总运行时间
     warning_time = models.CharField(max_length=32)                              # 运行时间
 
     class Meta:
@@ -140,5 +146,6 @@ class OrderInfo(models.Model):
     closing_time = models.DateTimeField()                                   # 订单完成时间
     robot = models.ForeignKey("Robot", on_delete=models.CASCADE, null=True, blank=True)
     currency_pair = models.CharField(max_length=32)
+    mark = models.IntegerField()
     order_id = models.IntegerField()
 

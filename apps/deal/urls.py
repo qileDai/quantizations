@@ -23,6 +23,7 @@ urlpatterns = [
     path('showtradedetail/', views.ShowTradeDetail.as_view(), name='showtradedetail'),
     path('getaccountinfo/', views.GetAccountInfo.as_view(), name='getaccountinfo'),
     path('createrobot/', views.CreateRobot.as_view(), name='createrobot'),
+    path('selectaccount/', views.SelectAccount.as_view(), name='selectaccount'),
     path('robot_protection/', views.RobotProtection.as_view(), name='robot_protection'),
     path('showconfig/', views.ShowConfig.as_view(), name='showconfig'),
     path('showconfiginfo/', views.ShowConfigInfo.as_view(), name='showconfiginfo'),

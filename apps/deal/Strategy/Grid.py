@@ -22,6 +22,7 @@ class GridStrategy(Thread):
         self.order_type = kwargs['order_type']      # 挂单类型
         self.grid_range = float(self.robot_obj.resistance - self.robot_obj.support_level) / float(self.robot_obj.girding_num)
         self.Flag = True                            # 停止标志位
+        self.set_risk = True
         self.start_time = time.time()               # 启动时间
         self.lock = threading.Lock()                # 锁对象
         self.id_dict = dict()                       # 挂单字典，保存挂单信息
@@ -76,7 +77,7 @@ class GridStrategy(Thread):
             # 创建Connection连接
             conn = connect(host='192.168.4.201',
                            port=3306,
-                           database='exx_quantitative_admin',
+                           database='exx_quantitvate_streagety',
                            user='root',
                            password='password',
                            charset='utf8')
@@ -131,6 +132,7 @@ class GridStrategy(Thread):
                     "amount": amount,
                     "trade_amount": 0,
                     "reverse": False,
+                    "mark_id": res.get("id"),
                 }
                 del self.id_dict[item[0]]
                 # print('删除--------------------------------------------------------------')
@@ -163,7 +165,7 @@ class GridStrategy(Thread):
             sql = "select min_num,max_num from deal_robot where id = %s"
             ret = self.connect_db(sql, (self.robot_obj.id,))
             n = self.robot_obj.girding_num      # 批量挂原始单
-
+            print(self.robot_obj.id, ret)
             for i in range(n):
                 # 计算原始挂单价格区间
                 amount = round(random.uniform(ret[0], ret[1]), 3)
@@ -191,6 +193,7 @@ class GridStrategy(Thread):
                             "amount": amount,
                             "trade_amount": 0,
                             "reverse": False,
+                            "mark_id": res.get("id"),
                         }
                         self.lock.release()
 
@@ -216,25 +219,28 @@ class GridStrategy(Thread):
         print('*'*10, '保存已完成订单信息')
         closing_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(order_info.get("trade_date")/1000))
 
-        sql_select = "select * from deal_orderinfo where order_id = %s"
-        ret = self.connect_db(sql_select, (order_info.get("id"),))
+        # sql_select1 = "select * from deal_orderinfo where order_id = %s"
+        sql_select = "select * from deal_orderinfo where order_type = %s and mark = %s"
+        ret = self.connect_db(sql_select, (order_info.get("type"), item[1].get("mark_id")))
+        print(ret)
         if ret:
             # ret不为空，更新部分成交挂单数据
-            sql = "update deal_orderinfo set closing_price=%s,total_price=%s where order_id=%s"
+            # sql = "update deal_orderinfo set closing_price=%s,total_price=%s where order_id=%s"
+            sql = "update deal_orderinfo set closing_price=%s,total_price=%s where order_type = %s and mark = %s"
             closing_price = float(ret[2])
             num = float(order_info["trade_amount"])-float(item[1]["trade_amount"])
             total_price = float(ret[3]) + num * float(order_info.get("price"))
-            self.connect_db(sql, (closing_price, total_price, order_info.get("id")))
+            # self.connect_db(sql, (closing_price, total_price, order_info.get("id")))
+            self.connect_db(sql, (closing_price, total_price, order_info.get("type"), item[1].get("mark_id")))
 
         else:
-            # ret为空，保存已完成挂单信息
-            sql = "insert into deal_orderinfo(currency_pair, order_type, order_id, " \
-                  "closing_price, total_price, closing_time, robot_id) " \
-                  "values('{}','{}','{}','{}',{},'{}','{}')".format(
+            # ret为空，保存已完成挂单信息order_info.get("id")
+            sql = "insert into deal_orderinfo(currency_pair, order_type, order_id, closing_price, " \
+                  "total_price, closing_time, robot_id, mark) values('{}','{}','{}','{}',{},'{}','{}','{}')".format(
                     self.currency_type, order_info.get("type"),
                     order_info.get("id"), float(order_info.get("price")),
                     float(order_info.get("trade_amount"))*float(order_info.get("price")),
-                    str(closing_time), self.robot_obj.id)
+                    str(closing_time), self.robot_obj.id, item[1].get("mark_id"))
 
             self.connect_db(sql)
 
@@ -279,8 +285,10 @@ class GridStrategy(Thread):
                 # 下单成功，添加反向挂单数据
                 if item[1]["reverse"]:
                     mark = False
+                    mark_id = item[0]
                 else:
                     mark = True
+                    mark_id = item[1].get("mark_id")
 
                 if res.get("id") is not None:
                     self.lock.acquire()
@@ -292,6 +300,7 @@ class GridStrategy(Thread):
                         "amount": amount,
                         "trade_amount": 0,
                         "reverse": mark,
+                        "mark_id": mark_id,
                         "id": item[0],
                     }
                     self.lock.release()
@@ -320,6 +329,7 @@ class GridStrategy(Thread):
                         "amount": str(nums),
                         "trade_amount": 0,
                         "reverse": True,
+                        "mark_id": item[0],
                         "id": item[0],
                     }
                     self.lock.release()
@@ -375,7 +385,8 @@ class GridStrategy(Thread):
         else:
 
             while True:
-                if not self.Flag:
+                if (not self.Flag) or (not self.set_risk):
+                    # del self.id_dict
                     break
                 else:
                     self.lock.acquire()
@@ -437,7 +448,8 @@ class GridStrategy(Thread):
                             print("获取委托单失败...", e)
                         time.sleep(0.2)
             if not self.Flag:
-                for i in range(3):
+                for i in range(5):
+                    print('撤单·······')
                     self.cancel_orders()
 
     def update_order_info(self):
@@ -446,7 +458,8 @@ class GridStrategy(Thread):
         :return:
         """
         while True:
-            if not self.Flag:
+            if (not self.Flag) or (not self.set_risk):
+                del self.id_dict
                 break
             else:
                 # 实时查询数据库中的刷单频率
@@ -521,46 +534,79 @@ class GridStrategy(Thread):
         设置风险策略
         :return:
         """
+        ord_id = ''
         # 实时获取交易对当前价
         while True:
-            markets_data = self.market_api.get_ticker()
-            current_price = markets_data.get("ticker")["last"]
-            # 当前价低于止损价
-            if float(current_price) <= float(self.robot_obj.stop_price):
-                self.Flag = False
-                time.sleep(3)
-                # 停止策略之后更改状态
-                Robot.objects.filter(id=self.robot_obj.id).update(run_status=1, status=0)
-                # 获取卖单信息
-                getopen_data = self.server_api.get_openorders(self.currency_type, '1', 'sell')
-                if isinstance(getopen_data, dict):
-                    # 获取卖一价
-                    try:
-                        depth_data = self.market_api.get_depth()
-                        print('+'*30, depth_data)
-                        sell_1_price, sell_1_amount = depth_data.get("bids")[0]
-                        self.server_api.order(sell_1_amount, self.currency_type, sell_1_price, "sell")
-                    except:
-                        print("未获取到买一价")
-                        break
-                else:
-                    # 一段时间内未成交，撤单
-                    self.cancel_orders()
-
-            # 当前价低于预警价
-            elif float(current_price) <= float(self.robot_obj.warning_price):
-                # 实时查询数据库中的warning_time
-                sql = "select warning_time from deal_robot where id = %s"
-                warning_time = self.connect_db(sql, (self.robot_obj.id,))
-                # 获取机器人的预警账户
-                warning_account = self.robot_obj.warning_account
-                acc_list = UserInfo.objects.filter(id__in=warning_account[1:-1].split(","))
-                warn = WarningAccount(acc_list, '网格', self.currency_type)
-                warn.send_msg()
-                print('---------预警', warning_time)
-                time.sleep(float(warning_time[0])*60)
-            else:
+            if not self.Flag:
                 break
+            else:
+                try:
+                    markets_data = self.market_api.get_ticker()
+                    current_price = markets_data.get("ticker")["last"]
+                    info = self.server_api.get_balance()
+                    total = info.get('funds')
+                    total = total[self.robot_obj.currency].get('total')
+                    print(ord_id, '········')
+                    if ord_id:
+                        order_info = self.server_api.get_order(self.currency_type, ord_id)
+                        info1 = dict()
+                        info1[ord_id] = {
+                            "price_range": None,
+                            "order_type": order_info.get('type'),
+                            "price": order_info.get('price'),
+                            "amount": order_info.get('trade_amount'),
+                            "trade_amount": 0,
+                            "reverse": False,
+                            "mark_id": ord_id,
+                            "id": ord_id,
+                        }
+                        for item in info1.items():
+                            if order_info.get("status") in [2]:
+                                print('保存·······')
+                                self.save_completedorder(item, order_info)
+                except:
+                    print('调用接口失败')
+                    import traceback
+                    traceback.print_exc()
+                    continue
+                # 当前价低于止损价
+                if float(current_price) <= float(self.robot_obj.stop_price):
+                    self.set_risk = False
+                    time.sleep(5)
+                    # 停止策略之后更改状态
+                    Robot.objects.filter(id=self.robot_obj.id).update(run_status=1, status=0)
+                    # 获取卖单信息
+                    getopen_data = self.server_api.get_openorders(self.currency_type, '1', 'sell')
+                    if isinstance(getopen_data, dict):
+                        # 获取卖一价
+                        try:
+                            depth_data = self.market_api.get_depth()
+                            print('+'*30, depth_data)
+                            sell_1_price, sell_1_amount = depth_data.get("bids")[0]
+                            ord = self.server_api.order(sell_1_amount, self.currency_type, sell_1_price, "sell")
+                            ord_id = ord['id']
+                        except:
+                            print("未获取到买一价或下单失败")
+                            break
+                    else:
+                        # 一段时间内未成交，撤单
+                        self.cancel_orders()
+
+                # 当前价低于预警价
+                elif float(current_price) <= float(self.robot_obj.warning_price):
+                    # 实时查询数据库中的warning_time
+                    sql = "select warning_time from deal_robot where id = %s"
+                    warning_time = self.connect_db(sql, (self.robot_obj.id,))
+                    # 获取机器人的预警账户
+                    warning_account = self.robot_obj.warning_account
+                    acc_list = UserInfo.objects.filter(id__in=warning_account[1:-1].split(","))
+                    warn = WarningAccount(acc_list, '网格', self.currency_type)
+                    warn.send_msg()
+                    print('---------预警', warning_time)
+                    time.sleep(float(warning_time[0])*60)
+                elif total == 0 or total == '0':
+                    break
+                time.sleep(1)
 
     def run_thread(self):
         """
