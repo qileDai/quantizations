@@ -1123,10 +1123,8 @@ class RobotYield(generics.CreateAPIView):
             sessionid = request.META.get("HTTP_SESSIONID")
             session_data = Session.objects.get(session_key=sessionid)
             user_id = session_data.get_decoded().get('user_id')
-            print(user_id)
             # 根据登录用户id拿到交易账户
             accounts = Account.objects.filter(users=user_id)
-            print(accounts)
             for account in accounts:
                 exx_service = ExxService(account.secretkey, account.accesskey)
                 # 根据交易账户id获取账户下所有的机器人
