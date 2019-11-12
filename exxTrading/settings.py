@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from exxTrading import configuration
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -42,7 +44,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'apps.exx',
     'apps.rbac',
     'apps.deal',
     'django_crontab',       # 定时任务
@@ -97,17 +98,26 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 import pymysql
 pymysql.install_as_MySQLdb()
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'exx_quantitvate_streagety',
+#         'HOST': '192.168.4.201',
+#         'PORT': 3306,
+#         'USER': 'root',
+#         'PASSWORD': 'password'
+#     }
+# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'exx_quantitvate_streagety',
-            'HOST': '192.168.4.201',
+        'ENGINE': configuration.ENGINE,
+        'NAME': configuration.NAME,
+        'HOST': configuration.HOST,
         'PORT': 3306,
-        'USER': 'root',
-        'PASSWORD': 'password'
+        'USER': configuration.USER,
+        'PASSWORD': configuration.PASSWORD
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -131,11 +141,11 @@ AUTH_PASSWORD_VALIDATORS = [
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.4.179:6379",
+        "LOCATION": "redis://" + configuration.REDIS_HOST,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "CONNECTION_POOL_KWARGS": {"max_connections": 100},
-            "PASSWORD": "sHZQ4zLB6LasF8ox",
+            "PASSWORD": configuration.REDIS_PWD,
         }
     }
 }
@@ -144,6 +154,7 @@ CACHES = {
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
 LANGUAGE_CODE = 'zh-hans'
+
 
 TIME_ZONE = 'Asia/Shanghai'
 
@@ -198,6 +209,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  # LimitOffsetPagination 分页风格
     'PAGE_SIZE': 20,  # 每页多少条记录
 }
+
+# # redis配置
+# REDIS_HOST = '192.168.4.179'
+# REDIS_PWD = 'sHZQ4zLB6LasF8ox'
+
 
 # 分钟(0-59) 小时(0-23) 每个月的哪一天(1-31) 月份(1-12) 周几(0-6) shell脚本或者命令
 CRONJOBS = [

@@ -212,7 +212,9 @@ class ExxService(object):
 
 
 # service_api = ExxService('c6b2ee35465dfddf535e8ddaeaaaf4ee8a90894e', '3b56369d-8072-461e-91f6-243b6277af01')
-# # data = service_api.order('1', 'eth_usdt', '666', 'sell')
+# service_api = ExxService('20738d0c7389c655d86f297d4a2fe8665ceadb2a', '646db7b9-4588-4733-ab19-0ec8cab14ee7')
+# service_api = ExxService('5706106ab1761acb276a905102be268f2c09502d', 'ed63b1a8-7906-4bfb-baec-9e01ff65742d')
+# data = service_api.order('1', 'eth_usdt', '666', 'sell')
 # data = service_api.get_balance()
 # print(data)
 

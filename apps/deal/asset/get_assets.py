@@ -113,23 +113,23 @@ class GetAssets(object):
 
         # 资产变化
         asset_change = dict()
-        asset_change['number'] = self.data_format(current_total - lastday_assets) + " usdt"
+        asset_change['number'] = self.data_format(current_total - lastday_assets)
         # 区分单个资产详情和汇总资产详情
         if self.flag:
             asset_change['lastday_assets'] = lastday_assets
         else:
             if lastday_assets != 0:
-                asset_change['percent'] = (current_total - lastday_assets) / lastday_assets
+                asset_change['percent'] = round((current_total - lastday_assets) / lastday_assets * 100, 3)
             else:
                 asset_change['percent'] = 0
         # 历史盈亏
         history_profit = dict()
-        history_profit['number'] = self.data_format(current_total - original_total) + " usdt"
+        history_profit['number'] = self.data_format(current_total - original_total)
         if self.flag:
             history_profit['original_total'] = self.data_format(original_total)
         else:
             if original_total != 0:
-                history_profit['percent'] = str((current_total - original_total) / original_total) + " usdt"
+                history_profit['percent'] = round((current_total - original_total) / original_total * 100, 3)
             else:
                 history_profit['percent'] = 0
         print(lastday_assets, current_total)
@@ -142,7 +142,7 @@ class GetAssets(object):
             # 今日资产变化
             'asset_change': asset_change,
             # 初始总资产
-            'original_assets': self.data_format(original_total) + " usdt",
+            'original_assets': self.data_format(original_total),
             # 历史盈亏
             'history_profit': history_profit,
             # 总提币
@@ -151,6 +151,8 @@ class GetAssets(object):
             'assets_dict': assets_dict,
             # 损益表
             'profit_loss_dict': profit_loss_dict,
+            # 市场币种
+            'currency': 'usdt'
         }
         print(context)
         return context

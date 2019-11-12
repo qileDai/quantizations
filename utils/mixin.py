@@ -10,8 +10,8 @@ def is_login(func):
             # request.session.clear_expired()
             sessionid = request.META.get("HTTP_SESSIONID")
             session_data = Session.objects.get(session_key=sessionid)
-            time = session_data.expire_date
             is_login = session_data.get_decoded().get('is_login')
+            print('is_login',is_login)
             if is_login is True:
                 res = func(request, *args, **kwargs)
                 return res

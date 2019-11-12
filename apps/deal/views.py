@@ -6,7 +6,7 @@ import json
 
 from django.db.models import Q
 from collections import OrderedDict
-from .models import Account, Property, LastdayAssets, Robot, TradingPlatform, OrderInfo
+from .models import Account, Property, LastdayAssets, Robot, TradingPlatform, OrderInfo, Currency
 from .forms import AccountModelForm
 from apps.rbac.models import UserInfo
 from django.core.paginator import Paginator
@@ -21,7 +21,7 @@ from rest_framework import serializers
 from utils import restful
 from utils.mixin import LoginRequireMixin
 from rest_framework import generics
-from apps.deal.serializers import AccountSerializer, RobotSerializer, OrderInfoSerializer, LastdayAssetsSerializer, PropertySerializer, PlatformSerializer
+from apps.deal.serializers import AccountSerializer, RobotSerializer, OrderInfoSerializer, LastdayAssetsSerializer, PropertySerializer, PlatformSerializer, CurrencySerializer
 from apps.rbac.serializers import UserSerializer
 
 # Create your views here.
@@ -54,7 +54,7 @@ def get_account_info(currency, market, id):
     return user_obj, service_obj, market_obj
 
 
-class AccountList(LoginRequireMixin, generics.CreateAPIView):
+class AccountList(generics.CreateAPIView):
     """
     显示用户所有账户信息
     """
@@ -83,7 +83,7 @@ class AccountList(LoginRequireMixin, generics.CreateAPIView):
         except:
             return restful.params_error(message='页码错误')
         # 获取勾选币种
-        currency_list = Property.objects.filter(currency_status='1').values("currency",).distinct()
+        currency_list = Currency.objects.filter(currency_status='1').values("currency",).distinct()
         ret = list(currency_list)
         data = json.dumps(ret)
         # data = PropertySerializer(currency_list, fields=('currency',), many=True).data
@@ -103,7 +103,7 @@ class AccountList(LoginRequireMixin, generics.CreateAPIView):
         return restful.result(data=context)
 
 
-class GetCurrencies(LoginRequireMixin, generics.CreateAPIView):
+class GetCurrencies(generics.CreateAPIView):
     """
     获取用户所有币种
     """
@@ -113,20 +113,18 @@ class GetCurrencies(LoginRequireMixin, generics.CreateAPIView):
             sessionid = request.META.get("HTTP_SESSIONID")
             session_data = Session.objects.get(session_key=sessionid)
             user_id = session_data.get_decoded().get('user_id')
+            if user_id:
+                currency_list = Currency.objects.values("currency",).distinct()
+                data = CurrencySerializer(currency_list, many=True).data
+                return restful.result(data=data)
         except Exception as e:
-            return restful.params_error(message="未获取到sessionid")
             print(e)
-        if user_id:
-            currency_list = Property.objects.filter(account__users__id=user_id).values("currency",).distinct()
-            ret = list(currency_list)
-            # currency_list = serialize('json', currency_list)
-            data = json.dumps(ret)
-            return restful.result(data=data)
-        else:
-            return restful.params_error(message='未获取到账户登陆信息，请检查是否登陆')
+            import traceback
+            traceback.print_exc()
+            return restful.params_error(message="未获取到sessionid")
 
 
-class AddAccount(LoginRequireMixin, generics.CreateAPIView):
+class AddAccount(generics.CreateAPIView):
     """
     添加账户
     """
@@ -147,6 +145,8 @@ class AddAccount(LoginRequireMixin, generics.CreateAPIView):
             # user_id = 1
         except Exception as e:
             print(e)
+            import traceback
+            traceback.print_exc()
             return restful.params_error(message='未获取到sessionid')
         if model_form.is_valid():
             # save()返回一个还未保存至数据库的对象,用这个对象添加一些额外的数据，然后在用save()保存到数据库
@@ -156,21 +156,24 @@ class AddAccount(LoginRequireMixin, generics.CreateAPIView):
             obj.users = user_obj
             obj.save()
             accounts = Account.objects.filter(Q(title=obj) & Q(platform=model_form.cleaned_data['platform']))
-            currency = Property.objects.values("currency").distinct()
-            select_currency = Property.objects.filter(currency_status='1').values("currency").distinct()
-
+            currency = Currency.objects.values("currency").distinct()
+            select_currency = Currency.objects.filter(currency_status='1').values("currency").distinct()
             print(accounts, currency, select_currency)
             # 给新账户添加币种/初始资产
             try:
                 market_api = MarketCondition()
                 info1 = market_api.get_tickers()
+                ser_obj = ExxService(model_form.cleaned_data['secretkey'], model_form.cleaned_data['accesskey'])
+                info = ser_obj.get_balance()
+                info = info['funds']
+            except:
+                import traceback
+                traceback.print_exc()
+            else:
                 for account in accounts:
                     for cur in currency:
                         print(cur['currency'])
                         try:
-                            ser_obj = ExxService(model_form.cleaned_data['secretkey'], model_form.cleaned_data['accesskey'])
-                            info = ser_obj.get_balance()
-                            info = info['funds']
                             total = info[cur['currency']]['total']
                             transaction_pair = cur['currency'].lower() + '_usdt'
                             data = info1.get(transaction_pair, None)
@@ -180,25 +183,27 @@ class AddAccount(LoginRequireMixin, generics.CreateAPIView):
                                 last = 1
                             else:
                                 last = 0
+                            if cur in select_currency:
+                                # 勾选状态为1
+                                LastdayAssets.objects.create(currency=cur['currency'], account=account,
+                                                             lastday_assets=total, last=last, currency_status=1)
+                                Property.objects.create(currency=cur['currency'], account=account,
+                                                        currency_status=1, original_assets=total, last=last)
+                            else:
+                                LastdayAssets.objects.create(currency=cur['currency'], account=account,
+                                                             lastday_assets=total, last=last, currency_status=0)
+                                Property.objects.create(currency=cur['currency'], account=account,
+                                                        currency_status=0, original_assets=total, last=last)
                         except:
                             # total = 1
+                            import traceback
+                            traceback.print_exc()
                             return restful.params_error(message='平台接口调用失败或者平台没有该币种')
-                        if cur in select_currency:
-                            # 勾选状态为1
-                            LastdayAssets.objects.create(currency=cur['currency'], account=account,
-                                                         lastday_assets=total, last=last, currency_status=1)
-                            Property.objects.create(currency=cur['currency'], account=account,
-                                                    currency_status=1, original_assets=total, last=last)
-                        else:
-                            LastdayAssets.objects.create(currency=cur['currency'], account=account,
-                                                         lastday_assets=total, last=last, currency_status=0)
-                            Property.objects.create(currency=cur['currency'], account=account,
-                                                    currency_status=0, original_assets=total, last=last)
+
                 return restful.ok()
-            except:
-                import traceback
-                traceback.print_exc()
         else:
+            import traceback
+            traceback.print_exc()
             return restful.params_error(model_form.get_errors())
 
 
@@ -210,7 +215,7 @@ def accountinfo(request):
     return restful.result(data=serialize.data)
 
 
-class EditAccount(LoginRequireMixin, generics.ListCreateAPIView):
+class EditAccount(generics.ListCreateAPIView):
     """
     get:
     获取要修改账户信息.
@@ -256,7 +261,7 @@ class EditAccount(LoginRequireMixin, generics.ListCreateAPIView):
             return restful.result(message='参数错误')
 
 
-class DeleteAccount(LoginRequireMixin, generics.CreateAPIView):
+class DeleteAccount(generics.CreateAPIView):
     """
     删除账户
     """
@@ -271,7 +276,7 @@ class DeleteAccount(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message="参数错误或该账户不存在")
 
 
-class ShowAssert(LoginRequireMixin, generics.CreateAPIView):
+class ShowAssert(generics.CreateAPIView):
     """
     显示账户资产信息
     """
@@ -296,7 +301,7 @@ class ShowAssert(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='参数为空')
 
 
-class ShowCollectAsset(LoginRequireMixin, generics.CreateAPIView):
+class ShowCollectAsset(generics.CreateAPIView):
     """
     汇总资产信息
     """
@@ -349,13 +354,30 @@ class ShowCollectAsset(LoginRequireMixin, generics.CreateAPIView):
                             float(context_list[0]['profit_loss_dict'][key][key1]) + float(value1)
                     else:
                         context_list[0]['profit_loss_dict'][key][key1] = value1
+        try:
+            for key in context_list[1:]:
+                context_list[0]['asset_change']['number'] = float(context_list[0]['asset_change']['number']) + \
+                                                            float(key['asset_change']['number'])
+                context_list[0]['asset_change']['lastday_assets'] = float(context_list[0]['asset_change']['lastday_assets']) + \
+                                                                    float(key['asset_change']['lastday_assets'])
+                context_list[0]['original_assets'] = float(context_list[0]['original_assets']) + \
+                                                     float(key['original_assets'])
+                context_list[0]['history_profit']['number'] = float(context_list[0]['history_profit']['number']) + \
+                                                              float(key['history_profit']['number'])
+                context_list[0]['history_profit']['original_total'] = float(context_list[0]['history_profit']['original_total']) + \
+                                                                      float(key['history_profit']['original_total'])
+        except:
+            import traceback
+            traceback.print_exc()
+
         # 汇总资产变化/初始总资产/历史盈亏/
         print('资产汇总', '-' * 20)
-        # print(context_list[0])
+        print(context_list[0])
+        # print(context_list[1])
         return restful.result(data=context_list[0])
 
 
-class ChargeAccount(LoginRequireMixin, generics.CreateAPIView):
+class ChargeAccount(generics.CreateAPIView):
     """
     增资
     """
@@ -391,7 +413,7 @@ class ChargeAccount(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='参数为空')
 
 
-class WithDraw(LoginRequireMixin, generics.CreateAPIView):
+class WithDraw(generics.CreateAPIView):
     """
     提币
     """
@@ -417,7 +439,7 @@ class WithDraw(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='参数为空')
 
 
-class ConfigCurrency(LoginRequireMixin, generics.CreateAPIView):
+class ConfigCurrency(generics.CreateAPIView):
     """
     币种新增/配置
     """
@@ -435,9 +457,15 @@ class ConfigCurrency(LoginRequireMixin, generics.CreateAPIView):
             keys = [x[0] for x in market_obj.items() if currency.lower() in x[0].split('_')]
             if not keys:
                 return restful.params_error(message='平台不存在该币种，请重新输入')
+            if not Currency.objects.filter(currency=currency):
+                Currency.objects.create(currency=currency)
+            else:
+                return restful.params_error(message='币种重复，请重新输入')
             currency_list = list()
             currency_list.append(currency)
         except:
+            import traceback
+            traceback.print_exc()
             return restful.params_error(message='未获取到sessionid或参数错误')
         if currency_list:
             accounts = Account.objects.filter(users=user_id)
@@ -459,14 +487,15 @@ class ConfigCurrency(LoginRequireMixin, generics.CreateAPIView):
                         # account必须为模型类对象
                         LastdayAssets.objects.create(currency=currency, account=account)
                         Property.objects.create(currency=currency, account=account, original_assets=total, currency_status=0)
+                    time.sleep(0.5)
             # 返回数据为json格式
-            data = Property.objects.values("currency").distinct()
+            data = Currency.objects.values("currency").distinct()
             return restful.result(data=list(data))
         else:
             return restful.params_error(message='请选择账户币种')
 
 
-class SelectCurrency(LoginRequireMixin, generics.CreateAPIView):
+class SelectCurrency(generics.CreateAPIView):
     """
     勾选的币种
     """
@@ -479,9 +508,11 @@ class SelectCurrency(LoginRequireMixin, generics.CreateAPIView):
         if currency_list:
             Property.objects.values("currency").update(currency_status='0')
             LastdayAssets.objects.values("currency").update(currency_status='0')
+            Currency.objects.values("currency").update(currency_status='0')
             for cur in list(currency_list):
                 Property.objects.filter(currency=cur).update(currency_status='1')
                 LastdayAssets.objects.filter(currency=cur).update(currency_status='1')
+                Currency.objects.filter(currency=cur).update(currency_status='1')
             return restful.ok()
         else:
             return restful.params_error(message='参数为空')
@@ -489,7 +520,7 @@ class SelectCurrency(LoginRequireMixin, generics.CreateAPIView):
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 创建机器人
-class CreateRobot(LoginRequireMixin, generics.CreateAPIView):
+class CreateRobot(generics.CreateAPIView):
     """
     获取配置策略的参数
     """
@@ -510,7 +541,7 @@ class CreateRobot(LoginRequireMixin, generics.CreateAPIView):
             return restful.result(message='参数错误')
 
 
-class GetAccountInfo(LoginRequireMixin, generics.CreateAPIView):
+class GetAccountInfo(generics.CreateAPIView):
     """
     展示交易对可用额度/当前价,计算默认值
     """
@@ -571,7 +602,7 @@ class GetAccountInfo(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='参数为空')
 
 
-class SelectAccount(LoginRequireMixin, generics.CreateAPIView):
+class SelectAccount(generics.CreateAPIView):
     """
     创建机器人选择账户
     """
@@ -581,7 +612,7 @@ class SelectAccount(LoginRequireMixin, generics.CreateAPIView):
         return restful.result(data=accounts)
 
 
-class RobotProtection(LoginRequireMixin, generics.CreateAPIView):
+class RobotProtection(generics.CreateAPIView):
     """
     机器人保护
     """
@@ -614,7 +645,7 @@ class RobotProtection(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='参数为空')
 
 
-class StartRobot(LoginRequireMixin, generics.CreateAPIView):
+class StartRobot(generics.CreateAPIView):
     """
     管理机器人
     """
@@ -653,7 +684,7 @@ class StartRobot(LoginRequireMixin, generics.CreateAPIView):
                 thread2 = GridStrategy(robot_obj=robot_obj, order_type="sell")
                 thread1.start()
                 thread2.start()
-                #获取机器人启动运行时间戳updta到数据库
+                # 获取机器人启动运行时间戳update到数据库
                 for item in threading.enumerate():
                     try:
                         # 获取线程对应的机器人
@@ -670,7 +701,6 @@ class StartRobot(LoginRequireMixin, generics.CreateAPIView):
                 print('-' * 30, '启动线程')
             elif robot_obj.trading_strategy == '网格交易V1.0' and Flag == 0:
                 Robot.objects.filter(id=robot_obj.id).update(run_status=1, status=Flag)
-
                 # Robot.objects.filter(id=robot_obj.id).update(run_status=1)
                 # 停止线程
                 for item in threading.enumerate():
@@ -678,6 +708,7 @@ class StartRobot(LoginRequireMixin, generics.CreateAPIView):
                         # 获取线程对应的机器人
                         robot = item.robot_obj
                         if robot_obj.id == robot.id:
+                            # 更新机器人的运行结束时间&机器人的运行总时间
                             item.setFlag(False)
                             end_time = time.time()
                             Robot.objects.filter(id=robot_obj.id).update(end_time=end_time)
@@ -692,12 +723,13 @@ class StartRobot(LoginRequireMixin, generics.CreateAPIView):
                 pass
             elif robot_obj.trading_strategy == '搬砖套利V1.0':
                 pass
+        print('sdssssssssssssss')
 
         StartRobot.order_list = threading.enumerate()
         return restful.ok()
 
 
-class ShowTradeDetail(LoginRequireMixin, generics.CreateAPIView):
+class ShowTradeDetail(generics.CreateAPIView):
     """
     展示机器人交易详情
     """
@@ -758,9 +790,16 @@ class ShowTradeDetail(LoginRequireMixin, generics.CreateAPIView):
                         break
                 else:
                     closed_info.append(buy)
-
-            closed_info = closed_info + close_sell
-
+            close_sells = list()
+            for elem in close_sell:
+                dd = dict()
+                for kk, vv in elem.items():
+                    kk1 = kk + '1'
+                    dd[kk1] = vv
+                    close_sells.append(dd)
+            print('-----------------------------------')
+            closed_info = closed_info + close_sells
+            print(closed_info)
             return closed_info, total_profit
         except:
             import traceback
@@ -774,113 +813,118 @@ class ShowTradeDetail(LoginRequireMixin, generics.CreateAPIView):
             id = data_dict.get('robot_id')
             pageNum = int(data_dict.get('pageIndex', 1))
             pagesize = data_dict.get('pageSize')
+            print('------', id)
         except ExxService as e:
             print(e)
             return restful.result(message='参数错误')
             # import traceback
             # traceback.print_exc()
         else:
-            if id and pageNum:
-                robot_obj = Robot.objects.get(id=id)
-                currency = robot_obj.currency
-                market = robot_obj.market
-                # 调用函数
-                try:
-                    user_obj, service_obj, market_obj = get_account_info(currency, market, robot_obj.trading_account_id)
-                    info = service_obj.get_balance()
-                    # print("交易详情"+info)
-                    info = info.get('funds')
-                    info1 = market_obj.get_ticker()
-                    info1 = info1.get('ticker')
-                except Exception as e:
-                    print(e)
-                    return restful.params_error(message='币种或交易对错误，请核对！')
-                # 查询已完成订单
-                property_obj = Property.objects.get(Q(account_id=robot_obj.trading_account) & Q(currency=currency))
-                closed_order_buy = OrderInfo.objects.filter(Q(robot=id) & Q(order_type='buy')).order_by("-id")
-                closed_order_sell = OrderInfo.objects.filter(Q(robot=id) & Q(order_type='sell')).order_by("-id")
-                closed_buy = OrderInfoSerializer(closed_order_buy, many=True).data
-                closed_sell = OrderInfoSerializer(closed_order_sell, many=True).data
-                closed_info, total_profit = self.match_buy_sell(closed_buy, closed_sell, robot_obj.procudere_fee)
-                # print('-='*20)
-                # print(type(closed_sell))
-                # 已完成订单分页
-                try:
-                    paginator = Paginator(closed_info, pagesize)
-                    page_obj = paginator.page(pageNum)
-                except:
-                    import traceback
-                    traceback.print_exc()
-                    return restful.params_error(message='页码错误')
-                numPerPage = len(page_obj.object_list)
-                totalCount = len(closed_info)
-                totalPageNum = paginator.num_pages
-
-                # 获取挂单信息
-                order_info = dict()
-                running_time = 0
-                for item in StartRobot.order_list:
+            try:
+                if id and pageNum:
+                    robot_obj = Robot.objects.get(id=id)
+                    currency = robot_obj.currency
+                    market = robot_obj.market
+                    # 调用函数
                     try:
-                        # 获取机器人对应的线程对象
-                        robot = item.robot_obj
-                        if id == robot.id:
-                            # 向字典中添加数据
-                            order_info = {**order_info, **item.id_dict}
-                            if item.Flag:
-                                running_time = time.time() - item.start_time
-                            else:
-                                running_time = 0
+                        user_obj, service_obj, market_obj = get_account_info(currency, market, robot_obj.trading_account_id)
+                        info = service_obj.get_balance()
+                        # print("交易详情"+info)
+                        info = info.get('funds')
+                        info1 = market_obj.get_ticker()
+                        info1 = info1.get('ticker')
+                    except Exception as e:
+                        print(e)
+                        return restful.params_error(message='币种或交易对错误，请核对！')
+                    # 查询已完成订单
+                    property_obj = Property.objects.get(Q(account_id=robot_obj.trading_account) & Q(currency=currency))
+                    closed_order_buy = OrderInfo.objects.filter(Q(robot=id) & Q(order_type='buy')).order_by("-id")
+                    closed_order_sell = OrderInfo.objects.filter(Q(robot=id) & Q(order_type='sell')).order_by("-id")
+                    closed_buy = OrderInfoSerializer(closed_order_buy, many=True).data
+                    closed_sell = OrderInfoSerializer(closed_order_sell, many=True).data
+                    closed_info, total_profit = self.match_buy_sell(closed_buy, closed_sell, robot_obj.procudere_fee)
+                    # print('-='*20)
+                    # print(type(closed_sell))
+                    # 已完成订单分页
+                    try:
+                        paginator = Paginator(closed_info, pagesize)
+                        page_obj = paginator.page(pageNum)
                     except:
-                        print('对象没有属性robot_obj')
-                        continue
-                sell, buy = self.sort_data(order_info)
-                print('----------------------------------', order_info)
-                context = {
-                    # 交易币种和交易市场
-                    'currency_market': {"currency": currency, "market": market},
-                    # 已完成笔数
-                    'closed_num': len(closed_buy)+len(closed_sell),
-                    # 已完成挂单信息
-                    'closed_order': page_obj.object_list,
-                    # 未完成笔数
-                    'open_num': len(order_info),
-                    # 未完成卖单信息
-                    'open_sell': sell,
-                    # 未完成买单信息
-                    'open_buy': buy,
-                    # 总投入
-                    'total_input': self.data_format(property_obj.original_assets),
-                    # 运行时间
-                    'running_time': self.changeTime(running_time),
-                    # 交易币种可用
-                    'currency_balance': self.data_format(info[currency.upper()].get('balance')) + ' ' + currency,
-                    # 交易市场可用
-                    'market_balance': self.data_format(info[market.upper()].get('balance')) + ' ' + market,
-                    # 交易币种冻结
-                    'currency_freeze': self.data_format(info[currency.upper()].get('freeze')) + ' ' + currency,
-                    # 交易市场冻结
-                    'market_freeze': self.data_format(info[market.upper()].get('freeze')) + ' ' + market,
-                    # 当前价
-                    'last': self.data_format(info1.get('last')) + ' ' + market,
-                    # 单笔收益
-                    'profit': self.data_format(
-                        (float(info[currency.upper()].get('total')) - float(property_obj.original_assets))
-                        * float(info1.get('last'))) + ' ' + market,
-                    # 总收益
-                    'total_profit': total_profit,
-                    'numPerPage': numPerPage,
-                    'PageNum': pageNum,
-                    'totalCount': totalCount,
-                    'totalPageNum': totalPageNum,
-                }
+                        import traceback
+                        traceback.print_exc()
+                        return restful.params_error(message='页码错误')
+                    numPerPage = len(page_obj.object_list)
+                    totalCount = len(closed_info)
+                    totalPageNum = paginator.num_pages
 
-                # print(context)
-                return restful.result(data=context)
-            else:
-                return restful.params_error(message='参数为空')
+                    # 获取挂单信息
+                    order_info = dict()
+                    running_time = 0
+                    for item in StartRobot.order_list:
+                        try:
+                            # 获取机器人对应的线程对象
+                            robot = item.robot_obj
+                            if id == robot.id:
+                                # 向字典中添加数据
+                                order_info = {**order_info, **item.id_dict}
+                                if item.Flag:
+                                    running_time = time.time() - item.start_time
+                                else:
+                                    running_time = 0
+                        except:
+                            print('对象没有属性robot_obj')
+                            continue
+                    sell, buy = self.sort_data(order_info)
+                    print('----------------------------------', order_info)
+                    context = {
+                        # 交易币种和交易市场
+                        'currency_market': {"currency": currency, "market": market},
+                        # 已完成笔数
+                        'closed_num': len(closed_buy)+len(closed_sell),
+                        # 已完成挂单信息
+                        'closed_order': page_obj.object_list,
+                        # 未完成笔数
+                        'open_num': len(order_info),
+                        # 未完成卖单信息
+                        'open_sell': sell,
+                        # 未完成买单信息
+                        'open_buy': buy,
+                        # 总投入
+                        'total_input': robot_obj.total_money,
+                        # 运行时间
+                        'running_time': self.changeTime(running_time),
+                        # 交易币种可用
+                        'currency_balance': self.data_format(info[currency.upper()].get('balance')) + ' ' + currency,
+                        # 交易市场可用
+                        'market_balance': self.data_format(info[market.upper()].get('balance')) + ' ' + market,
+                        # 交易币种冻结
+                        'currency_freeze': self.data_format(info[currency.upper()].get('freeze')) + ' ' + currency,
+                        # 交易市场冻结
+                        'market_freeze': self.data_format(info[market.upper()].get('freeze')) + ' ' + market,
+                        # 当前价
+                        'last': self.data_format(info1.get('last')) + ' ' + market,
+                        # 单笔收益
+                        'profit': self.data_format(
+                            (float(info[currency.upper()].get('total')) - float(property_obj.original_assets))
+                            * float(info1.get('last'))) + ' ' + market,
+                        # 总收益
+                        'total_profit': total_profit,
+                        'numPerPage': numPerPage,
+                        'PageNum': pageNum,
+                        'totalCount': totalCount,
+                        'totalPageNum': totalPageNum,
+                    }
+
+                    print(context)
+                    return restful.result(data=context)
+                else:
+                    return restful.params_error(message='参数为空')
+            except:
+                import traceback
+                traceback.print_exc()
 
 
-class ShowConfigInfo(LoginRequireMixin, generics.CreateAPIView):
+class ShowConfigInfo(generics.CreateAPIView):
     """
     展示机器人配置信息
     """
@@ -928,7 +972,7 @@ class ShowConfigInfo(LoginRequireMixin, generics.CreateAPIView):
             return restful.result(message='参数错误')
 
 
-class ShowConfig(LoginRequireMixin, generics.CreateAPIView):
+class ShowConfig(generics.CreateAPIView):
     """
     修改机器人配置信息
     """
@@ -950,7 +994,7 @@ class ShowConfig(LoginRequireMixin, generics.CreateAPIView):
             return restful.params_error(message='参数错误')
 
 
-class WarningUsers(LoginRequireMixin, generics.CreateAPIView):
+class WarningUsers(generics.CreateAPIView):
     """
     序列化预警账户
     """
@@ -967,7 +1011,7 @@ class WarningUsers(LoginRequireMixin, generics.CreateAPIView):
         return restful.result(data=usr.data)
 
 
-class RobotList(LoginRequireMixin, generics.CreateAPIView):
+class RobotList(generics.CreateAPIView):
     """
     机器人管理列表页面
     """
@@ -1063,7 +1107,7 @@ class RobotYield(generics.CreateAPIView):
         data = str(round(float(data), 2))
         return data
 
-    #对数据库中的数据四舍五入取2位小数点，并去掉单位
+    # 对数据库中的数据四舍五入取2位小数点，并去掉单位
     def str_util(self,data):
         if data:
             str_data = re.findall('\d+\.\d*', data)[0]
@@ -1074,66 +1118,68 @@ class RobotYield(generics.CreateAPIView):
 
     def post(self, request):
         try:
-            # 获取用户id
             robot_yield = []
+            # 获取用户id
             sessionid = request.META.get("HTTP_SESSIONID")
             session_data = Session.objects.get(session_key=sessionid)
             user_id = session_data.get_decoded().get('user_id')
+            print(user_id)
             # 根据登录用户id拿到交易账户
             accounts = Account.objects.filter(users=user_id)
+            print(accounts)
             for account in accounts:
                 exx_service = ExxService(account.secretkey, account.accesskey)
-                #根据交易账户id获取账户下所有的机器人
-                robots = Robot.objects.filter((Q(trading_account_id=account.id) & Q(status=1)) | (Q(trading_account_id=account.id) & Q(status=2)))
+                # 根据交易账户id获取账户下所有的机器人
+                robots = Robot.objects.filter((Q(trading_account_id=account.id) & Q(status=1)) |
+                                              (Q(trading_account_id=account.id) & Q(status=2)))
                 for robot in robots:
                     robot_id = robot.id  # 机器人id
-                    print('id**********',robot_id)
                     currency = robot.currency  # 交易币种
                     market = robot.market  # 市场币种
-                    # total_money = re.findall('\d+\.\d\d', robot.total_money)[0]  # 总投入
-                    total_money = self.str_util(robot.total_money)  # 总投入
+                    total_money = self.str_util(robot.total_money)     # 总投入
                     init_currency = self.str_util(robot.currency_num)  # 初始交易币种数量
-                    init_market = self.str_util(robot.market_num)  # 初始市场币种数量
-                    last_price = robot.current_price  # 当时价格
-                    start_time = robot.running_time    # 创建时间
-                    total_time = robot.total_time    #运行总时间秒
-                    print(total_time)
+                    init_market = self.str_util(robot.market_num)      # 初始市场币种数量
+                    last_price = robot.current_price                   # 当时价格
+                    start_time = robot.running_time                    # 创建时间
+                    total_time = robot.total_time                      # 运行总时间秒
                     try:
                         user_obj, service_obj, market_obj = get_account_info(currency, market, account.id)
                         info = exx_service.get_balance()
                         info = info.get('funds')
                         info1 = market_obj.get_ticker()
                         info1 = info1.get('ticker')
-                        current_price = info1.get('last')  # 最新价格
-                        balance_currency = self.data_format(info[currency.upper()].get('total'))                  #当前可用的交易币种数量包括冻结
-                        balance_market = self.data_format(info[market.upper()].get('total'))                      #当前可用的市场币种数量
-                        current_time = time.time()         #获取最新的时间
-                        print(current_time,"current_time")
-                        run_time = self.data_format((float(current_time) - float(start_time))/60)  #档次机器人运行多少分钟
-                        before_time = self.data_format(float(total_time) /60)                      #以前机器人总共运行多少分钟
-                        run_totalTime = float(before_time) + float(run_time)                         #运行总时间分钟
+                        # 最新价格
+                        current_price = info1.get('last')
+                        # 当前可用的交易币种数量包括冻结数量
+                        balance_currency = self.data_format(info[currency.upper()].get('total'))
+                        # 当前可用的市场币种数量包扣冻结数量
+                        balance_market = self.data_format(info[market.upper()].get('total'))
+                        # 获取最新的时间
+                        current_time = time.time()
+                        # 当次机器人运行多少分钟
+                        run_time = self.data_format((float(current_time) - float(start_time))/60)
+                        # 以前机器人总共运行多少分钟
+                        before_time = self.data_format(float(total_time) / 60)
+                        # 运行总时间分钟
+                        run_totalTime = float(before_time) + float(run_time)
 
-                        #------------------------------计算当次机器人启动运行产生的收益率-------------------------------------
-                        # residue_num = ((float(balance_currency) ) / float(last_price) ) + (float(balance_market) )
-                        float_profit = float(balance_currency) * float(current_price) - float(init_currency) * float(last_price)      #浮动盈亏（折算为交易市场币种）：当前剩余币种数量*当前价格-总投入数量*当时价格
-                        realized_profit = float(balance_market) - float(init_market)                                                  #实现利润（折算为交易市场币种）：当前剩余币种数量-总投入数量
-                        total_profit = float_profit + realized_profit                                                                 #总利润（折算为交易市场币种）：浮动盈亏+实现利润
-
-                        annual_yield = (float(realized_profit) / float(total_money)) / float(run_totalTime) * 525600 * 1                   #年化收益率：实现利润/总投入/运行分钟数*525,600*100%
-
+                        # ------------------------------计算机器人启动运行产生的收益率-------------------------------------
+                        # 浮动盈亏（折算为交易市场币种）：当前剩余币种数量*当前价格-总投入数量*当时价格
+                        float_profit = float(balance_currency) * float(current_price) - float(init_currency) * float(last_price)
+                        # 实现利润（折算为交易市场币种）：当前剩余币种数量-总投入数量
+                        realized_profit = float(balance_market) - float(init_market)
+                        # 总利润（折算为交易市场币种）：浮动盈亏+实现利润
+                        total_profit = float_profit + realized_profit
+                        # 年化收益率：实现利润/总投入/运行分钟数*525,600*100%
+                        annual_yield = (float(realized_profit) / float(total_money)) / float(run_totalTime) * 525600 * 1
                         new_annual_yield = self.data_format(annual_yield)
+                        yield_data = str(new_annual_yield) + '%'
 
-                        yield_data= str(new_annual_yield) + '%'
-                        print(yield_data)
-
-                        #------------------------跟新收益率到数据库表中------------------------------------------------------
-                        Robot.objects.filter(id=robot_id).update(float_profit=self.data_format(float_profit) + ' ' +market,
-                                                                 realized_profit=self.data_format(realized_profit) + ' '+ market,
-                                                                 total_profit=self.data_format(total_profit) + ' ' +  market ,
-                                                                 annual_yield= yield_data)
-
-                        # serialize = RobotSerializer(robot_obj)   #序列化机器人数据返回客户端
-                        #                         # print(serialize.data)
+                        # ------------------------跟新收益率到数据库表中------------------------------------------------------
+                        Robot.objects.filter(id=robot_id).update(float_profit=self.data_format(float_profit) + ' ' + market,
+                                                                 realized_profit=self.data_format(realized_profit) + ' ' + market,
+                                                                 total_profit=self.data_format(total_profit) + ' ' + market ,
+                                                                 annual_yield=yield_data)
                         robot_obj = Robot.objects.get(id=robot_id)
                         context = {
                             'id': robot_id,
@@ -1141,16 +1187,18 @@ class RobotYield(generics.CreateAPIView):
                             'realized_profit': self.data_format(realized_profit) + market,
                             'total_profit': self.data_format(total_profit) + market,
                             'annual_yield': self.data_format(annual_yield) + '%',
-                            'srart_time':robot_obj.running_time,
+                            'srart_time': robot_obj.running_time,
                             'end_time': robot_obj.end_time,
                             'total_time': run_totalTime,
-                            'run_time':run_time
+                            'run_time': run_time
 
                         }
                         robot_yield.append(context)
                     except robot.DoesNotExist:
                         return restful.params_error(message="机器人没有运行")
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             print(e)
         return restful.result(data=robot_yield)
 

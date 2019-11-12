@@ -3,16 +3,19 @@ from dealapi.exx.exxService import ExxService
 from dealapi.exx.exxMarket import MarketCondition
 from utils import restful
 from pymysql import *
+from django.conf import settings
+import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "exxTrading.settings")  # project_name 项目名称
 
 
 def main(sql, params=None):
     try:
         # 创建Connection连接
-        conn = connect(host='192.168.4.201',
-                       port=3306,
-                       database='exx_quantitvate_streagety',
-                       user='root',
-                       password='password',
+        conn = connect(host=settings.DATABASES.get('default')['HOST'],
+                       port=settings.DATABASES.get('default')['PORT'],
+                       database=settings.DATABASES.get('default')['NAME'],
+                       user=settings.DATABASES.get('default')['USER'],
+                       password=settings.DATABASES.get('default')['PASSWORD'],
                        charset='utf8')
     except Exception as e:
         print('数据库连接错误', e)
@@ -78,7 +81,7 @@ def huobi_scheduled_job():
     print('huobi-------------------------')
 
 
-# exx_scheduled_job()
+exx_scheduled_job()
 
 
 

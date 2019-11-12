@@ -10,6 +10,9 @@ from dealapi.exx.exxMarket import MarketCondition
 from apps.deal.models import Account, Property, LastdayAssets, Robot
 from apps.rbac.models import UserInfo
 from .WarningAccount import WarningAccount
+from django.conf import settings
+import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "exxTrading.settings")  # project_name 项目名称
 
 
 class GridStrategy(Thread):
@@ -75,11 +78,11 @@ class GridStrategy(Thread):
         """
         try:
             # 创建Connection连接
-            conn = connect(host='192.168.4.201',
-                           port=3306,
-                           database='exx_quantitvate_streagety',
-                           user='root',
-                           password='password',
+            conn = connect(host=settings.DATABASES.get('default')['HOST'],
+                           port=settings.DATABASES.get('default')['PORT'],
+                           database=settings.DATABASES.get('default')['NAME'],
+                           user=settings.DATABASES.get('default')['USER'],
+                           password=settings.DATABASES.get('default')['PASSWORD'],
                            charset='utf8')
         except Exception as e:
             print('数据库连接错误', e)
@@ -258,8 +261,10 @@ class GridStrategy(Thread):
                             id = result['id']
                             response = self.server_api.cancel_order(self.currency_type, id)
                             # print(response)
+                            # time.sleep(0.2)
             except Exception as e:
                 print("%s单撤单完成:" % self.order_type)
+            time.sleep(1)
 
     def completed_order_info(self, price, item, order_info, order_type, numb=None):
         """
@@ -448,7 +453,7 @@ class GridStrategy(Thread):
                             print("获取委托单失败...", e)
                         time.sleep(0.2)
             if not self.Flag:
-                for i in range(5):
+                for i in range(3):
                     print('撤单·······')
                     self.cancel_orders()
 
@@ -529,9 +534,9 @@ class GridStrategy(Thread):
 
 # ----------------------------------------------------------------------------------------------------------------------
 
-    def set_risk_strategy(self):
+    def set_cut_loss(self):
         """
-        设置风险策略
+        设置止损策略
         :return:
         """
         ord_id = ''
@@ -546,7 +551,6 @@ class GridStrategy(Thread):
                     info = self.server_api.get_balance()
                     total = info.get('funds')
                     total = total[self.robot_obj.currency].get('total')
-                    print(ord_id, '········')
                     if ord_id:
                         order_info = self.server_api.get_order(self.currency_type, ord_id)
                         info1 = dict()
@@ -564,65 +568,93 @@ class GridStrategy(Thread):
                             if order_info.get("status") in [2]:
                                 print('保存·······')
                                 self.save_completedorder(item, order_info)
-                except:
-                    print('调用接口失败')
+                        ord_id = ''
+                except Exception as e:
+                    print(e)
                     import traceback
                     traceback.print_exc()
                     continue
-                # 当前价低于止损价
-                if float(current_price) <= float(self.robot_obj.stop_price):
-                    self.set_risk = False
-                    time.sleep(5)
-                    # 停止策略之后更改状态
-                    Robot.objects.filter(id=self.robot_obj.id).update(run_status=1, status=0)
-                    # 获取卖单信息
-                    getopen_data = self.server_api.get_openorders(self.currency_type, '1', 'sell')
-                    if isinstance(getopen_data, dict):
-                        # 获取卖一价
-                        try:
-                            depth_data = self.market_api.get_depth()
-                            print('+'*30, depth_data)
-                            sell_1_price, sell_1_amount = depth_data.get("bids")[0]
-                            ord = self.server_api.order(sell_1_amount, self.currency_type, sell_1_price, "sell")
-                            ord_id = ord['id']
-                        except:
-                            print("未获取到买一价或下单失败")
-                            break
-                    else:
-                        # 一段时间内未成交，撤单
-                        self.cancel_orders()
+                else:
+                    # 当前价低于止损价
+                    if float(current_price) <= float(self.robot_obj.stop_price):
+                        self.set_risk = False
+                        time.sleep(5)
+                        # 停止策略之后更改状态
+                        Robot.objects.filter(id=self.robot_obj.id).update(run_status=1, status=0)
+                        # 获取卖单信息
+                        getopen_data = self.server_api.get_openorders(self.currency_type, '1', 'sell')
+                        if isinstance(getopen_data, dict):
+                            # 获取卖一价
+                            try:
+                                depth_data = self.market_api.get_depth()
+                                print('+'*30, depth_data)
+                                sell_1_price, sell_1_amount = depth_data.get("bids")[0]
+                                ord = self.server_api.order(sell_1_amount, self.currency_type, sell_1_price, "sell")
+                                ord_id = ord['id']
+                            except:
+                                print("未获取到买一价或下单失败")
+                                break
+                        else:
+                            # 一段时间内未成交，撤单
+                            self.cancel_orders()
 
-                # 当前价低于预警价
-                elif float(current_price) <= float(self.robot_obj.warning_price):
-                    # 实时查询数据库中的warning_time
-                    sql = "select warning_time from deal_robot where id = %s"
-                    warning_time = self.connect_db(sql, (self.robot_obj.id,))
-                    # 获取机器人的预警账户
-                    warning_account = self.robot_obj.warning_account
-                    acc_list = UserInfo.objects.filter(id__in=warning_account[1:-1].split(","))
-                    warn = WarningAccount(acc_list, '网格', self.currency_type)
-                    warn.send_msg()
-                    print('---------预警', warning_time)
-                    time.sleep(float(warning_time[0])*60)
-                elif total == 0 or total == '0':
-                    break
+                    elif total == 0 or total == '0':
+                        print('total is 0')
+                        break
+                time.sleep(1)
+
+    def set_warning_account(self):
+        """
+        设置预警账户
+        :return:
+        """
+        # 实时获取交易对当前价
+        while True:
+            if not self.Flag:
+                break
+            else:
+                try:
+                    markets_data = self.market_api.get_ticker()
+                    current_price = markets_data.get("ticker")["last"]
+                except Exception as e:
+                    print(e)
+                    import traceback
+                    traceback.print_exc()
+                    time.sleep(1)
+                    continue
+                else:
+                    # 当前价低于预警价
+                    if float(current_price) <= float(self.robot_obj.warning_price):
+                        # 实时查询数据库中的warning_time
+                        sql = "select warning_time from deal_robot where id = %s"
+                        warning_time = self.connect_db(sql, (self.robot_obj.id,))
+                        # 获取机器人的预警账户
+                        warning_account = self.robot_obj.warning_account
+                        acc_list = UserInfo.objects.filter(id__in=warning_account[1:-1].split(","))
+                        warn = WarningAccount(acc_list, '网格', self.currency_type)
+                        warn.send_msg()
+                        print('---------预警', warning_time)
+                        time.sleep(float(warning_time[0])*60)
                 time.sleep(1)
 
     def run_thread(self):
         """
-        运行更新挂单和反向挂单
+        运行更新挂单，反向挂单和风险策略
         :return:
         """
         thread1 = Thread(target=self.reverse_order,)
         thread2 = Thread(target=self.update_order_info,)
-        thread3 = Thread(target=self.set_risk_strategy,)
+        thread3 = Thread(target=self.set_cut_loss,)
+        thread4 = Thread(target=self.set_warning_account,)
         thread1.start()
         thread2.start()
         time.sleep(10)
         thread3.start()
+        thread4.start()
         thread1.join()
         thread2.join()
         thread3.join()
+        thread4.join()
 
     def run(self):
         self.place_many_order()

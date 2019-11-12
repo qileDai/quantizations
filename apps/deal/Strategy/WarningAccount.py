@@ -3,6 +3,7 @@ import socket
 import time
 import json
 import re
+from exxTrading import configuration
 
 
 class WarningAccount(object):
@@ -16,7 +17,7 @@ class WarningAccount(object):
         self.transaction_pair = transaction_pair
         try:
             # 连接redis
-            pool = redis.ConnectionPool(host='192.168.4.179', password='sHZQ4zLB6LasF8ox', port=6379, db=0)
+            pool = redis.ConnectionPool(host=configuration.REDIS_HOST, password=configuration.REDIS_PWD, port=6379, db=0)
             print("connected success.")
         except:
             print("could not connect to redis.")

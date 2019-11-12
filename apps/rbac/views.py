@@ -6,7 +6,6 @@ from django.core.paginator import Paginator
 from urllib import parse
 from .forms import UserInfoModelForm, UserInfoAddModelForm, RoleModelForm, EditUserForm,LoginForm
 from django.conf import settings
-from utils.mixin import LoginRequireMixin
 from django.contrib.sessions.models import Session
 from .models import NewMenu, RoleMenu
 from .serializers import  UserSerializer, RoleSerializer, NewmenuSerializer
@@ -17,6 +16,7 @@ from utils.mixin import LoginRequireMixin
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework.views import APIView
 import json,re
+import traceback
 from utils import RsaUtil
 from django_redis import get_redis_connection
 
@@ -25,12 +25,10 @@ from django_redis import get_redis_connection
 
 # 用户登录装饰器
 def is_login(func):
-
     def wrapper(request, *args, **kwargs):
         try:
             sessionid = request.META.get("HTTP_SESSIONID")
             session_data = Session.objects.get(session_key=sessionid)
-
             is_login = session_data.get_decoded().get('is_login')
             if is_login is True:
                 res = func(request, *args, **kwargs)
@@ -48,7 +46,6 @@ def setKey(request):
     RsaUtil.create_keys()
     conn = get_redis_connection()
     public_key = conn.get('pubkey').decode('utf-8')
-    print(public_key)
     context = {
         'publicKey':public_key
     }
@@ -59,7 +56,6 @@ def setKey(request):
 def login(request):
     username = request.POST.get('username')
     password = request.POST.get('password')
-
     if username is None:
         return restful.params_error(message="用户名不能为空")
     if password is None:
@@ -69,12 +65,14 @@ def login(request):
     # password = hl.hexdigest()
     # print(password)
     user_obj = UserInfo.objects.filter(username=username, password=password).first()
+
     if not user_obj:
         return restful.params_error(message="用户名或密码错误,请重新登录")
     elif user_obj.status == 0:
         return restful.params_error(message="用户已被禁用")
-    else:  # 普通用户
-
+    # 确认用户是否又权限登录
+    role = user_obj.roles.all()
+    if role:
         request.session.clear()
         request.session['is_login'] = True
         request.session['user_id'] = user_obj.id
@@ -94,15 +92,10 @@ def login(request):
             'sessionid': session_id,
 
         }
-
         return restful.result(data=context)
-
-
-def index(request):
-    if 'is_login' in request.session:
-        return render(request, 'cms/index.html')
     else:
-        return redirect('settings.LOGIN_URL')
+        return restful.unauth(message="该用户没有权限！")
+
 
 
 def logout(request):
@@ -127,8 +120,10 @@ class AddRoles(LoginRequireMixin,generics.CreateAPIView):
             description = request.POST.get("description")
             Role.objects.create(rolename=rolename, description=description)
             return restful.ok(message="成功")
+
         except Exception as e:
-            return restful.params_error(message=e)
+            traceback.print_exc()
+            print(e)
 
 
 """
@@ -138,18 +133,18 @@ class AddUsers(LoginRequireMixin,generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         try:
             username = request.POST.get("username")
-            email =  request.POST.get("email")
-            phone_number =  request.POST.get("phone_number")
-            password =  request.POST.get("password")
-            confirm_password =  request.POST.get("confirm_password")
-            status =  request.POST.get("status")
-            roles =  request.POST.get("roles")
+            email = request.POST.get("email")
+            phone_number = request.POST.get("phone_number")
+            password = request.POST.get("password")
+            confirm_password = request.POST.get("confirm_password")
+            status = request.POST.get("status")
+            roles = request.POST.get("roles")
 
-            #验证数据库中用户是否存在
+            # 验证数据库中用户是否存在
             user_info = UserInfo.objects.filter(username=username)
             if user_info:
                 return restful.params_error(message="该用户名已经存在,请换个名字!")
-            #验证数据库是否存在phone
+            # 验证数据库是否存在phone
             user_phone = UserInfo.objects.filter(phone_number=phone_number)
             if user_phone:
                 return restful.params_error(message="该手机号已被注册")
@@ -159,26 +154,26 @@ class AddUsers(LoginRequireMixin,generics.CreateAPIView):
             pattern = r'^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}$'
             if re.search(pattern, email) is None:
                 return restful.params_error(message='邮箱格式错误!')
-            #密码验证
+            # 密码验证
             if password.isdecimal() or password.isalpha():
                 return restful.params_error('密码为数字加字母')
             elif len(password) < 6:
                 return restful.params_error(message="密码长度需大于6位")
 
-            #密码跟确认密码验证
+            # 密码跟确认密码验证
             if password != confirm_password:
                 return restful.params_error(message="两次密码输入不一致!")
 
-            #保存用户信息到userinfo表中
+            # 保存用户信息到userinfo表中
             UserInfo.objects.create(username=username,password=password,email=email,
                                     phone_number=phone_number,status=status)
-            #查询数据库userinfo信息
+            # 查询数据库userinfo信息
             user = UserInfo.objects.get(Q(username=username) & Q(phone_number=phone_number))
             user.roles.add(roles)
             return restful.ok(message="成功")
         except Exception as e:
-            return restful.params_error(message=e)
-
+            traceback.print_exc()
+            print(e)
 
 
 """
@@ -196,86 +191,6 @@ def delete_users(request):
     except Exception as e:
         return restful.params_error(message=e)
 
-"""
-角色列表
-@:Method Get 
-@:param rolename
-@:param  pageIndex
-@:param pageSize 
-"""
-class RolesListView(LoginRequireMixin, View):
-    def get(self, request):
-        # request.GET：获取出来的所有数据，都是字符串类型
-        page = int(request.GET.get('p', 1))
-        rolename = request.GET.get('rolename-seach')
-        print(rolename)
-        roles = Role.objects.all()
-        # request.GET.get(参数,默认值)
-        # 这个默认值是只有这个参数没有传递的时候才会使用
-        # 如果传递了，但是是一个空的字
-        # 符串，那么也不会使用默认值
-        if rolename:
-            roles = Role.objects.filter(rolename__icontains=rolename)
-            print(roles)
-        paginator = Paginator(roles, 10)
-        print(paginator)
-        page_obj = paginator.page(page)
-        context_data = get_pagination_data(paginator, page_obj)
-        context = {
-            'roles': page_obj.object_list,
-            'page_obj': page_obj,
-            'paginator': paginator,
-            'rolename': rolename,
-            'permissions': Permission.objects.all(),
-            'url_query': '&' + parse.urlencode({
-                'rolename': rolename or '',
-            })
-        }
-        context.update(context_data)
-
-        return render(request, 'cms/role.html', context=context)
-
-"""
-角色列表
-@:Method Get 
-@:param username
-@:param status
-@:param  pageIndex
-@:param pageSize 
-"""
-class userListView(LoginRequireMixin,generics.ListCreateAPIView):
-    def get(self, request):
-        pageNum = request.GET.get('pageIndex', 1)
-        pagesize = request.GET.get('pageSize')
-        username = request.GET.get('username')
-        status = request.GET.get('status')
-        paginator = Paginator(UserInfo.objects.all(),20)
-        print("ss",paginator)
-        users = UserInfo.objects.all()
-        print("aaa",users)
-        if username:
-            paginator = Paginator(UserInfo.objects.filter(username=username), 20)
-            users = UserInfo.objects.filter(username=username)
-        elif status:
-            paginator = Paginator(UserInfo.objects.filter(status=status), 20)
-            users = UserInfo.objects.filter(status=status)
-        elif username & status:
-            paginator = Paginator(UserInfo.objects.filter(Q(status=status) & Q(username=username)), 20)
-            users = UserInfo.objects.filter(Q(status=status) & Q(username=username))
-        page_obj = paginator.page(int(pageNum))
-        numPerPage = len(page_obj.object_list),
-        totalCount = users.count(),
-        totalPageNum = paginator.num_pages
-        # context_data = get_pagination_data(paginator, page_obj)
-        context = {
-            'numPerPage': numPerPage,
-            'PageNum': int(pageNum),
-            'result': UserSerializer(page_obj.object_list, many=True).data,
-            'totalCount': totalCount,
-            'totalPageNum': totalPageNum,
-        }
-
-        return restful.result(data=context)
 
 """
 角色列表
@@ -290,12 +205,7 @@ class RoleList(LoginRequireMixin,View):
         try:
             roleList = []
             pageIndex = request.GET.get('pegeIndex', 1)
-            print(pageIndex)
             pageSize = request.GET.get("pageSize", 20)
-            print(pageSize)
-            # print(pageIndex)
-            # pageSize = request.GET.get('pageSize',20)
-            # print(pageSize)
             rolename = request.GET.get('rolename')
             if rolename:
                 roles = Role.objects.filter(rolename__icontains=rolename)
@@ -323,7 +233,7 @@ class RoleList(LoginRequireMixin,View):
                 'PageNum': int(pageSize),
                 'result': page_obj.object_list,
                 'totalCount': totalCount,
-                'totalPageNum':totalPageNum,
+                'totalPageNum': totalPageNum,
 
             }
         except Exception:
@@ -335,42 +245,32 @@ class RoleList(LoginRequireMixin,View):
 获取所有用户
 """
 
-
 class getAllUsers(LoginRequireMixin,APIView):
     def get(self, request,*args,**kwargs):
         try:
-            # token = django.middleware.csrf.get_token(request)
             username = request.GET.get('username')
             status = request.GET.get('status')
             pageIndex = request.GET.get('pegeIndex',1)
-            print(pageIndex)
             pageSize = request.GET.get("pageSize",20)
-            print(pageSize)
             if username:
                 users_list = UserInfo.objects.filter(username__icontains=username)
-
             elif status:
                 users_list = UserInfo.objects.filter(status=status)
             else:
                 users_list = UserInfo.objects.all()
             # 根据url参数 获取分页数据
+            pg = StandardResultSetPagination()
             paginator = Paginator(users_list, pageSize)
             page_obj = paginator.page(int(pageIndex))
-            # obj = StandardResultSetPagination()
-            # pg = StandardResultSetPagination()
-            # page_user_list = pg.paginate_queryset(queryset=users_list, request=request, view=self)
-            # 对数据序列化 普通序列化 显示的只是数据
-            # ser = UserSerializer(instance=page_user_list, many=True)  # 多个many=True # instance：把对象序列化
-            # totalPageNum = int(totalCount)/ int(pg.page_size)
             numPerPage = len(page_obj.object_list)
             totalCount = users_list.count()
             totalPageNum = paginator.num_pages
             context = {
-                'numPerPage':numPerPage,
-                'PageNum':pageSize,
-                'result':UserSerializer(page_obj.object_list,many=True).data ,
+                'numPerPage': numPerPage,
+                'PageNum': pageSize,
+                'result': UserSerializer(page_obj.object_list,many=True).data ,
                 'totalCount': totalCount,
-                'totalPageNum':totalPageNum,
+                'totalPageNum': totalPageNum,
                 # 'token':token
             }
         except Exception:
@@ -381,7 +281,7 @@ class getAllUsers(LoginRequireMixin,APIView):
 
 
 
-"""
+""" 
 删除角色
 """
 @is_login
@@ -395,12 +295,13 @@ def delete_roles(request):
                 for usr_role in user_roles:
                     if int(pk) == usr_role.id:
                         return restful.params_error(message="该角色已被用户关联，不能删除！")
-                    else:
-                        Role.objects.filter(pk=pk).delete()
+                    # else:
+            Role.objects.filter(pk=pk).delete()
             return restful.ok(message="成功")
         else:
             return restful.params_error(message="role_id is null")
-    except:
+    except Exception as e:
+        print(e)
         return restful.params_error(message='该角色不存在')
 
 
@@ -413,7 +314,6 @@ class EditRole(LoginRequireMixin,View):
     def post(self, request):
         role_id = request.POST.get("id")
         role_name = request.POST.get("rolename")
-        print(role_name)
         description = request.POST.get('description')
         if role_name == '':
             return restful.params_error(message="角色名称不能为空")
@@ -428,7 +328,7 @@ class EditRole(LoginRequireMixin,View):
         return restful.ok(message="角色修改成功")
 
 
-@is_login
+
 def edit_users(request):
     """
     编辑用户
@@ -451,10 +351,13 @@ def edit_users(request):
                 user_obj = UserInfo.objects.get(pk=pk)
                 UserInfo.objects.filter(pk=pk).update(username=username, phone_number=phone_number
                                                       , email=email, status=status)
-                # user_obj.roles.remove()
-                user_obj.roles.set(roles)
+                user_obj.roles.clear()
+                try:
+                    user_obj.roles.add(roles)
+                except Exception as e:
+                    print(e)
             else:
-                return restful.params_error(message="user_id is Invaid")
+                return restful.params_error(message="user_id is invalid")
         else:
             return restful.params_error(message="user_id is null")
     except Exception as e:
@@ -470,7 +373,9 @@ class UpdatePasssword(LoginRequireMixin,generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         try:
             user_id = request.POST.get("id")
+            print(user_id)
             old_password = request.POST.get("old_password")
+            new_password = request.POST.get('password')
             if user_id:
                 user = UserInfo.objects.filter(pk=user_id)
                 if user:
@@ -479,122 +384,59 @@ class UpdatePasssword(LoginRequireMixin,generics.CreateAPIView):
                         password1 = user_obj.password
                         if password1 != old_password:
                             return restful.params_error(message="原始密码输入错误")
-                    new_password = request.POST.get('password')
-                    print(new_password)
                     if new_password:
-                        UserInfo.objects.filter(pk=user_id).update(password=new_password)
-                    elif new_password.isdecimal() or new_password.isalpha():
-                        return restful.params_error(message='密码为数字加字母')
-                    elif len(new_password) < 6:
-                        return restful.params_error(message='密码长度需大于6位')
-                    else:
-                        return restful.params_error(message="新密吗不能为空")
+                        if new_password.isdecimal() or new_password.isalpha():
+                            return restful.params_error(message='密码为数字加字母')
+                        elif len(new_password) < 6:
+                            return restful.params_error(message='密码长度需大于6位')
+                        else:
+                            UserInfo.objects.filter(pk=user_id).update(password=new_password)
                 else:
-                    return restful.params_error(message="user_id id Invaid")
-
+                    return restful.params_error(message="user_id id invalid")
             else:
                 return restful.params_error(message="user_id is null")
         except Exception as e:
-            return restful.params_error(message=e)
+            print(e)
+            return restful.params_error(message="密码修改失败")
         return restful.ok(message="账户密码修改成功")
 
 
-"""
-分配权限
-当角色没有权限点时添加权限
-当角色有权限点时修改权限
-"""
+
 class AllotPermissson(LoginRequireMixin,View):
+    """
+    分配权限
+    当角色没有权限点时添加权限
+    当角色有权限点时修改权限
+    """
     def post(self, request):
         try:
             data = request.body.decode("utf-8")
             menu_data = json.loads(data)
             role_id = menu_data.get("role_id")
             if role_id:
-                menu_lsit = menu_data.get("menu_list")
+                menu_list = menu_data.get("menu_list")
                 role_obj = RoleMenu.objects.filter(role_id=role_id)
                 if role_obj:
                     old_menu = []
                     for obj in role_obj:
                         old_menu.append(obj.menu_id)
-                    add_list = list(set(menu_lsit).difference(set(old_menu)))
-                    dele_list = list(set(old_menu).difference(set(menu_lsit)))
+                    add_list = list(set(menu_list).difference(set(old_menu)))
+                    dele_list = list(set(old_menu).difference(set(menu_list)))
                     for add_name in add_list:
                         RoleMenu.objects.create(role_id=role_id, menu_id=add_name)
                     for dele_name in dele_list:
                         RoleMenu.objects.filter(Q(role_id=role_id) & Q(menu_id=dele_name)).delete()
                 else:
-                    for menu in menu_lsit:
+                    for menu in menu_list:
                         RoleMenu.objects.create(role_id=role_id, menu_id=menu)
             else:
                 return restful.params_error(message="角色id不能为空")
         except Exception as e:
-            return restful.params_error("分配权限失败", message=e)
+            return restful.params_error("分配权限失败")
         return restful.ok(message="成功")
 
 
-def menu_permission(request):
-    menus = {}
-    try:
-        menu_data = NewMenu.objects.filter(parentid__isnull=True)
-        for obj in menu_data:
-            mu_data = NewMenu.objects.filter(parentid=obj.id).order_by('orderNum')
-            menus[obj.name] = NewmenuSerializer(mu_data, many=True).data
-            for objs in mu_data:
-                try:
-                    m_data = NewMenu.objects.filter(parentid=objs.id).order_by('orderNum')
-                    menus[obj.name][objs.name] = NewmenuSerializer(m_data, many=True).data
-                except:
-                    continue
 
-        return restful.result(data=menus)
-
-    except Exception as e:
-        return restful.params_error(message=u"获取菜单失败")
-
-"""
-获取所有的菜单级联关系
-
-"""
-def get_all_menus11(request):
-
-    menu_list = []
-    permission_list = []
-    try:
-        menu_data = NewMenu.objects.filter(parentid__isnull=True)
-        permissions = NewMenu.objects.all().values().order_by('orderNum')
-        for permission in permissions:
-            permission_list.append(permission['perms'])
-        n = 0
-        for i in menu_data:
-            data1 = NewmenuSerializer(i).data
-            menu_list.append(data1)
-            menu_list[n]['list'] = list()
-            i_data = NewMenu.objects.filter(parentid=i.id)
-            m = 0
-            for j in i_data:
-                data2 = NewmenuSerializer(j).data
-                menu_list[n]['list'].append(data2)
-                menu_list[n]['list'][m]['list'] = list()
-                j_data = NewMenu.objects.filter(parentid=j.id)
-                r = 0
-                for k in j_data:
-                    data3 = NewmenuSerializer(k).data
-                    menu_list[n]['list'][m]['list'].append(data3)
-                    # menu_list[n]['list'][m]['list'][r]['list'] = list()
-                    # menu_list[n]['list'][m]['list'] = list()
-                    r += 1
-                m += 1
-            n = n + 1
-        print(menu_list)
-        context = {
-            "menuList": menu_list,
-            'permission': permission_list
-        }
-
-        return restful.result(data=context)
-    except:
-        return restful.params_error(message=u"获取菜单失败")
 
 
 """
@@ -606,13 +448,10 @@ class getAllMenus(LoginRequireMixin,generics.ListAPIView):
         try:
             sessionid = request.META.get("HTTP_SESSIONID")
             session_data = Session.objects.get(session_key = sessionid)
-            dateTime= session_data.expire_date
             user_id = session_data.get_decoded().get('user_id')
-            log = session_data.get_decoded().get('is_login')
-
-            datas_list = []           #菜单详情关系 list
-            menu_list = []            #菜单id list
-            permission_list = []      #权限码list
+            datas_list = []           # 菜单详情关系 list
+            menu_list = []            # 菜单id list
+            permission_list = []      # 权限码list
             if user_id:
                 user = UserInfo.objects.get(id=user_id)
                 roles = user.roles.all()
@@ -649,12 +488,12 @@ class getAllMenus(LoginRequireMixin,generics.ListAPIView):
                                             data3 = NewmenuSerializer(k).data
                                             datas_list[n]['list'][m]['list'].append(data3)
                                             r += 1
-                                    m +=1
+                                    m += 1
                             n += 1
                     context = {
-                        'menuList':datas_list,
-                        'mnues':menu_list,
-                        'permissions':permission_list,
+                        'menuList': datas_list,
+                        'mnues': menu_list,
+                        'permissions': permission_list,
 
                     }
                 else:
@@ -662,26 +501,28 @@ class getAllMenus(LoginRequireMixin,generics.ListAPIView):
             else:
                 return restful.params_error(message="user_id is null")
         except Exception as e:
-            return restful.params_error(message=e)
+            return restful.params_error(message="获取权限菜单失败")
         return restful.result(data=context)
 
-"""
-获取所有的菜单信息
-"""
+
 class SelectMenu(LoginRequireMixin,View):
+    """
+    获取所有的菜单信息
+    """
     def get(self, request):
         try:
-            allmenu_list = NewMenu.objects.all()
-            serialize = NewmenuSerializer(allmenu_list, many=True)
+            menu_list = NewMenu.objects.all()
+            serialize = NewmenuSerializer(menu_list, many=True)
             return restful.result(data=serialize.data)
         except:
             return restful.params_error(message="获取菜单详情失败")
 
 
-"""
-分页函数
-"""
+
 def get_pagination_data(paginator, page_obj, around_count=2):
+    """
+    分页函数
+    """
     current_page = page_obj.number
     num_pages = paginator.num_pages
 
@@ -711,6 +552,8 @@ def get_pagination_data(paginator, page_obj, around_count=2):
         'right_has_more': right_has_more,
         'num_pages': num_pages
     }
+
+
 
 
 class ArticlePagination(PageNumberPagination):

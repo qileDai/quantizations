@@ -22,8 +22,7 @@ schema_view = get_schema_view(title='接口文档', renderer_classes=[SwaggerUIR
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('rbac/', include('apps.rbac.urls',namespace='rbac')),
-    path('exx/', include('apps.exx.urls')),
+    path('rbac/', include('apps.rbac.urls', namespace='rbac')),
     path('login/', views.login),
     path('deal/', include('apps.deal.urls', namespace='deal')),
     path('docs/', schema_view, name='docs')

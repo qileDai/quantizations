@@ -1,5 +1,5 @@
-from django.apps import AppConfig
-
-
-class ExxConfig(AppConfig):
-    name = 'apps.exx'
+# from django.apps import AppConfig
+#
+#
+# class ExxConfig(AppConfig):
+#     name = 'apps.exx'

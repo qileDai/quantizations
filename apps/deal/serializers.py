@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .forms import Account, TradingPlatform, Robot
-from .models import OrderInfo, Property, LastdayAssets
+from .models import OrderInfo, Property, LastdayAssets, Currency
 
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
@@ -113,6 +113,11 @@ class LastdayAssetsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class CurrencySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Currency
+        fields = '__all__'
 
 
 
