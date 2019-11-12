@@ -1131,9 +1131,9 @@ class RobotYield(generics.CreateAPIView):
                 robots = Robot.objects.filter((Q(trading_account_id=account.id) & Q(status=1)) |
                                               (Q(trading_account_id=account.id) & Q(status=2)))
                 for robot in robots:
-                    robot_id = robot.id  # 机器人id
-                    currency = robot.currency  # 交易币种
-                    market = robot.market  # 市场币种
+                    robot_id = robot.id                                # 机器人id
+                    currency = robot.currency                          # 交易币种
+                    market = robot.market                              # 市场币种
                     total_money = self.str_util(robot.total_money)     # 总投入
                     init_currency = self.str_util(robot.currency_num)  # 初始交易币种数量
                     init_market = self.str_util(robot.market_num)      # 初始市场币种数量
@@ -1159,7 +1159,7 @@ class RobotYield(generics.CreateAPIView):
                         # 以前机器人总共运行多少分钟
                         before_time = self.data_format(float(total_time) / 60)
                         # 运行总时间分钟
-                        run_totalTime = float(before_time) + float(run_time)
+                        run_total_time = float(before_time) + float(run_time)
 
                         # ------------------------------计算机器人启动运行产生的收益率-------------------------------------
                         # 浮动盈亏（折算为交易市场币种）：当前剩余币种数量*当前价格-总投入数量*当时价格
@@ -1169,7 +1169,7 @@ class RobotYield(generics.CreateAPIView):
                         # 总利润（折算为交易市场币种）：浮动盈亏+实现利润
                         total_profit = float_profit + realized_profit
                         # 年化收益率：实现利润/总投入/运行分钟数*525,600*100%
-                        annual_yield = (float(realized_profit) / float(total_money)) / float(run_totalTime) * 525600 * 1
+                        annual_yield = (float(realized_profit) / float(total_money)) / float(run_total_time) * 525600 * 1
                         new_annual_yield = self.data_format(annual_yield)
                         yield_data = str(new_annual_yield) + '%'
 
@@ -1187,7 +1187,7 @@ class RobotYield(generics.CreateAPIView):
                             'annual_yield': self.data_format(annual_yield) + '%',
                             'srart_time': robot_obj.running_time,
                             'end_time': robot_obj.end_time,
-                            'total_time': run_totalTime,
+                            'total_time': run_total_time,
                             'run_time': run_time
 
                         }
