@@ -13,7 +13,7 @@ djangorestframework==3.10.3
 dwebsocket==0.5.11
 idna==2.8
 itypes==1.1.0
-Jinja2==2.10.3
+Jinja2==2.11.3
 joblib==0.13.2
 kiwisolver==1.1.0
 MarkupSafe==1.1.1
