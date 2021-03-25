@@ -28,7 +28,7 @@ PyMySQL==0.9.3
 pyparsing==2.4.1.1
 python-dateutil==2.8.0
 pytz==2019.1
-PyYAML==5.1.2
+PyYAML==5.4
 redis==3.3.11
 requests==2.22.0
 rsa==4.0
